@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Project: servus — a private home management system for two primary users (plus
+  short-lived invited helpers during a house move). Bavarian for "hello/goodbye".
+
+  First scope: inventory management built around an imminent move. Long-term
+  scope (not in MVP): shopping list, recipe management, fridge/pantry.
+
+  Hard constraints (non-negotiable):
+    - Must run on a free hosting tier indefinitely. No paid services.
+    - Low maintenance: avoid dependencies that have frequent major version bumps
+      or active churn. Prefer the standard library and small, stable libraries.
+    - Public GitHub repository, but the running app is private (auth-gated).
+    - Custom authentication, hardened against brute-force attacks. No third-party
+      auth providers.
+
+  Stack:
+    - Runtime: Deno (latest stable)
+    - Framework: Fresh 2 (fullstack — server-rendered islands, no separate backend)
+    - Database: Deno KV (native, free on Deno Deploy, atomic transactions)
+    - Hosting: Deno Deploy, custom domain servus.valor.codes
+    - Object storage (photos, post-MVP): Cloudflare R2 (10GB free tier)
+    - Tests: Deno's built-in test runner for unit/integration; Playwright for E2E
+    - CI/CD: GitHub Actions (free for public repos)
+
+  Conventions:
+    - TDD: tests are written before or alongside the implementation, never after.
+    - Every user-facing capability is verified by at least one Playwright E2E
+      scenario before the change is archived.
+    - Conventional commits (feat:, fix:, chore:, docs:, refactor:, test:).
+    - Trunk-based development. All merges to main go through a PR with green CI.
+    - No feature flags or backwards-compatibility shims in MVP — the app has two
+      users; we can change schemas freely with a migration script.
+
+  Domain vocabulary:
+    - Item: a thing we own. Has name, category, optional value, location.
+    - Category: a tag for items (e.g. "kitchen", "books"). Flat, not hierarchical.
+    - Room: a destination room in the new home. Items resolve to a room either
+      directly or via the box they're packed in.
+    - Box: a physical container with a short, scannable code (QR or text). Items
+      get assigned to boxes during packing; boxes get assigned to rooms during
+      unpacking.
+    - Pack/unpack status: tracks whether a box is empty, packed, in-transit, or
+      unpacked at its destination.
+
+rules:
+  proposal:
+    - State the user-visible behavior change in the opening paragraph.
+    - Always include a "Non-goals" section to keep MVP scope tight.
+    - Call out any new dependency added and justify why it can't be avoided.
+    - Identify what the change does NOT secure or harden, if relevant.
+
+  tasks:
+    - Break work into chunks of at most ~2 hours each.
+    - Every implementation task is preceded by a failing-test task (TDD).
+    - The final task in every change is a Playwright E2E verification task.
+    - The penultimate task is "update affected specs and run `openspec validate`".
+
+  specs:
+    - Use "MUST" / "MUST NOT" / "SHOULD" deliberately (RFC 2119 style).
+    - Each requirement has at least one #### Scenario: block with Given/When/Then.
+    - Security-relevant requirements MUST state the threat being mitigated.

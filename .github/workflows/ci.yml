@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Lint · Format · Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.deno
+          key: deno-${{ hashFiles('deno.lock') }}
+      - run: deno lint .
+      - run: deno fmt --check .
+      - run: deno check **/*.ts **/*.tsx
+
+  test:
+    name: Unit & Integration tests
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.deno
+          key: deno-${{ hashFiles('deno.lock') }}
+      - run: deno test --allow-env --allow-read --allow-net tests/unit tests/integration
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.deno
+          key: deno-${{ hashFiles('deno.lock') }}
+      - name: Build Fresh app
+        run: deno task build
+      - name: Install Playwright browsers
+        run: node_modules/.bin/playwright install --with-deps chromium
+      - name: Run Playwright tests
+        run: node_modules/.bin/playwright test
+        env:
+          CI: true
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
