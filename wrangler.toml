@@ -1,0 +1,13 @@
+name = "servus"
+pages_build_output_dir = "web/app/dist"
+compatibility_date = "2025-05-25"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "servus-db"
+# database_id is set after the D1 database is created in the Cloudflare dashboard (task 7.1)
+database_id = "placeholder"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "servus-media"

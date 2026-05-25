@@ -1,0 +1,50 @@
+schema: spec-driven
+
+context: |
+  Project: SERVUS — private home management system for 2 people. Not a product.
+
+  Backend: TypeScript + Hono, running on Cloudflare Pages Functions.
+  All API routes under /api/v1/. Handlers return JSON only.
+  Error shape: { "code": "SCREAMING_SNAKE_CASE" } + HTTP status.
+  Validation errors: { "code": "VALIDATION_ERROR", "fields": { "field": "CODE" } }.
+  Backend never returns human-readable messages — frontend owns all user text.
+  D1 accessed via env.DB binding — raw SQL, no ORM.
+
+  Database: Cloudflare D1 (SQLite-compatible). Numbered SQL migrations in
+  migrations/ applied via wrangler d1 migrations apply. Tables prefixed by
+  module (auth_*, inv_*, box_*). Soft delete only. Every mutable record
+  carries version, updated_at, updated_by, deleted, deleted_at, deleted_by.
+
+  Frontend: Vue 3 + TypeScript (strict) + Vite + Pinia + Tailwind CSS v4 + vue-i18n.
+  Deployed to Cloudflare Pages at servus.valor.codes.
+  All user-visible strings go through t() — no hardcoded strings in templates.
+  Locale files in web/app/src/locales/de.json.
+  Components use <script setup>. Stores in src/stores/. API wrappers in src/api/.
+  Offline mutations queued in IndexedDB, flushed on reconnect (last-write-wins).
+  vite-plugin-pwa for service worker and PWA manifest.
+
+  Image storage: Cloudflare R2 (Phase 3). DB stores only the object key.
+
+  Linting: Biome covers the entire repo (backend + frontend) via root biome.json.
+  Testing: Vitest with @cloudflare/vitest-pool-workers (backend, real D1) +
+  Vitest (frontend pure logic: composables, stores, API client) +
+  Playwright E2E (critical journeys, run against wrangler pages dev).
+
+  Hosting: Cloudflare Pages auto-deploys on push to main. No Docker.
+  Custom domain servus.valor.codes via user's existing Cloudflare account.
+
+  Conventions: see openspec/conventions.md for the full style guide.
+  Decisions: see decision_reason_for_initial_project_doc.md for why.
+
+rules:
+  proposal:
+    - Keep proposals concise — one feature, one PR
+    - Always include a Non-goals section
+    - Flag any new npm dependency explicitly (requires human approval)
+    - Flag any new migration file (requires human review)
+    - Flag any change to auth, sessions, cookies, or file uploads
+    - Flag any wrangler.toml changes
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Write failing tests before implementation (TDD)
+    - Mark tasks that touch security-sensitive code for extra human review

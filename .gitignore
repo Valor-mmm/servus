@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+web/app/dist/
+dist/
+
+# Cloudflare / Wrangler
+.wrangler/
+worker-configuration.d.ts
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test output
+test-results/
+web/app/test-results/
+
+# Claude Code
+.claude/
+
+# Editor
+.DS_Store
+*.swp
