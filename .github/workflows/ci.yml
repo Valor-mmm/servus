@@ -44,7 +44,7 @@ jobs:
             node_modules
           key: deno-${{ hashFiles('deno.lock') }}
       - run: deno install
-      - run: deno test --allow-env --allow-read --allow-net tests/unit tests/integration
+      - run: deno test --allow-env --allow-read --allow-net --permit-no-files tests/unit tests/integration
 
   e2e:
     name: Playwright E2E

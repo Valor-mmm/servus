@@ -6,7 +6,7 @@
     "build": "deno run -A dev.ts build",
     "start": "deno serve -A _fresh/server.js",
     "update": "deno run -A -r jsr:@fresh/update .",
-    "test": "deno test --allow-env --allow-read --allow-net tests/unit tests/integration",
+    "test": "deno test --allow-env --allow-read --allow-net --permit-no-files tests/unit tests/integration",
     "e2e": "deno task build && node_modules/.bin/playwright test",
     "lint": "deno lint .",
     "fmt": "deno fmt ."
