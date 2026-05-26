@@ -18,8 +18,11 @@ jobs:
       - name: Cache Deno dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.deno
+          path: |
+            ~/.deno
+            node_modules
           key: deno-${{ hashFiles('deno.lock') }}
+      - run: deno install
       - run: deno lint .
       - run: deno fmt --check .
       - run: deno check **/*.ts **/*.tsx
@@ -36,8 +39,11 @@ jobs:
       - name: Cache Deno dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.deno
+          path: |
+            ~/.deno
+            node_modules
           key: deno-${{ hashFiles('deno.lock') }}
+      - run: deno install
       - run: deno test --allow-env --allow-read --allow-net tests/unit tests/integration
 
   e2e:
@@ -52,8 +58,11 @@ jobs:
       - name: Cache Deno dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.deno
+          path: |
+            ~/.deno
+            node_modules
           key: deno-${{ hashFiles('deno.lock') }}
+      - run: deno install
       - name: Build Fresh app
         run: deno task build
       - name: Install Playwright browsers
