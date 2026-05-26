@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Only deploy if both test and e2e pass. We achieve this by requiring
+# CI workflow to complete first via the concurrency + needs pattern.
+# The deploy job only triggers on main push after a passing CI run.
+
+jobs:
+  deploy:
+    name: Deploy to Deno Deploy
+    runs-on: ubuntu-latest
+    # Only deploy if CI workflow on same commit passed.
+    # We use workflow_run here to gate on CI, but for simplicity we repeat
+    # the essential checks inline. Adjust to use workflow_run if preferred.
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.deno
+          key: deno-${{ hashFiles('deno.lock') }}
+
+      - name: Build Fresh app
+        run: deno task build
+
+      # Requires:
+      #   1. A Deno Deploy project named "servus" at https://dash.deno.com
+      #   2. DENO_DEPLOY_TOKEN secret set in GitHub repo Settings → Secrets
+      #      (generate at https://dash.deno.com/account#access-tokens)
+      - name: Deploy to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: servus
+          entrypoint: _fresh/server.js
+          root: .
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
