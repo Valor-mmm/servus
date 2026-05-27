@@ -1,8 +1,7 @@
 # servus
 
-Private home management system. Bavarian for "hello/goodbye".
-
-Built with [Deno](https://deno.com) + [Fresh 2](https://fresh.deno.dev) +
+Private home management system. Bavarian for "hello/goodbye". den Built with
+[Deno](https://deno.com) + [Fresh 2](https://fresh.deno.dev) +
 [Deno KV](https://deno.com/kv). Deployed to
 [servus.valor.codes](https://servus.valor.codes).
 
