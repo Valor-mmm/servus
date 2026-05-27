@@ -5,6 +5,8 @@
     "jsr:@deno/loader@~0.3.10": "0.3.10",
     "jsr:@fresh/build-id@1": "1.0.1",
     "jsr:@fresh/core@^2.3.3": "2.3.3",
+    "jsr:@std/assert@*": "1.0.16",
+    "jsr:@std/assert@^1.0.16": "1.0.16",
     "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@^1.0.8": "1.0.10",
@@ -28,6 +30,7 @@
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.7",
+    "npm:hash-wasm@*": "4.12.0",
     "npm:preact-render-to-string@^6.6.3": "6.7.0_preact@10.29.2",
     "npm:preact@^10.28.2": "10.29.2",
     "npm:preact@^10.29.1": "10.29.2"
@@ -73,6 +76,12 @@
         "npm:preact-render-to-string",
         "npm:preact@^10.28.2",
         "npm:preact@^10.29.1"
+      ]
+    },
+    "@std/assert@1.0.16": {
+      "integrity": "6a7272ed1eaa77defe76e5ff63ca705d9c495077e2d5fd0126d2b53fc5bd6532",
+      "dependencies": [
+        "jsr:@std/internal"
       ]
     },
     "@std/bytes@1.0.6": {
@@ -326,6 +335,9 @@
       "os": ["darwin"],
       "scripts": true
     },
+    "hash-wasm@4.12.0": {
+      "integrity": "sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ=="
+    },
     "playwright-core@1.60.0": {
       "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==",
       "bin": true
@@ -353,8 +365,10 @@
   "workspace": {
     "dependencies": [
       "jsr:@fresh/core@^2.3.3",
+      "jsr:@std/assert@^1.0.16",
       "npm:@playwright/test@^1.44.0",
       "npm:@preact/signals@^2.9.0",
+      "npm:hash-wasm@4.12.0",
       "npm:preact@^10.29.1"
     ]
   }

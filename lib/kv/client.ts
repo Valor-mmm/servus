@@ -2,7 +2,9 @@ let _kv: Deno.Kv | undefined;
 
 export async function getKv(): Promise<Deno.Kv> {
   if (!_kv) {
-    _kv = await Deno.openKv();
+    // DENO_KV_PATH allows E2E tests to use ":memory:" to avoid state bleed
+    const path = Deno.env.get("DENO_KV_PATH");
+    _kv = path !== undefined ? await Deno.openKv(path) : await Deno.openKv();
   }
   return _kv;
 }
