@@ -27,8 +27,8 @@ build on.
 
 - `inventory`: Create, read, update, and delete items with name, category, room,
   optional estimated value, photo key (nullable), and classification status.
-  Categories and rooms are flat admin-managed lists. Indexes support fast
-  lookup by category and by room.
+  Categories and rooms are flat admin-managed lists. Indexes support fast lookup
+  by category and by room.
 
 ### Modified Capabilities
 
@@ -41,8 +41,8 @@ _(none — this is a greenfield capability)_
 - **New lib modules**: `lib/inventory/itemRepo.ts`,
   `lib/inventory/categoryRepo.ts`, `lib/inventory/roomRepo.ts`,
   `lib/inventory/types.ts`.
-- **KV layout**: primary keys `["item", id]`, `["category", id]`, `["room", id]`;
-  indexes `["item-by-category", categoryId, itemId]`,
+- **KV layout**: primary keys `["item", id]`, `["category", id]`,
+  `["room", id]`; indexes `["item-by-category", categoryId, itemId]`,
   `["item-by-room", roomId, itemId]`.
 - **No new dependencies**: Deno standard library and existing Fresh 2 / Deno KV
   stack are sufficient.

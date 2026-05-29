@@ -7,26 +7,26 @@
 
 ## 2. Category repository
 
-- [ ] 2.1 Write failing unit tests for `lib/inventory/categoryRepo.ts`:
-      create category, find by id, list all, delete unused, reject duplicate
-      name, reject delete when items reference the category.
+- [ ] 2.1 Write failing unit tests for `lib/inventory/categoryRepo.ts`: create
+      category, find by id, list all, delete unused, reject duplicate name,
+      reject delete when items reference the category.
 - [ ] 2.2 Implement `lib/inventory/categoryRepo.ts` with `createCategory`,
       `findCategory`, `listCategories`, `deleteCategory`.
 
 ## 3. Room repository
 
-- [ ] 3.1 Write failing unit tests for `lib/inventory/roomRepo.ts`:
-      create room, find by id, list all, delete unused, reject duplicate name,
-      reject delete when items reference the room.
+- [ ] 3.1 Write failing unit tests for `lib/inventory/roomRepo.ts`: create room,
+      find by id, list all, delete unused, reject duplicate name, reject delete
+      when items reference the room.
 - [ ] 3.2 Implement `lib/inventory/roomRepo.ts` with `createRoom`, `findRoom`,
       `listRooms`, `deleteRoom`.
 
 ## 4. Item repository
 
-- [ ] 4.1 Write failing unit tests for `lib/inventory/itemRepo.ts`: create
-      item (sets `status:"confirmed"`, `photoKey:null`), find by id, list all,
-      update (name / category / room / value), delete — verifying that category
-      and room indexes are maintained atomically in all mutation cases.
+- [ ] 4.1 Write failing unit tests for `lib/inventory/itemRepo.ts`: create item
+      (sets `status:"confirmed"`, `photoKey:null`), find by id, list all, update
+      (name / category / room / value), delete — verifying that category and
+      room indexes are maintained atomically in all mutation cases.
 - [ ] 4.2 Implement `lib/inventory/itemRepo.ts` with `createItem`, `findItem`,
       `listItems`, `listItemsByCategory`, `listItemsByRoom`, `updateItem`,
       `deleteItem`. Use `kv.atomic()` for all index-touching mutations.
@@ -39,21 +39,21 @@
 
 ## 6. Category routes
 
-- [ ] 6.1 Implement `routes/categories/index.tsx` — list all categories, form
-      to add a new one (POST), delete button per category (POST with CSRF).
-      Show error if name is duplicate or deletion is blocked.
+- [ ] 6.1 Implement `routes/categories/index.tsx` — list all categories, form to
+      add a new one (POST), delete button per category (POST with CSRF). Show
+      error if name is duplicate or deletion is blocked.
 
 ## 7. Room routes
 
-- [ ] 7.1 Implement `routes/rooms/index.tsx` — list all rooms, form to add a
-      new one (POST), delete button per room (POST with CSRF).
-      Show error if name is duplicate or deletion is blocked.
+- [ ] 7.1 Implement `routes/rooms/index.tsx` — list all rooms, form to add a new
+      one (POST), delete button per room (POST with CSRF). Show error if name is
+      duplicate or deletion is blocked.
 
 ## 8. Item routes
 
-- [ ] 8.1 Implement `routes/items/index.tsx` — list view with server-side
-      search (name substring, case-insensitive) and filter by category and room
-      via query params. Each item shows name, category, room.
+- [ ] 8.1 Implement `routes/items/index.tsx` — list view with server-side search
+      (name substring, case-insensitive) and filter by category and room via
+      query params. Each item shows name, category, room.
 - [ ] 8.2 Implement `routes/items/new.tsx` — GET renders create form (category
       select, optional room select, optional estimated value); POST creates item
       and redirects to `/items`.
@@ -79,8 +79,8 @@
 
 - [ ] 11.1 E2E scenario: create a category, create a room, create an item
       assigned to both — item appears in the list and in filtered views.
-- [ ] 11.2 E2E scenario: edit an item's category — old category filter no
-      longer shows the item; new category filter does.
+- [ ] 11.2 E2E scenario: edit an item's category — old category filter no longer
+      shows the item; new category filter does.
 - [ ] 11.3 E2E scenario: delete an item — item no longer appears in the list.
 - [ ] 11.4 E2E scenario: attempt to delete a category in use — error is shown
       and category persists.

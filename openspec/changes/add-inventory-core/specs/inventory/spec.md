@@ -8,7 +8,8 @@ MUST NOT be deleted while any item references it.
 
 #### Scenario: Create a category
 
-- **WHEN** an authenticated user POSTs a non-empty category name to `/categories`
+- **WHEN** an authenticated user POSTs a non-empty category name to
+  `/categories`
 - **THEN** a new category record is created and appears in the category list
 
 #### Scenario: Duplicate category name is rejected
@@ -54,16 +55,16 @@ deletion).
 
 ### Requirement: Item creation
 
-The system MUST allow authenticated users to create items with a name,
-category, and optional room assignment and estimated value. On creation the
-system MUST set `status` to `"confirmed"` and `photoKey` to `null`.
+The system MUST allow authenticated users to create items with a name, category,
+and optional room assignment and estimated value. On creation the system MUST
+set `status` to `"confirmed"` and `photoKey` to `null`.
 
 #### Scenario: Create an item with required fields
 
 - **WHEN** an authenticated user submits a new item form with a non-empty name
   and a valid category
-- **THEN** an item record is created with `status: "confirmed"`, `photoKey: null`,
-  and timestamps set to the current time
+- **THEN** an item record is created with `status: "confirmed"`,
+  `photoKey: null`, and timestamps set to the current time
 
 #### Scenario: Create an item with all optional fields
 
@@ -79,9 +80,9 @@ system MUST set `status` to `"confirmed"` and `photoKey` to `null`.
 
 ### Requirement: Item editing
 
-The system MUST allow authenticated users to edit an item's name, category,
-room assignment, and estimated value. Index entries MUST be updated atomically
-with the primary record.
+The system MUST allow authenticated users to edit an item's name, category, room
+assignment, and estimated value. Index entries MUST be updated atomically with
+the primary record.
 
 #### Scenario: Change an item's category
 
@@ -98,8 +99,8 @@ with the primary record.
 #### Scenario: Remove an item's room assignment
 
 - **WHEN** an authenticated user clears the room field on an item
-- **THEN** `item.roomId` is `null` and the item no longer appears in any
-  room index
+- **THEN** `item.roomId` is `null` and the item no longer appears in any room
+  index
 
 ### Requirement: Item deletion
 
@@ -114,8 +115,8 @@ atomically remove the primary record and all index entries.
 
 ### Requirement: Item list with search and filter
 
-The system MUST provide a list view of all items with server-side search by
-name (case-insensitive substring) and filter by category and by room.
+The system MUST provide a list view of all items with server-side search by name
+(case-insensitive substring) and filter by category and by room.
 
 #### Scenario: List all items
 
@@ -152,14 +153,14 @@ primary item records.
 #### Scenario: Index reflects item after create
 
 - **WHEN** an item is created with category C and room R
-- **THEN** the item appears in the prefix scan for `["item-by-category", C]`
-  and `["item-by-room", R]`
+- **THEN** the item appears in the prefix scan for `["item-by-category", C]` and
+  `["item-by-room", R]`
 
 #### Scenario: Index reflects item after update
 
 - **WHEN** an item's category is changed from C1 to C2
-- **THEN** the item no longer appears under `["item-by-category", C1]` and
-  does appear under `["item-by-category", C2]`
+- **THEN** the item no longer appears under `["item-by-category", C1]` and does
+  appear under `["item-by-category", C2]`
 
 #### Scenario: Index reflects item after delete
 

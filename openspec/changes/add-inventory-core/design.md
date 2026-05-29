@@ -18,8 +18,8 @@ unnecessary.
 - Implement repository functions with atomic index maintenance.
 - Deliver a mobile-friendly CRUD UI for items (primary use case: phone in hand
   during the move).
-- Include `photoKey` and `status` fields on Item now so M3 and M6 do not
-  require a schema migration.
+- Include `photoKey` and `status` fields on Item now so M3 and M6 do not require
+  a schema migration.
 - Admin-only CRUD for categories and rooms.
 
 **Non-Goals:**
