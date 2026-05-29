@@ -1,16 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-const USER = "testuser";
-const PASS = "TestPw!1234";
-
-async function login(page: import("@playwright/test").Page) {
-  await page.goto("/login");
-  await page.fill('[name="username"]', USER);
-  await page.fill('[name="password"]', PASS);
-  await page.click('[type="submit"]');
-  await expect(page).toHaveURL("/");
-}
-
 // Unique suffix per test run to avoid KV collisions across concurrent runs
 const RUN = Date.now().toString(36);
 
@@ -52,8 +41,6 @@ async function createItem(
 // ── 11.1: Create category, room, item — appears in list and filtered views ───
 
 test("create category, room, item — item appears in list and filtered views", async ({ page }) => {
-  await login(page);
-
   const catName = `Bücher-${RUN}`;
   const roomName = `Küche-${RUN}`;
   const itemName = `Kochbuch-${RUN}`;
@@ -80,8 +67,6 @@ test("create category, room, item — item appears in list and filtered views", 
 // ── 11.2: Edit item category — old filter gone, new filter shows item ─────────
 
 test("edit item category — old filter gone, new filter shows item", async ({ page }) => {
-  await login(page);
-
   const cat1 = `Elektro-${RUN}`;
   const cat2 = `Möbel-${RUN}`;
   const itemName = `Stehlampe-${RUN}`;
@@ -111,8 +96,6 @@ test("edit item category — old filter gone, new filter shows item", async ({ p
 // ── 11.3: Delete item — item no longer in list ────────────────────────────────
 
 test("delete item — item no longer appears in list", async ({ page }) => {
-  await login(page);
-
   const catName = `Kleidung-${RUN}`;
   const itemName = `Jacke-${RUN}`;
 
@@ -130,8 +113,6 @@ test("delete item — item no longer appears in list", async ({ page }) => {
 // ── 11.4: Delete category in use — error shown, category persists ─────────────
 
 test("delete referenced category shows error and category persists", async ({ page }) => {
-  await login(page);
-
   const catName = `Werkzeug-${RUN}`;
   const itemName = `Hammer-${RUN}`;
 
@@ -151,8 +132,6 @@ test("delete referenced category shows error and category persists", async ({ pa
 // ── 11.5: Search by name — only matching items shown ─────────────────────────
 
 test("search by name — only matching items shown", async ({ page }) => {
-  await login(page);
-
   const catName = `Küche-cat-${RUN}`;
   const itemA = `Mixer-${RUN}`;
   const itemB = `Toaster-${RUN}`;

@@ -26,9 +26,26 @@ export default defineConfig({
   },
 
   projects: [
+    // Logs in once and saves session cookies for reuse by the chromium project.
+    {
+      name: "setup",
+      testMatch: /auth\.setup\.ts/,
+    },
+    // Auth tests exercise login/logout flows and must start unauthenticated.
+    {
+      name: "auth",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /auth\.test\.ts/,
+    },
+    // All other tests start pre-authenticated via storageState.
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "tests/e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
+      testIgnore: /auth\.(test|setup)\.ts/,
     },
   ],
 
