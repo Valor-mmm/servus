@@ -37,6 +37,18 @@ var to keep an existing username's hash refreshed under their chosen password.
 - **WHEN** the app starts with `SERVUS_SEED_USERS` unset or set to `[]`
 - **THEN** no users are created and the boot succeeds
 
+#### Local development
+
+For local development, copy `.env.example` to `.env` and fill in both variables.
+The `deno task dev` command loads `.env` automatically via `--env-file=.env`.
+Without a `SERVUS_SEED_USERS` entry the app boots with no users and login is
+impossible, so local `.env` must include at least one seed entry. Because the
+value is a JSON array, it must be wrapped in single quotes in the `.env` file:
+
+```
+SERVUS_SEED_USERS='[{"username":"monster","password":"..."}]'
+```
+
 ### Requirement: Password storage uses Argon2id
 
 The system MUST hash passwords with Argon2id before storing them. The hash MUST
@@ -59,6 +71,22 @@ disclosure via logs.
 - **WHEN** the system verifies the candidate password `p1`
 - **THEN** verification returns true
 - **AND** verifying `p1-wrong` returns false
+
+### Requirement: SERVUS_SESSION_KEY must be set at startup
+
+The application MUST refuse to start if `SERVUS_SESSION_KEY` is absent or unset.
+On detecting a missing key the process MUST log a clear error message and exit
+with a non-zero status before accepting any requests.
+
+_Rationale:_ an empty signing key silently produces invalid session cookies,
+making every login fail with a misleading "wrong credentials" error rather than
+a clear operational alert.
+
+#### Scenario: Missing session key aborts startup
+
+- **WHEN** the app starts with `SERVUS_SESSION_KEY` unset or empty
+- **THEN** the process logs an error referencing `.env.example`
+- **AND** exits before serving any requests
 
 ### Requirement: Login issues a signed session cookie
 
