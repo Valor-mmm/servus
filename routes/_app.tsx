@@ -16,6 +16,9 @@ export default define.page(function App({ Component, state }) {
       <body>
         {state.user && (
           <nav>
+            <a href="/items">{t("nav.items")}</a>
+            <a href="/categories">{t("nav.categories")}</a>
+            <a href="/rooms">{t("nav.rooms")}</a>
             <form method="post" action="/logout">
               <input
                 type="hidden"
