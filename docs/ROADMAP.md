@@ -1,53 +1,41 @@
 # servus — Roadmap
 
-This is the spec-driven roadmap. Each MVP milestone corresponds to one OpenSpec
-change. The ordering is deliberate: each change builds on the capabilities of
-the previous one and is shippable on its own.
+This is the spec-driven roadmap. Each milestone corresponds to one OpenSpec
+change and is shippable on its own. The ordering is deliberate: each change
+builds on the capabilities of the previous one.
 
 ## North star
 
 A private, free-to-run home management system that helps two people catalog what
 they own, pack it into boxes, move it, and then continue to manage it
-day-to-day. The MVP must be **usable for the imminent move** within 1–2 weeks.
-
-## MVP timeline (target)
-
-| Week | Days | Milestone                                               |
-| ---- | ---- | ------------------------------------------------------- |
-| 1    | 1    | M0: Foundation (Fresh app, KV, deploy pipeline, domain) |
-| 1    | 2–3  | M1: Authentication + sessions + brute-force protection  |
-| 1    | 3    | M2: Invite codes                                        |
-| 1    | 4–7  | M3: Inventory core (items, categories, rooms)           |
-| 2    | 1–3  | M4: Boxes + short codes (QR labels)                     |
-| 2    | 3–5  | M5: Moving flow (pack/unpack + bulk box→room)           |
-| 2    | 6–7  | M6 (stretch): Item photos via Cloudflare R2             |
-
-Stretch is droppable without affecting the move's usability.
+day-to-day.
 
 ## Capabilities
 
-Long-term capability list (what the system _will_ be able to do, not just MVP):
-
 - `auth` — authenticate users, manage sessions, resist brute-force.
-- `invites` — mint single-use codes that let an admin add a temporary user
-  without a code change.
 - `inventory` — catalog physical items with name, category, room, and optional
-  estimated value.
-- `boxes` — model physical containers with scannable codes; assign items to
-  boxes during packing.
-- `moving` — pack/unpack lifecycle, bulk-reassign a whole box to a destination
-  room.
-- `item-photos` — attach images to items.
+  photo.
+- `boxes` — model physical containers with scannable QR codes; assign items to
+  boxes during packing via photo-first bulk capture.
+- `moving` — pack/unpack lifecycle; unpack a box into a room with per-item
+  exceptions; standalone item capture for large items without a box.
+- `invites` — mint single-use codes that let an admin add a temporary helper
+  without a code change.
+- `item-classification` — async AI pipeline (Cloudflare Workers AI + ISBN
+  lookup) classifies captured photos; swipe-to-review UI for curation.
 - (future) `shopping` — shopping list synced between two people.
 - (future) `recipes` — recipe storage with ingredient links to inventory.
 - (future) `pantry` — fridge / pantry items with expiry tracking.
 
-## MVP changes (ordered)
+---
 
-### M0 — Project foundation (not an OpenSpec change)
+## Required milestones
 
-Pure setup. Tracked in git and CI, not in OpenSpec, because it doesn't add a
-user-visible capability.
+These are move-blocking. Must be done before the move.
+
+### M0 — Project foundation ✓ _(not an OpenSpec change)_
+
+Pure setup. Tracked in git and CI, not in OpenSpec.
 
 - Deno + Fresh 2 skeleton, `deno.json` tasks.
 - `lib/kv/` typed wrappers around `Deno.openKv()`.
@@ -56,14 +44,11 @@ user-visible capability.
 - Deno Deploy project + custom domain `servus.valor.codes`.
 - Playwright bootstrap with a "homepage loads" smoke test.
 - `renovate.json` — Renovate Bot config (auto-merge patch/minor, flag majors).
-  Requires Renovate GitHub App installed on the `Valor-mmm` account.
+  Requires Renovate GitHub App installed on the `Valor-mmm` account at
+  `github.com/apps/renovate`.
 - `README.md` and this `ROADMAP.md` committed.
 
-**Exit criteria:** a hello-world page is live on `servus.valor.codes`, green CI
-on main, Playwright smoke test passes, Renovate Bot opens its first
-dependency-dashboard issue.
-
-### M1 — `add-authentication`
+### M1 — `add-authentication` ✓
 
 Capability gained: **auth**.
 
@@ -79,7 +64,71 @@ Capability gained: **auth**.
 
 **Non-goals:** password reset, MFA, OAuth, email verification.
 
-### M2 — `add-invite-codes`
+### M2 — `add-inventory-core`
+
+Capability gained: **inventory**.
+
+- Item entity: id, name, category, optional estimated value, room (nullable),
+  photo key (nullable), status (`pending` | `suggested` | `confirmed`),
+  created/updated timestamps.
+- Category entity: flat list, admin-managed.
+- Room entity: flat list, admin-managed (matches rooms in new home).
+- CRUD UI: create / edit / delete items, search by name, filter by category and
+  by room.
+- KV layout: primary `["item", id]`; indexes `["item-by-category", cat, id]`,
+  `["item-by-room", room, id]`.
+- Atomic writes keep indexes consistent.
+
+**Non-goals:** purchase history, invoices, warranty tracking, bulk import.
+
+### M3 — `add-boxes-and-codes`
+
+Capability gained: **boxes**.
+
+- Box entity: id, short human code (e.g. `B-042`), optional label,
+  `destinationRoom` (nullable, editable at any phase), status (`empty` |
+  `packed` | `unpacked`).
+- A `packed` box remains fully editable — items can still be added or removed
+  after packing. Status is a convenience indicator, not a lock.
+- Item location model: `item.roomId` (explicit) takes precedence over
+  `box.destinationRoom` (inherited). Items in a box without a direct room
+  assignment inherit the box's destination when unpacked.
+- Printable label page with a QR code linking to the box detail view. System
+  camera on iOS/Android handles scanning natively — no in-app QR reader needed.
+- QR scan shows a context-aware view based on box status:
+  - `empty` or `packed` → contents list + photo-first bulk-add + "Unpack here"
+  - `unpacked` → read-only contents list
+- **Photo-first bulk-add**: set room once at the top, then tap to photograph
+  items one by one. Each photo immediately creates an item assigned to the box
+  and queues it for AI classification. No name or category required at capture
+  time.
+
+**Non-goals:** weight/dimension tracking, multiple photos per item.
+
+### M4 — `add-moving-flow`
+
+Capability gained: **moving**.
+
+- Box status transitions: `empty → packed → unpacked`.
+- **Unpack with exceptions**: default destination room applies to all items, but
+  individual items can be tapped to assign a different room before confirming.
+  Committed as one atomic KV write.
+- **Standalone item capture**: for large items that move without a box — photo +
+  mandatory room picker. Item gets a direct `roomId`, no box involved.
+- Box `destinationRoom` editable at any phase (plans change during a move).
+- Reverse action: re-pack an item into a different box.
+- Move dashboard: count of boxes by status, items packed vs. total.
+
+**Non-goals:** multi-truck logistics, mover assignments, scheduling.
+
+---
+
+## Optional milestones
+
+These are useful but the move works fine without them. Implement when time
+allows.
+
+### M5 — `add-invite-codes`
 
 Capability gained: **invites**.
 
@@ -91,87 +140,56 @@ Capability gained: **invites**.
 
 **Non-goals:** role granularity beyond admin/user, email delivery.
 
-### M3 — `add-inventory-core`
+### M6 — `add-item-classification`
 
-Capability gained: **inventory**.
+Capability gained: **item-classification**.
 
-- Item entity: id, name, category, optional estimated value, room (nullable),
-  created/updated timestamps.
-- Category entity: flat list, admin-managed.
-- Room entity: flat list, admin-managed (matches rooms in new home).
-- CRUD UI: create / edit / delete items, search by name, filter by category and
-  by room.
-- KV layout: primary `["item", id]`; indexes `["item-by-category", cat, id]`,
-  `["item-by-room", room, id]`.
-- Atomic writes keep indexes consistent.
+- Async pipeline: after a photo is captured, a Deno KV queue job fetches the
+  image from R2 and sends it to Cloudflare Workers AI (LLaVA vision-language
+  model, free tier).
+- ISBN/barcode detection path for books: if a barcode is found, a Google Books
+  API lookup (free, no auth) returns title, author, publisher — richer than
+  vision alone.
+- Pipeline result updates the item: name, category, any extra fields; status →
+  `suggested`.
+- **Tinder-style review UI**: swipe or tap through `suggested` items. AI got it
+  right → confirm in one tap. Wrong → edit modal pre-filled with the suggestion.
+  No typing required for the common case.
+- Items without a photo or with a failed classification remain `pending` and
+  appear in a separate "needs review" list.
 
-**Non-goals:** purchase history, invoices, warranty tracking, photos (M6
-stretch), bulk import.
+**Non-goals:** on-device classification, paid vision APIs, multiple photos.
 
-### M4 — `add-boxes-and-codes`
+---
 
-Capability gained: **boxes**.
+## Decision log
 
-- Box entity: id, short human code (e.g. `B-042`), optional label, status
-  (`empty` | `packed` | `in-transit` | `unpacked`).
-- Items can be assigned to a box; assigning to a box clears any direct room
-  assignment. (Box owns location until unpacked.)
-- Printable label page with a QR code that links to the box's detail view.
-  Scanning opens the contents list on a phone.
-- Bulk-add: from a box's detail page, quickly add many items in one go (single
-  input, comma-separated or one-per-line).
+- **D1.** Database is Deno KV, not SQLite/Postgres. Native to Deno Deploy, free,
+  atomic ops; our access patterns are prefix-scans not joins. Migration path to
+  SQL exists if needed.
+- **D2.** Framework is Fresh 2, not a SPA + separate API. Fewer moving parts,
+  server-rendered = fast on mobile, islands cover interactive needs.
+- **D3.** Custom auth, not third-party. A 2-user app does not need an identity
+  platform; vendor risk and dependency churn outweigh the convenience.
+- **D4.** No invoices / purchase history. Easy to add later as additional fields
+  on `Item`.
+- **D5.** Invite codes before AI classification in optional milestones. Helpers
+  joining to pack is a more immediate need than retrospective AI enrichment.
+- **D6.** Photo-first capture lives in M3 (boxes bulk-add) and M4 (standalone
+  items), not as a separate milestone. The box workflow is the natural capture
+  moment; photos are part of the flow, not an add-on.
+- **D7.** AI classification is optional (M6) and fully async — the move works
+  with unnamed items. Classification enriches data after the fact and is never
+  on the critical path.
+- **D8.** Classification via Cloudflare Workers AI (LLaVA, free tier) + Google
+  Books ISBN API (free, no auth). Stays within the free-forever constraint. ISBN
+  path preferred for books; LLaVA fallback for everything else.
+- **D9.** No `in-transit` box status. For a single-trip move, the state adds
+  friction with no benefit — boxes go directly from `packed` to `unpacked`.
+  Packed boxes remain editable so last-minute item changes don't require a
+  status reset.
 
-**Non-goals:** weight/dimension tracking, photo of box contents.
-
-### M5 — `add-moving-flow`
-
-Capability gained: **moving**.
-
-- Box status transitions: `empty → packed → in-transit → unpacked`.
-- "Unpack" action on a box: pick a destination room; all items in the box
-  atomically get that room and the box becomes `unpacked`.
-- Reverse action: re-pack into a different box (rare, but supported).
-- Move dashboard: count of boxes by status, items packed vs. total, next room to
-  unpack.
-
-**Non-goals:** multi-truck logistics, mover assignments, scheduling.
-
-### M6 — `add-item-photos` (stretch)
-
-Capability gained: **item-photos**.
-
-- One photo per item (sufficient for visual recognition).
-- Upload from mobile camera via the standard `<input type="file" capture>`.
-- Storage: Cloudflare R2 free tier; presigned PUT URL from server.
-- Thumbnail generated server-side on upload (small WebP).
-- Item view shows photo; list view shows thumbnail.
-
-**Non-goals:** multiple photos, image search, OCR.
-
-## Decision log (will move to `docs/decisions/`)
-
-- **D1.** Database is Deno KV, not SQLite/Postgres. Rationale: native to Deno
-  Deploy, free, atomic ops, our access patterns are prefix-scans not joins.
-  Migration path to SQL exists if needed.
-- **D2.** Framework is Fresh 2, not a SPA + separate API. Rationale: fewer
-  moving parts, server-rendered = fast on mobile, islands cover our interactive
-  needs (search, bulk add, QR scanning).
-- **D3.** Custom auth, not third-party. Rationale: a 2-user app does not need an
-  identity platform; vendor risk and dependency churn outweigh the convenience.
-- **D4.** No invoices / purchase history in MVP. Rationale: speed. Easy to add
-  later as additional fields on `Item`.
-- **D5.** Photos are a stretch goal, not MVP-critical. Rationale: the move
-  benefits more from box/room workflow than from photos.
-
-## Open questions to resolve before M0
-
-- Exact subdomain — confirm `servus.valor.codes` and DNS access for it.
-- Whether to print physical QR labels via a separate tool or render print-ready
-  PDF in-app (probably in-app for self-containment).
-- Whether to track move-day notes (e.g. "fragile") as a free-text field on Box
-  or Item. Likely Item.
-
-## Beyond MVP (sketched, not committed)
+## Beyond MVP
 
 - Shopping list with two-person sync and "added by" attribution.
 - Recipes that reference items / categories from inventory.
