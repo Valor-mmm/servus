@@ -87,16 +87,16 @@ Capability gained: **boxes**.
 
 - Box entity: id, short human code (e.g. `B-042`), optional label,
   `destinationRoom` (nullable, editable at any phase), status (`empty` |
-  `packed` | `in-transit` | `unpacked`).
+  `packed` | `unpacked`).
+- A `packed` box remains fully editable — items can still be added or removed
+  after packing. Status is a convenience indicator, not a lock.
 - Item location model: `item.roomId` (explicit) takes precedence over
   `box.destinationRoom` (inherited). Items in a box without a direct room
   assignment inherit the box's destination when unpacked.
 - Printable label page with a QR code linking to the box detail view. System
   camera on iOS/Android handles scanning natively — no in-app QR reader needed.
 - QR scan shows a context-aware view based on box status:
-  - `empty` → photo-first bulk-add view
-  - `packed` → contents list + "Add more" + "Unpack here"
-  - `in-transit` → prominent "Unpack here" button
+  - `empty` or `packed` → contents list + photo-first bulk-add + "Unpack here"
   - `unpacked` → read-only contents list
 - **Photo-first bulk-add**: set room once at the top, then tap to photograph
   items one by one. Each photo immediately creates an item assigned to the box
@@ -109,7 +109,7 @@ Capability gained: **boxes**.
 
 Capability gained: **moving**.
 
-- Box status transitions: `empty → packed → in-transit → unpacked`.
+- Box status transitions: `empty → packed → unpacked`.
 - **Unpack with exceptions**: default destination room applies to all items, but
   individual items can be tapped to assign a different room before confirming.
   Committed as one atomic KV write.
@@ -184,6 +184,10 @@ Capability gained: **item-classification**.
 - **D8.** Classification via Cloudflare Workers AI (LLaVA, free tier) + Google
   Books ISBN API (free, no auth). Stays within the free-forever constraint. ISBN
   path preferred for books; LLaVA fallback for everything else.
+- **D9.** No `in-transit` box status. For a single-trip move, the state adds
+  friction with no benefit — boxes go directly from `packed` to `unpacked`.
+  Packed boxes remain editable so last-minute item changes don't require a
+  status reset.
 
 ## Beyond MVP
 
