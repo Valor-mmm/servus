@@ -28,7 +28,7 @@
     "npm:@playwright/test@^1.44.0": "1.60.0",
     "npm:@preact/signals@^2.5.1": "2.9.1_preact@10.29.2",
     "npm:@preact/signals@^2.9.0": "2.9.1_preact@10.29.2",
-    "npm:@types/qrcode@1.5.5": "1.5.5",
+    "npm:@types/qrcode@1.5.6": "1.5.6",
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.7",
@@ -303,8 +303,8 @@
         "undici-types"
       ]
     },
-    "@types/qrcode@1.5.5": {
-      "integrity": "sha512-CdfBi/e3Qk+3Z/fXYShipBT13OJ2fDO2Q2w5CIP5anLTLIndQG9z6P1cnm+8zCWSpm5dnxMFd/uREtb0EXuQzg==",
+    "@types/qrcode@1.5.6": {
+      "integrity": "sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw==",
       "dependencies": [
         "@types/node"
       ]
@@ -534,7 +534,7 @@
       "jsr:@std/assert@^1.0.16",
       "npm:@playwright/test@^1.44.0",
       "npm:@preact/signals@^2.9.0",
-      "npm:@types/qrcode@1.5.5",
+      "npm:@types/qrcode@1.5.6",
       "npm:hash-wasm@4.12.0",
       "npm:preact@^10.29.1",
       "npm:qrcode@1.5.4"
