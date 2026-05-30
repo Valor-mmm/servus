@@ -94,8 +94,6 @@ test("box detail page with ?delivered=1 includes confetti script tag", async ({ 
   await page.click('main [type="submit"]');
   await expect(page).toHaveURL(/\/boxes\/.+/);
 
-  const boxUrl = page.url();
-
   await page.fill('[name="names"]', `Item-${RUN}`);
   await Promise.all([
     page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),

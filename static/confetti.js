@@ -2,7 +2,7 @@
 // No dependencies. Respects prefers-reduced-motion.
 (function () {
   if (!new URL(location.href).searchParams.has("delivered")) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const canvas = document.createElement("canvas");
   canvas.style.cssText =
