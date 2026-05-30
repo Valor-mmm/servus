@@ -25,6 +25,7 @@ interface PageProps {
   addedCount: number | null;
   csrfToken: string;
   categoryMap: Record<string, string>;
+  showConfetti: boolean;
 }
 
 function BoxDetailPage(
@@ -37,184 +38,206 @@ function BoxDetailPage(
     addedCount,
     csrfToken,
     categoryMap,
+    showConfetti,
   }: PageProps,
 ) {
   return (
-    <main class="page">
-      <h1>
-        {t("boxes.detail_title")}: <strong>{box.code}</strong>
-        {box.label ? ` – ${box.label}` : ""}
-      </h1>
+    <>
+      {showConfetti && <script src="/confetti.js" />}
+      <main class="page">
+        <h1>
+          {t("boxes.detail_title")}: <strong>{box.code}</strong>
+          {box.label ? ` – ${box.label}` : ""}
+        </h1>
 
-      <dl class="detail-list">
-        <dt>{t("boxes.destination_room_label")}</dt>
-        <dd>{destinationRoom?.name ?? t("boxes.no_destination_room")}</dd>
-        <dt>{t("boxes.status_label")}</dt>
-        <dd>{t(`boxes.status.${box.status}` as Parameters<typeof t>[0])}</dd>
-      </dl>
+        <dl class="detail-list">
+          <dt>{t("boxes.destination_room_label")}</dt>
+          <dd>{destinationRoom?.name ?? t("boxes.no_destination_room")}</dd>
+          <dt>{t("boxes.status_label")}</dt>
+          <dd>
+            <span class={`badge badge-${box.status}`}>
+              {t(`boxes.status.${box.status}` as Parameters<typeof t>[0])}
+            </span>
+          </dd>
+        </dl>
 
-      <div class="actions">
-        <a href={`/boxes/${box.id}/edit`} class="btn-secondary">
-          {t("action.edit")}
-        </a>
-        <a href={`/boxes/${box.id}/label`} class="btn-secondary">
-          {t("boxes.label_page_title")}
-        </a>
-        {box.status === "packed" && (
-          <form
-            method="post"
-            action={`/boxes/${box.id}`}
-            style="display:inline"
-          >
-            <input type="hidden" name="csrf_token" value={csrfToken} />
-            <input type="hidden" name="_action" value="mark_delivered" />
-            <button type="submit" class="btn-primary">
-              {t("boxes.action.mark_delivered")}
-            </button>
-          </form>
+        <div class="actions">
+          <a href={`/boxes/${box.id}/edit`} class="btn-secondary">
+            {t("action.edit")}
+          </a>
+          <a href={`/boxes/${box.id}/label`} class="btn-secondary">
+            {t("boxes.label_page_title")}
+          </a>
+          {box.status === "packed" && (
+            <form
+              method="post"
+              action={`/boxes/${box.id}`}
+              style="display:inline"
+            >
+              <input type="hidden" name="csrf_token" value={csrfToken} />
+              <input type="hidden" name="_action" value="mark_delivered" />
+              <button type="submit" class="btn-primary">
+                {t("boxes.action.mark_delivered")}
+              </button>
+            </form>
+          )}
+          {items.length === 0 && box.status !== "delivered" && (
+            <form
+              method="post"
+              action={`/boxes/${box.id}`}
+              style="display:inline"
+            >
+              <input type="hidden" name="csrf_token" value={csrfToken} />
+              <input type="hidden" name="_action" value="delete" />
+              <button type="submit" class="btn-danger">
+                {t("action.delete")}
+              </button>
+            </form>
+          )}
+          <a href="/boxes">{t("action.back")}</a>
+        </div>
+
+        {error && <p class="error">{error}</p>}
+        {addedCount !== null && (
+          <p class="success">
+            {t("boxes.bulk_add_result", { count: String(addedCount) })}
+          </p>
         )}
-        {items.length === 0 && box.status !== "delivered" && (
-          <form
-            method="post"
-            action={`/boxes/${box.id}`}
-            style="display:inline"
-          >
-            <input type="hidden" name="csrf_token" value={csrfToken} />
-            <input type="hidden" name="_action" value="delete" />
-            <button type="submit" class="btn-danger">
-              {t("action.delete")}
-            </button>
-          </form>
+
+        {box.status === "delivered" && box.destinationRoomId === null && (
+          <section class="assign-room-section">
+            <h2>{t("boxes.assign_room_heading")}</h2>
+            <form method="post" action={`/boxes/${box.id}`} class="inline-form">
+              <input type="hidden" name="csrf_token" value={csrfToken} />
+              <input type="hidden" name="_action" value="assign_room" />
+              <select name="roomId" required>
+                <option value="">
+                  — {t("boxes.destination_room_label")} —
+                </option>
+                {rooms.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+              <button type="submit" class="btn-primary">
+                {t("boxes.action.assign_room")}
+              </button>
+            </form>
+          </section>
         )}
-        <a href="/boxes">{t("action.back")}</a>
-      </div>
 
-      {error && <p class="error">{error}</p>}
-      {addedCount !== null && (
-        <p class="success">
-          {t("boxes.bulk_add_result", { count: String(addedCount) })}
-        </p>
-      )}
+        <h2>{t("boxes.item_count")}</h2>
 
-      {box.status === "delivered" && box.destinationRoomId === null && (
-        <section class="assign-room-section">
-          <h2>{t("boxes.assign_room_heading")}</h2>
-          <form method="post" action={`/boxes/${box.id}`} class="inline-form">
-            <input type="hidden" name="csrf_token" value={csrfToken} />
-            <input type="hidden" name="_action" value="assign_room" />
-            <select name="roomId" required>
-              <option value="">— {t("boxes.destination_room_label")} —</option>
-              {rooms.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-            <button type="submit" class="btn-primary">
-              {t("boxes.action.assign_room")}
-            </button>
-          </form>
-        </section>
-      )}
-
-      <h2>{t("boxes.item_count")}</h2>
-
-      {items.length === 0
-        ? <p class="empty">{t("boxes.items_empty")}</p>
-        : (
-          <ul class="item-list">
-            {items.map((item) => (
-              <li key={item.id} class="item-row">
-                <a href={`/items/${item.id}`}>{item.name}</a>
-                <span class="meta">
-                  {item.categoryId
-                    ? (categoryMap[item.categoryId] ?? "–")
-                    : "–"}
-                </span>
-                {box.status === "delivered"
-                  ? (
-                    <form
-                      method="post"
-                      action={`/boxes/${box.id}`}
-                      style="display:inline"
-                    >
-                      <input
-                        type="hidden"
-                        name="csrf_token"
-                        value={csrfToken}
-                      />
-                      <input type="hidden" name="_action" value="place_item" />
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <select name="roomId">
-                        <option value="">
-                          — {t("boxes.place_item_label")} —
-                        </option>
-                        {rooms.map((r) => (
-                          <option
-                            key={r.id}
-                            value={r.id}
-                            selected={r.id === box.destinationRoomId}
-                          >
-                            {r.name}
+        {items.length === 0
+          ? <p class="empty">{t("boxes.items_empty")}</p>
+          : (
+            <ul class="item-list">
+              {items.map((item) => (
+                <li key={item.id} class="item-row">
+                  <a href={`/items/${item.id}`}>{item.name}</a>
+                  <span class="meta">
+                    {item.categoryId
+                      ? (categoryMap[item.categoryId] ?? "–")
+                      : "–"}
+                  </span>
+                  {box.status === "delivered"
+                    ? (
+                      <form
+                        method="post"
+                        action={`/boxes/${box.id}`}
+                        style="display:inline"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value={csrfToken}
+                        />
+                        <input
+                          type="hidden"
+                          name="_action"
+                          value="place_item"
+                        />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <select name="roomId">
+                          <option value="">
+                            — {t("boxes.place_item_label")} —
                           </option>
-                        ))}
-                      </select>
-                      <button type="submit" class="btn-small">
-                        {t("boxes.action.place_item")}
-                      </button>
-                    </form>
-                  )
-                  : (
-                    <form
-                      method="post"
-                      action={`/boxes/${box.id}`}
-                      style="display:inline"
-                    >
-                      <input
-                        type="hidden"
-                        name="csrf_token"
-                        value={csrfToken}
-                      />
-                      <input type="hidden" name="_action" value="remove_item" />
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <button type="submit" class="btn-small">
-                        {t("boxes.remove_item")}
-                      </button>
-                    </form>
-                  )}
-              </li>
-            ))}
-          </ul>
-        )}
+                          {rooms.map((r) => (
+                            <option
+                              key={r.id}
+                              value={r.id}
+                              selected={r.id === box.destinationRoomId}
+                            >
+                              {r.name}
+                            </option>
+                          ))}
+                        </select>
+                        <button type="submit" class="btn-small">
+                          {t("boxes.action.place_item")}
+                        </button>
+                      </form>
+                    )
+                    : (
+                      <form
+                        method="post"
+                        action={`/boxes/${box.id}`}
+                        style="display:inline"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value={csrfToken}
+                        />
+                        <input
+                          type="hidden"
+                          name="_action"
+                          value="remove_item"
+                        />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <button type="submit" class="btn-small">
+                          {t("boxes.remove_item")}
+                        </button>
+                      </form>
+                    )}
+                </li>
+              ))}
+            </ul>
+          )}
 
-      {box.status === "delivered" && box.destinationRoomId !== null && (
-        <form method="post" action={`/boxes/${box.id}`} class="unpack-all-form">
-          <input type="hidden" name="csrf_token" value={csrfToken} />
-          <input type="hidden" name="_action" value="unpack_all" />
-          <button type="submit" class="btn-primary">
-            {t("boxes.action.unpack_all", {
-              room: destinationRoom?.name ?? "",
-            })}
-          </button>
-        </form>
-      )}
-
-      {box.status !== "delivered" && (
-        <>
-          <h2>{t("boxes.bulk_add_label")}</h2>
-          <form method="post" action={`/boxes/${box.id}`}>
+        {box.status === "delivered" && box.destinationRoomId !== null && (
+          <form
+            method="post"
+            action={`/boxes/${box.id}`}
+            class="unpack-all-form"
+          >
             <input type="hidden" name="csrf_token" value={csrfToken} />
-            <input type="hidden" name="_action" value="bulk_add" />
-            <textarea
-              name="names"
-              rows={6}
-              placeholder={t("boxes.bulk_add_placeholder")}
-            />
+            <input type="hidden" name="_action" value="unpack_all" />
             <button type="submit" class="btn-primary">
-              {t("boxes.bulk_add_submit")}
+              {t("boxes.action.unpack_all", {
+                room: destinationRoom?.name ?? "",
+              })}
             </button>
           </form>
-        </>
-      )}
-    </main>
+        )}
+
+        {box.status !== "delivered" && (
+          <>
+            <h2>{t("boxes.bulk_add_label")}</h2>
+            <form method="post" action={`/boxes/${box.id}`}>
+              <input type="hidden" name="csrf_token" value={csrfToken} />
+              <input type="hidden" name="_action" value="bulk_add" />
+              <textarea
+                name="names"
+                rows={6}
+                placeholder={t("boxes.bulk_add_placeholder")}
+              />
+              <button type="submit" class="btn-primary">
+                {t("boxes.bulk_add_submit")}
+              </button>
+            </form>
+          </>
+        )}
+      </main>
+    </>
   );
 }
 
@@ -260,6 +283,7 @@ export const handler = define.handlers({
     );
     const addedParam = ctx.url.searchParams.get("added");
     const addedCount = addedParam !== null ? Number(addedParam) : null;
+    const showConfetti = ctx.url.searchParams.has("delivered");
 
     return ctx.render(
       <BoxDetailPage
@@ -271,6 +295,7 @@ export const handler = define.handlers({
         addedCount={addedCount}
         csrfToken={ctx.state.csrfToken ?? ""}
         categoryMap={categoryMap}
+        showConfetti={showConfetti}
       />,
     );
   },
@@ -305,6 +330,7 @@ export const handler = define.handlers({
             addedCount={null}
             csrfToken={ctx.state.csrfToken ?? ""}
             categoryMap={categoryMap}
+            showConfetti={false}
           />,
         );
       }
@@ -319,7 +345,7 @@ export const handler = define.handlers({
       await markBoxDelivered(box.id);
       return new Response(null, {
         status: 302,
-        headers: { Location: `/boxes/${box.id}` },
+        headers: { Location: `/boxes/${box.id}?delivered=1` },
       });
     }
 

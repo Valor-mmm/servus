@@ -22,8 +22,10 @@ function ItemsPage(
 
   return (
     <main class="page">
-      <h1>{t("items.title")}</h1>
-      <a href="/items/new" class="btn-primary">{t("items.add")}</a>
+      <div class="page-header">
+        <h1>{t("items.title")}</h1>
+        <a href="/items/new" class="btn-primary">{t("items.add")}</a>
+      </div>
 
       <form method="get" action="/items" class="filter-form">
         <input
@@ -56,7 +58,12 @@ function ItemsPage(
       </form>
 
       {items.length === 0
-        ? <p class="empty">{t("items.empty")}</p>
+        ? (
+          <div class="empty-state">
+            <img src="/lion.svg" alt="" aria-hidden="true" />
+            <p>{t("items.empty")}</p>
+          </div>
+        )
         : (
           <ul class="item-list">
             {items.map((item) => (
