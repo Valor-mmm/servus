@@ -138,6 +138,7 @@ function BoxDetailPage(
                     {item.categoryId
                       ? (categoryMap[item.categoryId] ?? "–")
                       : "–"}
+                    {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                   </span>
                   {box.status === "delivered"
                     ? (

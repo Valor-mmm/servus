@@ -72,6 +72,7 @@ function ItemsPage(
                 <span class="meta">
                   {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
                   {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
+                  {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                 </span>
               </li>
             ))}
