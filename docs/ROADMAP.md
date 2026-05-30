@@ -16,9 +16,9 @@ day-to-day.
 - `inventory` — catalog physical items with name, category, room, and optional
   photo.
 - `boxes` — model physical containers with scannable QR codes; assign items to
-  boxes during packing via photo-first bulk capture.
-- `moving` — pack/unpack lifecycle; unpack a box into a room with per-item
-  exceptions; standalone item capture for large items without a box.
+  boxes during packing.
+- `moving` — packed → delivered → unpack lifecycle; place items into rooms
+  individually or all at once; standalone item capture for large items.
 - `invites` — mint single-use codes that let an admin add a temporary helper
   without a code change.
 - `item-classification` — async AI pipeline (Cloudflare Workers AI + ISBN
@@ -64,62 +64,81 @@ Capability gained: **auth**.
 
 **Non-goals:** password reset, MFA, OAuth, email verification.
 
-### M2 — `add-inventory-core`
+### M2 — `add-inventory-core` ✓
 
 Capability gained: **inventory**.
 
 - Item entity: id, name, category, optional estimated value, room (nullable),
-  photo key (nullable), status (`pending` | `suggested` | `confirmed`),
-  created/updated timestamps.
+  box (nullable), photo key (nullable), status (`confirmed`), created/updated
+  timestamps.
 - Category entity: flat list, admin-managed.
 - Room entity: flat list, admin-managed (matches rooms in new home).
 - CRUD UI: create / edit / delete items, search by name, filter by category and
   by room.
 - KV layout: primary `["item", id]`; indexes `["item-by-category", cat, id]`,
-  `["item-by-room", room, id]`.
+  `["item-by-room", room, id]`, `["item-by-box", box, id]`.
 - Atomic writes keep indexes consistent.
+- `boxId` and `roomId` are mutually exclusive: assigning a box clears the room
+  and vice versa.
 
 **Non-goals:** purchase history, invoices, warranty tracking, bulk import.
 
-### M3 — `add-boxes-and-codes`
+### M3 — `add-boxes-and-codes` ✓
 
 Capability gained: **boxes**.
 
-- Box entity: id, short human code (e.g. `B-042`), optional label,
-  `destinationRoom` (nullable, editable at any phase), status (`empty` |
-  `packed` | `unpacked`).
-- A `packed` box remains fully editable — items can still be added or removed
-  after packing. Status is a convenience indicator, not a lock.
-- Item location model: `item.roomId` (explicit) takes precedence over
-  `box.destinationRoom` (inherited). Items in a box without a direct room
-  assignment inherit the box's destination when unpacked.
-- Printable label page with a QR code linking to the box detail view. System
-  camera on iOS/Android handles scanning natively — no in-app QR reader needed.
-- QR scan shows a context-aware view based on box status:
-  - `empty` or `packed` → contents list + photo-first bulk-add + "Unpack here"
-  - `unpacked` → read-only contents list
-- **Photo-first bulk-add**: set room once at the top, then tap to photograph
-  items one by one. Each photo immediately creates an item assigned to the box
-  and queues it for AI classification. No name or category required at capture
-  time.
+- Box entity: id, auto-incrementing short code (`B-001`, `B-002`, …), optional
+  label, destination room (nullable), status (`empty` | `packed` | `delivered`).
+- Status is tracked automatically: `empty` when no items, `packed` when ≥ 1
+  item. Status never auto-downgrades once `delivered`.
+- Printable label page: destination room name as dominant element with Unicode
+  room icon, short code, optional label, item count badge, SVG QR code linking
+  to the box detail view.
+- Bulk-add: enter item names in a textarea (comma-separated or one-per-line);
+  creates items immediately assigned to the box.
+- Box list and detail views with item counts, per-item remove action, edit form.
 
-**Non-goals:** weight/dimension tracking, multiple photos per item.
+**Non-goals:** weight/dimension tracking, photo-first bulk capture (future M4/M6).
 
-### M4 — `add-moving-flow`
+### M4 — `box-lifecycle-and-label` ✓
 
-Capability gained: **moving**.
+Capability gained: **moving flow**.
 
-- Box status transitions: `empty → packed → unpacked`.
-- **Unpack with exceptions**: default destination room applies to all items, but
-  individual items can be tapped to assign a different room before confirming.
-  Committed as one atomic KV write.
-- **Standalone item capture**: for large items that move without a box — photo +
-  mandatory room picker. Item gets a direct `roomId`, no box involved.
-- Box `destinationRoom` editable at any phase (plans change during a move).
-- Reverse action: re-pack an item into a different box.
-- Move dashboard: count of boxes by status, items packed vs. total.
+- Box status transitions: `empty ↔ packed` (automatic), `packed → delivered`
+  (manual "Als geliefert markieren" button), `delivered` → tombstone-deleted via
+  unpack flow.
+- Per-item "Einlagern" form on delivered boxes: room select pre-filled to
+  destination room. Placing the last item tombstone-deletes the box.
+- "Alle entpacken nach [Raum]": assigns destination room to all remaining items,
+  removes them from the box, tombstone-deletes the box in one flow.
+- Inline assign-destination-room section shown when a delivered box has no room.
+- Tombstone deletion: live box record and code index are removed atomically;
+  `BoxTombstone` written so short codes are permanently retired and history
+  preserved.
 
-**Non-goals:** multi-truck logistics, mover assignments, scheduling.
+**Non-goals:** multi-truck logistics, mover assignments, scheduling, re-packing.
+
+### M_design — `design-overhaul` _(next)_
+
+Capability gained: **polished, mobile-ready UI**.
+
+Inserted ahead of M5 (item photos) because M5 requires Cloudflare R2
+infrastructure setup that is not yet in place.
+
+- Mobile-first layout with bottom navigation bar (thumb-reachable).
+- Bavarian-inspired color palette: rich blue, warm parchment white background,
+  lion-gold accent for primary CTAs.
+- Lion mascot SVG used as app logo and empty-state illustration.
+- CSS custom properties (design tokens) for consistent theming across the app.
+- Dark mode via `@media (prefers-color-scheme: dark)` — same token names, dark
+  values.
+- Micro-animations: fade-up on list render, scale on button press, playful
+  confetti on "Als geliefert markieren".
+- Status badges with distinct colors (empty=gray, packed=blue, delivered=green).
+- PWA: installable via `manifest.json` — app icon, splash screen, standalone
+  display mode (no service worker / offline data in scope).
+
+**Non-goals:** custom font loading, theming UI, service worker, offline data.
 
 ---
 
@@ -128,17 +147,16 @@ Capability gained: **moving**.
 These are useful but the move works fine without them. Implement when time
 allows.
 
-### M5 — `add-invite-codes`
+### M5 — `add-item-photos` _(blocked — needs Cloudflare R2 setup)_
 
-Capability gained: **invites**.
+Capability gained: **item photos**.
 
-- Admin can mint single-use invite codes (random, ≥ 128 bits, stored hashed).
-- Codes expire 7 days from issuance by default.
-- Consuming a code creates a user with a chosen password; the code is burned
-  atomically.
-- Admin can list outstanding invites and revoke unused ones.
+- One photo per item captured from mobile camera (`<input type="file" capture>`).
+- Storage: Cloudflare R2 free tier; presigned PUT URL from server.
+- Thumbnail generated server-side on upload (small WebP).
+- Item view shows photo; list view shows thumbnail.
 
-**Non-goals:** role granularity beyond admin/user, email delivery.
+**Non-goals:** multiple photos per item, image search.
 
 ### M6 — `add-item-classification`
 
@@ -160,6 +178,18 @@ Capability gained: **item-classification**.
 
 **Non-goals:** on-device classification, paid vision APIs, multiple photos.
 
+### M7 — `add-invite-codes`
+
+Capability gained: **invites**.
+
+- Admin can mint single-use invite codes (random, ≥ 128 bits, stored hashed).
+- Codes expire 7 days from issuance by default.
+- Consuming a code creates a user with a chosen password; the code is burned
+  atomically.
+- Admin can list outstanding invites and revoke unused ones.
+
+**Non-goals:** role granularity beyond admin/user, email delivery.
+
 ---
 
 ## Decision log
@@ -173,21 +203,22 @@ Capability gained: **item-classification**.
   platform; vendor risk and dependency churn outweigh the convenience.
 - **D4.** No invoices / purchase history. Easy to add later as additional fields
   on `Item`.
-- **D5.** Invite codes before AI classification in optional milestones. Helpers
-  joining to pack is a more immediate need than retrospective AI enrichment.
-- **D6.** Photo-first capture lives in M3 (boxes bulk-add) and M4 (standalone
-  items), not as a separate milestone. The box workflow is the natural capture
-  moment; photos are part of the flow, not an add-on.
+- **D5.** Invite codes deferred to optional M7. Invite infrastructure is not
+  needed until helpers are added during the move; the two primary users are
+  seeded via env vars.
+- **D6.** Photo-first capture and AI classification planned for M5/M6 (after
+  Cloudflare R2 setup). Text bulk-add covers the packing workflow for MVP.
 - **D7.** AI classification is optional (M6) and fully async — the move works
-  with unnamed items. Classification enriches data after the fact and is never
-  on the critical path.
+  with unnamed items. Classification enriches data after the fact.
 - **D8.** Classification via Cloudflare Workers AI (LLaVA, free tier) + Google
-  Books ISBN API (free, no auth). Stays within the free-forever constraint. ISBN
-  path preferred for books; LLaVA fallback for everything else.
-- **D9.** No `in-transit` box status. For a single-trip move, the state adds
-  friction with no benefit — boxes go directly from `packed` to `unpacked`.
-  Packed boxes remain editable so last-minute item changes don't require a
-  status reset.
+  Books ISBN API (free, no auth). Stays within the free-forever constraint.
+- **D9.** No `in-transit` box status. For a single-trip move the state adds
+  friction with no benefit. `delivered` replaces the old `unpacked`/`in-transit`
+  pair: it is set manually when the box arrives, which is the signal that
+  triggers the unpack flow.
+- **D10.** Design overhaul (M_design) inserted before M5 item photos. M5 is
+  blocked on Cloudflare R2 infrastructure setup; the design work is
+  self-contained and immediately improves usability for the move.
 
 ## Beyond MVP
 
