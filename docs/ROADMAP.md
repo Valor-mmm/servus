@@ -232,8 +232,8 @@ Capability gained: **invites**.
   pair: it is set manually when the box arrives, which is the signal that
   triggers the unpack flow.
 - **D10.** Design overhaul shipped as M5 ahead of item photos (M7). The design
-  work was self-contained and immediately improved usability for the move.
-  Item quantity (M6) was an in-flight extension to inventory rather than a
+  work was self-contained and immediately improved usability for the move. Item
+  quantity (M6) was an in-flight extension to inventory rather than a
   pre-planned milestone; recorded here so the roadmap reflects what shipped.
 
 ## Beyond MVP
