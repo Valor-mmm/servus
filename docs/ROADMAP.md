@@ -119,7 +119,7 @@ Capability gained: **moving flow**.
 
 **Non-goals:** multi-truck logistics, mover assignments, scheduling, re-packing.
 
-### M_design — `design-overhaul` _(next)_
+### M_design — `design-overhaul` ✓
 
 Capability gained: **polished, mobile-ready UI**.
 
