@@ -89,14 +89,20 @@ optional label, destination room (if assigned), status, and item count.
 
 The system MUST provide a detail page for each box showing its short code,
 label, destination room, status, and the list of items currently assigned to it.
-Each item row MUST have a remove (unbox) action when the box is not in
-`"delivered"` state.
+Each item row MUST display the item's quantity and have a remove (unbox) action
+when the box is not in `"delivered"` state.
 
 #### Scenario: View box contents
 
 - **WHEN** an authenticated user visits `/boxes/:id`
 - **THEN** the page shows the box short code, label, destination room, status,
   and all items assigned to the box with their names and categories
+
+#### Scenario: View box contents shows item quantity
+
+- **WHEN** an authenticated user visits `/boxes/:id`
+- **THEN** the page shows all items assigned to the box, each row displaying the
+  item's name, category, and quantity
 
 ---
 
