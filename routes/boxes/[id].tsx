@@ -8,6 +8,7 @@ import {
   updateBoxStatus,
 } from "@/lib/inventory/boxRepo.ts";
 import {
+  adjustQuantity,
   createItem,
   listItemsByBox,
   updateItem,
@@ -178,26 +179,88 @@ function BoxDetailPage(
                       </form>
                     )
                     : (
-                      <form
-                        method="post"
-                        action={`/boxes/${box.id}`}
-                        style="display:inline"
-                      >
-                        <input
-                          type="hidden"
-                          name="csrf_token"
-                          value={csrfToken}
-                        />
-                        <input
-                          type="hidden"
-                          name="_action"
-                          value="remove_item"
-                        />
-                        <input type="hidden" name="itemId" value={item.id} />
-                        <button type="submit" class="btn-small">
-                          {t("boxes.remove_item")}
-                        </button>
-                      </form>
+                      <span class="qty-controls">
+                        <form
+                          method="post"
+                          action={`/boxes/${box.id}`}
+                          style="display:inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="csrf_token"
+                            value={csrfToken}
+                          />
+                          <input
+                            type="hidden"
+                            name="_action"
+                            value="qty_dec"
+                          />
+                          <input
+                            type="hidden"
+                            name="itemId"
+                            value={item.id}
+                          />
+                          <button
+                            type="submit"
+                            class="btn-small"
+                            aria-label={t("items.qty_dec_aria")}
+                          >
+                            {t("items.qty_dec")}
+                          </button>
+                        </form>
+                        <form
+                          method="post"
+                          action={`/boxes/${box.id}`}
+                          style="display:inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="csrf_token"
+                            value={csrfToken}
+                          />
+                          <input
+                            type="hidden"
+                            name="_action"
+                            value="qty_inc"
+                          />
+                          <input
+                            type="hidden"
+                            name="itemId"
+                            value={item.id}
+                          />
+                          <button
+                            type="submit"
+                            class="btn-small"
+                            aria-label={t("items.qty_inc_aria")}
+                          >
+                            {t("items.qty_inc")}
+                          </button>
+                        </form>
+                        <form
+                          method="post"
+                          action={`/boxes/${box.id}`}
+                          style="display:inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="csrf_token"
+                            value={csrfToken}
+                          />
+                          <input
+                            type="hidden"
+                            name="_action"
+                            value="remove_item"
+                          />
+                          <input
+                            type="hidden"
+                            name="itemId"
+                            value={item.id}
+                          />
+                          <button type="submit" class="btn-small">
+                            {t("boxes.remove_item")}
+                          </button>
+                        </form>
+                      </span>
                     )}
                 </li>
               ))}
@@ -397,6 +460,24 @@ export const handler = define.handlers({
           headers: { Location: "/boxes" },
         });
       }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/boxes/${box.id}` },
+      });
+    }
+
+    if (action === "qty_inc") {
+      const itemId = (form.get("itemId") as string | null) ?? "";
+      if (itemId) await adjustQuantity(itemId, 1);
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/boxes/${box.id}` },
+      });
+    }
+
+    if (action === "qty_dec") {
+      const itemId = (form.get("itemId") as string | null) ?? "";
+      if (itemId) await adjustQuantity(itemId, -1);
       return new Response(null, {
         status: 302,
         headers: { Location: `/boxes/${box.id}` },

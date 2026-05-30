@@ -208,6 +208,16 @@ export async function updateItem(
   return updated;
 }
 
+export async function adjustQuantity(
+  id: string,
+  delta: 1 | -1,
+): Promise<Item> {
+  const item = await findItem(id);
+  if (!item) throw new Error(`Item '${id}' not found`);
+  if (delta === -1 && item.quantity <= 1) return item;
+  return updateItem(id, { quantity: item.quantity + delta });
+}
+
 export async function deleteItem(id: string): Promise<void> {
   const kv = await getKv();
   const item = await findItem(id);
