@@ -1,0 +1,17 @@
+{
+  "name": "Servus",
+  "short_name": "Servus",
+  "description": "Private home management — inventory, boxes, moving.",
+  "display": "standalone",
+  "start_url": "/items",
+  "scope": "/",
+  "theme_color": "#1a5fa8",
+  "background_color": "#fdf8f0",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

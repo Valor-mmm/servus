@@ -33,7 +33,12 @@ function BoxesPage({ boxes, rooms, csrfToken }: PageProps) {
       </form>
 
       {boxes.length === 0
-        ? <p class="empty">{t("boxes.empty")}</p>
+        ? (
+          <div class="empty-state">
+            <img src="/lion.svg" alt="" aria-hidden="true" />
+            <p>{t("boxes.empty")}</p>
+          </div>
+        )
         : (
           <ul class="item-list">
             {boxes.map((box) => (
@@ -48,7 +53,8 @@ function BoxesPage({ boxes, rooms, csrfToken }: PageProps) {
                     : t("boxes.no_destination_room")}
                   {" · "}
                   {t("boxes.item_count")}: {box.itemCount}
-                  {" · "}
+                </span>
+                <span class={`badge badge-${box.status}`}>
                   {t(`boxes.status.${box.status}` as Parameters<typeof t>[0])}
                 </span>
               </li>
