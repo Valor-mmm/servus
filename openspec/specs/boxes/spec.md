@@ -261,7 +261,8 @@ The system MUST allow authenticated users to add multiple items to a box in a
 single operation by entering item names in a textarea (comma-separated or
 one-per-line). Each non-empty name MUST create a new item with that name
 assigned to the box. No matching against existing items is performed. All new
-items are created with `status: "confirmed"`, `categoryId: null`, `roomId:
+items are created with `status: "confirmed"`, `categoryId: null`,
+`roomId:
 null`, and `boxId` set to the current box.
 
 #### Scenario: Bulk-add creates new items
@@ -298,8 +299,8 @@ MUST render without navigation chrome and MUST apply print-optimised CSS.
 
 - **WHEN** an authenticated user opens the label page for a box with destination
   room "Küche"
-- **THEN** the page shows a large room name "Küche" with the 🍳 icon as the
-  most prominent element
+- **THEN** the page shows a large room name "Küche" with the 🍳 icon as the most
+  prominent element
 
 #### Scenario: Label page omits room section when no room assigned
 

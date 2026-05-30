@@ -98,7 +98,8 @@ Capability gained: **boxes**.
   creates items immediately assigned to the box.
 - Box list and detail views with item counts, per-item remove action, edit form.
 
-**Non-goals:** weight/dimension tracking, photo-first bulk capture (future M4/M6).
+**Non-goals:** weight/dimension tracking, photo-first bulk capture (future
+M4/M6).
 
 ### M4 — `box-lifecycle-and-label` ✓
 
@@ -151,7 +152,8 @@ allows.
 
 Capability gained: **item photos**.
 
-- One photo per item captured from mobile camera (`<input type="file" capture>`).
+- One photo per item captured from mobile camera
+  (`<input type="file" capture>`).
 - Storage: Cloudflare R2 free tier; presigned PUT URL from server.
 - Thumbnail generated server-side on upload (small WebP).
 - Item view shows photo; list view shows thumbnail.
