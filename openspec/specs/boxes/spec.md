@@ -90,7 +90,10 @@ optional label, destination room (if assigned), status, and item count.
 The system MUST provide a detail page for each box showing its short code,
 label, destination room, status, and the list of items currently assigned to it.
 Each item row MUST display the item's quantity and have a remove (unbox) action
-when the box is not in `"delivered"` state.
+when the box is not in `"delivered"` state. Each item row MUST provide inline
+`−` and `+` actions to adjust quantity by 1. A decrement request when quantity
+is already `1` MUST be silently ignored. The `−`/`+` actions MUST NOT be
+available when the box is in `"delivered"` state.
 
 #### Scenario: View box contents
 
@@ -103,6 +106,25 @@ when the box is not in `"delivered"` state.
 - **WHEN** an authenticated user visits `/boxes/:id`
 - **THEN** the page shows all items assigned to the box, each row displaying the
   item's name, category, and quantity
+
+#### Scenario: Increment quantity from box detail
+
+- **WHEN** an authenticated user presses the `+` button on an item row in a
+  non-delivered box
+- **THEN** the item's quantity is increased by 1 and the updated count is shown
+  in the box detail
+
+#### Scenario: Decrement quantity from box detail
+
+- **WHEN** an authenticated user presses the `−` button on an item row in a
+  non-delivered box and the item's quantity is greater than 1
+- **THEN** the item's quantity is decreased by 1 and the updated count is shown
+  in the box detail
+
+#### Scenario: Quantity adjust not available for delivered boxes
+
+- **WHEN** an authenticated user views a box in `"delivered"` state
+- **THEN** no `−`/`+` quantity buttons are shown on item rows
 
 ---
 

@@ -166,13 +166,36 @@ atomically remove the primary record and all index entries.
 
 The system MUST provide a list view of all items with server-side search by name
 (case-insensitive substring) and filter by category and by room. Each item row
-MUST display the item's quantity.
+MUST display the item's quantity and MUST provide inline `−` and `+` actions to
+decrement or increment the quantity by 1. The quantity MUST NOT be decremented
+below `1`; a decrement request when quantity is already `1` MUST be silently
+ignored.
 
 #### Scenario: List all items shows quantity
 
 - **WHEN** an authenticated user visits `/items` with no filters
 - **THEN** all items are displayed, each showing name, category, room, and
   quantity
+
+#### Scenario: Increment quantity from item list
+
+- **WHEN** an authenticated user presses the `+` button on an item row in the
+  item list
+- **THEN** the item's quantity is increased by 1 and the updated count is shown
+  in the list
+
+#### Scenario: Decrement quantity from item list
+
+- **WHEN** an authenticated user presses the `−` button on an item row in the
+  item list and the item's quantity is greater than 1
+- **THEN** the item's quantity is decreased by 1 and the updated count is shown
+  in the list
+
+#### Scenario: Decrement at minimum is ignored
+
+- **WHEN** an authenticated user presses the `−` button on an item row whose
+  quantity is already `1`
+- **THEN** the quantity remains `1` and no error is shown
 
 #### Scenario: Filter by category
 
