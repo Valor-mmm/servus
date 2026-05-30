@@ -169,7 +169,9 @@ The system MUST provide a list view of all items with server-side search by name
 MUST display the item's quantity and MUST provide inline `−` and `+` actions to
 decrement or increment the quantity by 1. The quantity MUST NOT be decremented
 below `1`; a decrement request when quantity is already `1` MUST be silently
-ignored.
+ignored. The `+`/`−` actions MUST update the displayed quantity in-place without
+a full-page reload (implemented via the `QuantityControl` island and the
+`/api/items/adjust-quantity` endpoint).
 
 #### Scenario: List all items shows quantity
 
@@ -182,14 +184,14 @@ ignored.
 - **WHEN** an authenticated user presses the `+` button on an item row in the
   item list
 - **THEN** the item's quantity is increased by 1 and the updated count is shown
-  in the list
+  in the list without a page reload
 
 #### Scenario: Decrement quantity from item list
 
 - **WHEN** an authenticated user presses the `−` button on an item row in the
   item list and the item's quantity is greater than 1
 - **THEN** the item's quantity is decreased by 1 and the updated count is shown
-  in the list
+  in the list without a page reload
 
 #### Scenario: Decrement at minimum is ignored
 

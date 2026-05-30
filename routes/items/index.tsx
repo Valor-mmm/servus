@@ -1,9 +1,10 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
-import { adjustQuantity, listItems } from "@/lib/inventory/itemRepo.ts";
+import { listItems } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
+import QuantityControl from "@/islands/QuantityControl.tsx";
 
 interface PageProps {
   items: Item[];
@@ -13,50 +14,6 @@ interface PageProps {
   categoryId: string;
   roomId: string;
   csrfToken: string;
-}
-
-function QtyButtons(
-  { itemId, csrfToken, q, cat, room }: {
-    itemId: string;
-    csrfToken: string;
-    q: string;
-    cat: string;
-    room: string;
-  },
-) {
-  const back = `/items?q=${encodeURIComponent(q)}&cat=${
-    encodeURIComponent(cat)
-  }&room=${encodeURIComponent(room)}`;
-  return (
-    <span class="qty-controls">
-      <form method="post" action="/items" style="display:inline">
-        <input type="hidden" name="csrf_token" value={csrfToken} />
-        <input type="hidden" name="_action" value="qty_dec" />
-        <input type="hidden" name="itemId" value={itemId} />
-        <input type="hidden" name="_back" value={back} />
-        <button
-          type="submit"
-          class="btn-small"
-          aria-label={t("items.qty_dec_aria")}
-        >
-          {t("items.qty_dec")}
-        </button>
-      </form>
-      <form method="post" action="/items" style="display:inline">
-        <input type="hidden" name="csrf_token" value={csrfToken} />
-        <input type="hidden" name="_action" value="qty_inc" />
-        <input type="hidden" name="itemId" value={itemId} />
-        <input type="hidden" name="_back" value={back} />
-        <button
-          type="submit"
-          class="btn-small"
-          aria-label={t("items.qty_inc_aria")}
-        >
-          {t("items.qty_inc")}
-        </button>
-      </form>
-    </span>
-  );
 }
 
 function ItemsPage(
@@ -118,14 +75,12 @@ function ItemsPage(
                 <span class="meta">
                   {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
                   {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
-                  {` · ×${item.quantity}`}
                 </span>
-                <QtyButtons
+                <QuantityControl
                   itemId={item.id}
+                  initialQuantity={item.quantity}
                   csrfToken={csrfToken}
-                  q={search}
-                  cat={categoryId}
-                  room={roomId}
+                  readonly={false}
                 />
               </li>
             ))}
@@ -170,20 +125,5 @@ export const handler = define.handlers({
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
     );
-  },
-
-  async POST(ctx) {
-    const form = await ctx.req.formData();
-    const action = (form.get("_action") as string | null) ?? "";
-    const itemId = (form.get("itemId") as string | null) ?? "";
-    const back = (form.get("_back") as string | null) ?? "/items";
-
-    if (action === "qty_inc" && itemId) {
-      await adjustQuantity(itemId, 1);
-    } else if (action === "qty_dec" && itemId) {
-      await adjustQuantity(itemId, -1);
-    }
-
-    return new Response(null, { status: 302, headers: { Location: back } });
   },
 });

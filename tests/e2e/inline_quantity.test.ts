@@ -40,12 +40,10 @@ test("6.1 + button on item list increments quantity", async ({ page }) => {
   const row = page.locator(".item-row", { hasText: name });
   await expect(row.locator("text=×3")).toBeVisible();
 
-  // Click + button in that row
+  // Click + button in that row — no page reload expected
   await row.locator(`button[aria-label="Anzahl erhöhen"]`).click();
 
-  await expect(page).toHaveURL(/\/items/);
-  const updatedRow = page.locator(".item-row", { hasText: name });
-  await expect(updatedRow.locator("text=×4")).toBeVisible();
+  await expect(row.locator("text=×4")).toBeVisible();
 });
 
 test("6.2 − button on item list decrements quantity", async ({ page }) => {
@@ -58,8 +56,7 @@ test("6.2 − button on item list decrements quantity", async ({ page }) => {
   const row = page.locator(".item-row", { hasText: name });
   await row.locator(`button[aria-label="Anzahl verringern"]`).click();
 
-  const updatedRow = page.locator(".item-row", { hasText: name });
-  await expect(updatedRow.locator("text=×4")).toBeVisible();
+  await expect(row.locator("text=×4")).toBeVisible();
 });
 
 test("6.3 − button at quantity 1 keeps quantity at 1", async ({ page }) => {
@@ -74,8 +71,7 @@ test("6.3 − button at quantity 1 keeps quantity at 1", async ({ page }) => {
   // Click − when quantity is 1 — should stay at ×1
   await row.locator(`button[aria-label="Anzahl verringern"]`).click();
 
-  const updatedRow = page.locator(".item-row", { hasText: name });
-  await expect(updatedRow.locator("text=×1")).toBeVisible();
+  await expect(row.locator("text=×1")).toBeVisible();
 });
 
 // ── Box detail ────────────────────────────────────────────────────────────────
@@ -117,9 +113,7 @@ test("6.4 + button in box detail increments quantity", async ({ page }) => {
 
   await row.locator(`button[aria-label="Anzahl erhöhen"]`).click();
 
-  await expect(page).toHaveURL(boxUrl);
-  const updatedRow = page.locator(".item-row", { hasText: name });
-  await expect(updatedRow.locator("text=×5")).toBeVisible();
+  await expect(row.locator("text=×5")).toBeVisible();
 });
 
 test("6.5 − button in box detail decrements quantity", async ({ page }) => {
@@ -131,8 +125,7 @@ test("6.5 − button in box detail decrements quantity", async ({ page }) => {
   const row = page.locator(".item-row", { hasText: name });
   await row.locator(`button[aria-label="Anzahl verringern"]`).click();
 
-  const updatedRow = page.locator(".item-row", { hasText: name });
-  await expect(updatedRow.locator("text=×5")).toBeVisible();
+  await expect(row.locator("text=×5")).toBeVisible();
 });
 
 test("6.6 delivered box shows no +/- buttons", async ({ page }) => {
