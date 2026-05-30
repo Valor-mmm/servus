@@ -90,6 +90,53 @@ const de = {
   "items.created_at": "Erstellt",
   "items.updated_at": "Zuletzt geändert",
   "items.estimated_value": "Geschätzter Wert",
+  "items.box_label": "Karton (optional)",
+  "items.no_box": "Kein Karton",
+  "items.in_box": "In Karton",
+
+  // ── Boxes ──────────────────────────────────────────────────────────────────
+  "boxes.title": "Kartons",
+  "boxes.add": "Karton hinzufügen",
+  "boxes.empty": "Noch keine Kartons vorhanden.",
+  "boxes.code_label": "Code",
+  "boxes.label_label": "Beschriftung (optional)",
+  "boxes.label_placeholder": "z. B. Küche – Geschirr",
+  "boxes.destination_room_label": "Zielraum (optional)",
+  "boxes.status_label": "Status",
+  "boxes.item_count": "Gegenstände",
+  "boxes.new_title": "Neuer Karton",
+  "boxes.edit_title": "Karton bearbeiten",
+  "boxes.detail_title": "Karton",
+  "boxes.label_page_title": "Karton-Etikett",
+  "boxes.no_label": "Kein Etikett",
+  "boxes.no_destination_room": "Kein Zielraum",
+  "boxes.bulk_add_label": "Gegenstände hinzufügen",
+  "boxes.bulk_add_placeholder":
+    "Gegenstandsnamen eingeben, einer pro Zeile oder kommagetrennt …",
+  "boxes.bulk_add_submit": "Hinzufügen",
+  "boxes.bulk_add_result": "{count} Gegenstand/Gegenstände hinzugefügt.",
+  "boxes.remove_item": "Entfernen",
+  "boxes.remove_item_confirm": 'Gegenstand "{name}" aus Karton entfernen?',
+  "boxes.delete_confirm": 'Karton "{code}" wirklich löschen?',
+  "boxes.error.not_empty":
+    "Karton enthält noch Gegenstände und kann nicht gelöscht werden.",
+  "boxes.items_empty": "Noch keine Gegenstände in diesem Karton.",
+
+  // Box status labels
+  "boxes.status.empty": "Leer",
+  "boxes.status.packed": "Gepackt",
+  "boxes.status.delivered": "Geliefert",
+
+  // Box lifecycle actions
+  "boxes.action.mark_delivered": "Als geliefert markieren",
+  "boxes.action.place_item": "Einlagern",
+  "boxes.action.assign_room": "Zielraum festlegen",
+  "boxes.action.unpack_all": "Alle entpacken nach {room}",
+
+  // Box delivered-state UI copy
+  "boxes.place_item_label": "In Raum einlagern",
+  "boxes.assign_room_heading": "Zielraum festlegen",
+  "boxes.label_item_count": "{count} Gegenstände",
 } as const;
 
 export default de;

@@ -3,16 +3,21 @@ import { t } from "@/lib/i18n/t.ts";
 import { createItem } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
+import { listBoxes } from "@/lib/inventory/boxRepo.ts";
+import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { Category, Room } from "@/lib/inventory/types.ts";
 
 interface PageProps {
   categories: Category[];
   rooms: Room[];
+  boxes: BoxWithItemCount[];
   error: string | null;
   csrfToken: string;
 }
 
-function NewItemPage({ categories, rooms, error, csrfToken }: PageProps) {
+function NewItemPage(
+  { categories, rooms, boxes, error, csrfToken }: PageProps,
+) {
   return (
     <main class="page">
       <h1>{t("items.new_title")}</h1>
@@ -50,6 +55,19 @@ function NewItemPage({ categories, rooms, error, csrfToken }: PageProps) {
         </label>
 
         <label>
+          {t("items.box_label")}
+          <select name="boxId">
+            <option value="">{t("items.no_box")}</option>
+            {boxes.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.code}
+                {b.label ? ` – ${b.label}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           {t("items.value_label")}
           <input type="number" name="estimatedValue" min="0" step="0.01" />
         </label>
@@ -63,14 +81,16 @@ function NewItemPage({ categories, rooms, error, csrfToken }: PageProps) {
 
 export const handler = define.handlers({
   async GET(ctx) {
-    const [categories, rooms] = await Promise.all([
+    const [categories, rooms, boxes] = await Promise.all([
       listCategories(),
       listRooms(),
+      listBoxes(),
     ]);
     return ctx.render(
       <NewItemPage
         categories={categories}
         rooms={rooms}
+        boxes={boxes}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
@@ -82,17 +102,20 @@ export const handler = define.handlers({
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) ?? "";
     const roomId = (form.get("roomId") as string | null) ?? "";
+    const boxId = (form.get("boxId") as string | null) ?? "";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
 
     if (!name) {
-      const [categories, rooms] = await Promise.all([
+      const [categories, rooms, boxes] = await Promise.all([
         listCategories(),
         listRooms(),
+        listBoxes(),
       ]);
       return ctx.render(
         <NewItemPage
           categories={categories}
           rooms={rooms}
+          boxes={boxes}
           error={t("items.error.name_required")}
           csrfToken={ctx.state.csrfToken ?? ""}
         />,
@@ -100,14 +123,16 @@ export const handler = define.handlers({
     }
 
     if (!categoryId) {
-      const [categories, rooms] = await Promise.all([
+      const [categories, rooms, boxes] = await Promise.all([
         listCategories(),
         listRooms(),
+        listBoxes(),
       ]);
       return ctx.render(
         <NewItemPage
           categories={categories}
           rooms={rooms}
+          boxes={boxes}
           error={t("items.error.category_required")}
           csrfToken={ctx.state.csrfToken ?? ""}
         />,
@@ -119,6 +144,7 @@ export const handler = define.handlers({
       name,
       categoryId,
       roomId: roomId || null,
+      boxId: boxId || null,
       estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
         ? null
         : estimatedValue,

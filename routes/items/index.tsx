@@ -63,7 +63,7 @@ function ItemsPage(
               <li key={item.id} class="item-row">
                 <a href={`/items/${item.id}`}>{item.name}</a>
                 <span class="meta">
-                  {catMap[item.categoryId] ?? "–"}
+                  {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
                   {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
                 </span>
               </li>

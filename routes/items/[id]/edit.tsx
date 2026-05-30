@@ -3,18 +3,21 @@ import { t } from "@/lib/i18n/t.ts";
 import { findItem, updateItem } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
+import { listBoxes } from "@/lib/inventory/boxRepo.ts";
+import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
 
 interface PageProps {
   item: Item;
   categories: Category[];
   rooms: Room[];
+  boxes: BoxWithItemCount[];
   error: string | null;
   csrfToken: string;
 }
 
 function EditItemPage(
-  { item, categories, rooms, error, csrfToken }: PageProps,
+  { item, categories, rooms, boxes, error, csrfToken }: PageProps,
 ) {
   return (
     <main class="page">
@@ -30,7 +33,10 @@ function EditItemPage(
 
         <label>
           {t("items.category_label")}
-          <select name="categoryId" required>
+          <select name="categoryId">
+            <option value="" selected={item.categoryId === null}>
+              – {t("items.category_label")} –
+            </option>
             {categories.map((c) => (
               <option
                 key={c.id}
@@ -46,12 +52,30 @@ function EditItemPage(
         <label>
           {t("items.room_label")}
           <select name="roomId">
-            <option value="" selected={item.roomId === null}>
+            <option
+              value=""
+              selected={item.roomId === null && item.boxId === null}
+            >
               {t("items.no_room")}
             </option>
             {rooms.map((r) => (
               <option key={r.id} value={r.id} selected={r.id === item.roomId}>
                 {r.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          {t("items.box_label")}
+          <select name="boxId">
+            <option value="" selected={item.boxId === null}>
+              {t("items.no_box")}
+            </option>
+            {boxes.map((b) => (
+              <option key={b.id} value={b.id} selected={b.id === item.boxId}>
+                {b.code}
+                {b.label ? ` – ${b.label}` : ""}
               </option>
             ))}
           </select>
@@ -80,15 +104,17 @@ export const handler = define.handlers({
     const item = await findItem(ctx.params.id);
     if (!item) return new Response(t("error.not_found"), { status: 404 });
 
-    const [categories, rooms] = await Promise.all([
+    const [categories, rooms, boxes] = await Promise.all([
       listCategories(),
       listRooms(),
+      listBoxes(),
     ]);
     return ctx.render(
       <EditItemPage
         item={item}
         categories={categories}
         rooms={rooms}
+        boxes={boxes}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
@@ -101,20 +127,23 @@ export const handler = define.handlers({
 
     const form = await ctx.req.formData();
     const name = ((form.get("name") as string | null) ?? "").trim();
-    const categoryId = (form.get("categoryId") as string | null) ?? "";
+    const categoryId = (form.get("categoryId") as string | null) || null;
     const roomId = (form.get("roomId") as string | null) ?? "";
+    const boxId = (form.get("boxId") as string | null) ?? "";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
 
     if (!name) {
-      const [categories, rooms] = await Promise.all([
+      const [categories, rooms, boxes] = await Promise.all([
         listCategories(),
         listRooms(),
+        listBoxes(),
       ]);
       return ctx.render(
         <EditItemPage
           item={item}
           categories={categories}
           rooms={rooms}
+          boxes={boxes}
           error={t("items.error.name_required")}
           csrfToken={ctx.state.csrfToken ?? ""}
         />,
@@ -126,6 +155,7 @@ export const handler = define.handlers({
       name,
       categoryId,
       roomId: roomId || null,
+      boxId: boxId || null,
       estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
         ? null
         : estimatedValue,
