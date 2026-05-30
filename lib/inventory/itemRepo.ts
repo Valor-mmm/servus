@@ -24,6 +24,7 @@ export interface CreateItemInput {
   categoryId: string | null;
   roomId: string | null;
   boxId?: string | null;
+  quantity?: number;
   estimatedValue: number | null;
 }
 
@@ -32,7 +33,13 @@ export interface UpdateItemInput {
   categoryId?: string | null;
   roomId?: string | null;
   boxId?: string | null;
+  quantity?: number;
   estimatedValue?: number | null;
+}
+
+function coerceQuantity(raw: unknown): number {
+  const n = typeof raw === "number" ? raw : undefined;
+  return n !== undefined && n >= 1 ? n : 1;
 }
 
 export async function createItem(input: CreateItemInput): Promise<Item> {
@@ -50,6 +57,7 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     categoryId: input.categoryId,
     roomId,
     boxId,
+    quantity: coerceQuantity(input.quantity),
     estimatedValue: input.estimatedValue,
     photoKey: null,
     status: "confirmed",
@@ -74,10 +82,14 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
   return item;
 }
 
+function normalizeItem(raw: Item): Item {
+  return { ...raw, quantity: coerceQuantity(raw.quantity) };
+}
+
 export async function findItem(id: string): Promise<Item | null> {
   const kv = await getKv();
   const entry = await kv.get<Item>(ITEM_KEY(id));
-  return entry.value;
+  return entry.value ? normalizeItem(entry.value) : null;
 }
 
 export async function listItems(): Promise<Item[]> {
@@ -85,7 +97,7 @@ export async function listItems(): Promise<Item[]> {
   const entries = kv.list<Item>({ prefix: ["item"] });
   const results: Item[] = [];
   for await (const entry of entries) {
-    results.push(entry.value);
+    results.push(normalizeItem(entry.value));
   }
   return results.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -154,6 +166,9 @@ export async function updateItem(
       : existing.categoryId,
     roomId: resolvedRoomId,
     boxId: resolvedBoxId,
+    quantity: input.quantity !== undefined
+      ? coerceQuantity(input.quantity)
+      : existing.quantity,
     estimatedValue: input.estimatedValue !== undefined
       ? input.estimatedValue
       : existing.estimatedValue,
@@ -191,6 +206,16 @@ export async function updateItem(
   }
 
   return updated;
+}
+
+export async function adjustQuantity(
+  id: string,
+  delta: 1 | -1,
+): Promise<Item> {
+  const item = await findItem(id);
+  if (!item) throw new Error(`Item '${id}' not found`);
+  if (delta === -1 && item.quantity <= 1) return item;
+  return updateItem(id, { quantity: item.quantity + delta });
 }
 
 export async function deleteItem(id: string): Promise<void> {

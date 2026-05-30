@@ -4,6 +4,7 @@ import { listItems } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
+import QuantityControl from "@/islands/QuantityControl.tsx";
 
 interface PageProps {
   items: Item[];
@@ -12,10 +13,12 @@ interface PageProps {
   search: string;
   categoryId: string;
   roomId: string;
+  csrfToken: string;
 }
 
 function ItemsPage(
-  { items, categories, rooms, search, categoryId, roomId }: PageProps,
+  { items, categories, rooms, search, categoryId, roomId, csrfToken }:
+    PageProps,
 ) {
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
   const roomMap = Object.fromEntries(rooms.map((r) => [r.id, r.name]));
@@ -73,6 +76,12 @@ function ItemsPage(
                   {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
                   {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
                 </span>
+                <QuantityControl
+                  itemId={item.id}
+                  initialQuantity={item.quantity}
+                  csrfToken={csrfToken}
+                  readonly={false}
+                />
               </li>
             ))}
           </ul>
@@ -113,6 +122,7 @@ export const handler = define.handlers({
         search={q}
         categoryId={catFilter}
         roomId={roomFilter}
+        csrfToken={ctx.state.csrfToken ?? ""}
       />,
     );
   },

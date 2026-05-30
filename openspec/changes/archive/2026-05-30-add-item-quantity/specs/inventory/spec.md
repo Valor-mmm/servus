@@ -1,58 +1,5 @@
 ## ADDED Requirements
 
-### Requirement: Category management
-
-The system MUST provide a flat, admin-managed list of categories used to
-classify items. Categories have a unique name and a generated ID. A category
-MUST NOT be deleted while any item references it.
-
-#### Scenario: Create a category
-
-- **WHEN** an authenticated user POSTs a non-empty category name to
-  `/categories`
-- **THEN** a new category record is created and appears in the category list
-
-#### Scenario: Duplicate category name is rejected
-
-- **WHEN** an authenticated user creates a category with a name that already
-  exists (case-insensitive)
-- **THEN** the system returns a validation error and no record is created
-
-#### Scenario: Delete a referenced category is rejected
-
-- **WHEN** an authenticated user attempts to delete a category that is assigned
-  to one or more items
-- **THEN** the system returns an error and the category is not deleted
-
-#### Scenario: Delete an unused category
-
-- **WHEN** an authenticated user deletes a category with no items assigned to it
-- **THEN** the category record is removed and no longer appears in the list
-
-### Requirement: Room management
-
-The system MUST provide a flat, admin-managed list of destination rooms. Rooms
-have a unique name and a generated ID. A room MUST NOT be deleted while any item
-references it directly (items assigned via a box are not affected by room
-deletion).
-
-#### Scenario: Create a room
-
-- **WHEN** an authenticated user POSTs a non-empty room name to `/rooms`
-- **THEN** a new room record is created and appears in the room list
-
-#### Scenario: Duplicate room name is rejected
-
-- **WHEN** an authenticated user creates a room with a name that already exists
-  (case-insensitive)
-- **THEN** the system returns a validation error and no record is created
-
-#### Scenario: Delete a room directly assigned to an item is rejected
-
-- **WHEN** an authenticated user attempts to delete a room that has items with a
-  direct `roomId` pointing to it
-- **THEN** the system returns an error and the room is not deleted
-
 ### Requirement: Item quantity field
 
 Every `Item` record MUST have a `quantity` field: a positive integer with a
@@ -94,6 +41,8 @@ Records persisted before this field was introduced MUST be read back as
 - **WHEN** an item record exists in KV without a `quantity` field
   (pre-migration)
 - **THEN** `findItem` and `listItems` return that item with `quantity: 1`
+
+## MODIFIED Requirements
 
 ### Requirement: Item creation
 
@@ -151,53 +100,17 @@ atomically with the primary record.
 - **THEN** the updated quantity is persisted and shown in the item list and box
   detail
 
-### Requirement: Item deletion
-
-The system MUST allow authenticated users to delete an item. Deletion MUST
-atomically remove the primary record and all index entries.
-
-#### Scenario: Delete an item
-
-- **WHEN** an authenticated user deletes an item
-- **THEN** the item record and all index entries for that item are removed and
-  the item no longer appears in any list or filter view
-
 ### Requirement: Item list with search and filter
 
 The system MUST provide a list view of all items with server-side search by name
 (case-insensitive substring) and filter by category and by room. Each item row
-MUST display the item's quantity and MUST provide inline `−` and `+` actions to
-decrement or increment the quantity by 1. The quantity MUST NOT be decremented
-below `1`; a decrement request when quantity is already `1` MUST be silently
-ignored. The `+`/`−` actions MUST update the displayed quantity in-place without
-a full-page reload (implemented via the `QuantityControl` island and the
-`/api/items/adjust-quantity` endpoint).
+MUST display the item's quantity.
 
 #### Scenario: List all items shows quantity
 
 - **WHEN** an authenticated user visits `/items` with no filters
 - **THEN** all items are displayed, each showing name, category, room, and
   quantity
-
-#### Scenario: Increment quantity from item list
-
-- **WHEN** an authenticated user presses the `+` button on an item row in the
-  item list
-- **THEN** the item's quantity is increased by 1 and the updated count is shown
-  in the list without a page reload
-
-#### Scenario: Decrement quantity from item list
-
-- **WHEN** an authenticated user presses the `−` button on an item row in the
-  item list and the item's quantity is greater than 1
-- **THEN** the item's quantity is decreased by 1 and the updated count is shown
-  in the list without a page reload
-
-#### Scenario: Decrement at minimum is ignored
-
-- **WHEN** an authenticated user presses the `−` button on an item row whose
-  quantity is already `1`
-- **THEN** the quantity remains `1` and no error is shown
 
 #### Scenario: Filter by category
 
@@ -220,25 +133,15 @@ a full-page reload (implemented via the `QuantityControl` island and the
   simultaneously
 - **THEN** only items matching both conditions are shown
 
-### Requirement: KV index consistency
+### Requirement: Box detail view
 
-The system MUST maintain category and room indexes atomically with every item
-mutation. No mutation MUST leave the indexes in a state inconsistent with the
-primary item records.
+The system MUST provide a detail page for each box showing its short code,
+label, destination room, status, and the list of items currently assigned to it.
+Each item row MUST display the item's quantity and have a remove (unbox) action
+when the box is not in `"delivered"` state.
 
-#### Scenario: Index reflects item after create
+#### Scenario: View box contents shows item quantity
 
-- **WHEN** an item is created with category C and room R
-- **THEN** the item appears in the prefix scan for `["item-by-category", C]` and
-  `["item-by-room", R]`
-
-#### Scenario: Index reflects item after update
-
-- **WHEN** an item's category is changed from C1 to C2
-- **THEN** the item no longer appears under `["item-by-category", C1]` and does
-  appear under `["item-by-category", C2]`
-
-#### Scenario: Index reflects item after delete
-
-- **WHEN** an item is deleted
-- **THEN** it no longer appears in any category or room index prefix scan
+- **WHEN** an authenticated user visits `/boxes/:id`
+- **THEN** the page shows all items assigned to the box, each row displaying the
+  item's name, category, and quantity

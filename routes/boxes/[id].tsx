@@ -15,6 +15,7 @@ import {
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
+import QuantityControl from "@/islands/QuantityControl.tsx";
 
 interface PageProps {
   box: Box;
@@ -139,6 +140,12 @@ function BoxDetailPage(
                       ? (categoryMap[item.categoryId] ?? "–")
                       : "–"}
                   </span>
+                  <QuantityControl
+                    itemId={item.id}
+                    initialQuantity={item.quantity}
+                    csrfToken={csrfToken}
+                    readonly={box.status === "delivered"}
+                  />
                   {box.status === "delivered"
                     ? (
                       <form
@@ -192,7 +199,11 @@ function BoxDetailPage(
                           name="_action"
                           value="remove_item"
                         />
-                        <input type="hidden" name="itemId" value={item.id} />
+                        <input
+                          type="hidden"
+                          name="itemId"
+                          value={item.id}
+                        />
                         <button type="submit" class="btn-small">
                           {t("boxes.remove_item")}
                         </button>

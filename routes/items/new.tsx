@@ -68,6 +68,18 @@ function NewItemPage(
         </label>
 
         <label>
+          {t("items.quantity_label")}
+          <input
+            type="number"
+            name="quantity"
+            min="1"
+            step="1"
+            value="1"
+            required
+          />
+        </label>
+
+        <label>
           {t("items.value_label")}
           <input type="number" name="estimatedValue" min="0" step="0.01" />
         </label>
@@ -103,9 +115,10 @@ export const handler = define.handlers({
     const categoryId = (form.get("categoryId") as string | null) ?? "";
     const roomId = (form.get("roomId") as string | null) ?? "";
     const boxId = (form.get("boxId") as string | null) ?? "";
+    const quantityRaw = (form.get("quantity") as string | null) ?? "1";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
 
-    if (!name) {
+    const renderError = async (error: string) => {
       const [categories, rooms, boxes] = await Promise.all([
         listCategories(),
         listRooms(),
@@ -116,27 +129,18 @@ export const handler = define.handlers({
           categories={categories}
           rooms={rooms}
           boxes={boxes}
-          error={t("items.error.name_required")}
+          error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
         />,
       );
-    }
+    };
 
-    if (!categoryId) {
-      const [categories, rooms, boxes] = await Promise.all([
-        listCategories(),
-        listRooms(),
-        listBoxes(),
-      ]);
-      return ctx.render(
-        <NewItemPage
-          categories={categories}
-          rooms={rooms}
-          boxes={boxes}
-          error={t("items.error.category_required")}
-          csrfToken={ctx.state.csrfToken ?? ""}
-        />,
-      );
+    if (!name) return renderError(t("items.error.name_required"));
+    if (!categoryId) return renderError(t("items.error.category_required"));
+
+    const quantity = parseInt(quantityRaw, 10);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return renderError(t("items.error.quantity_invalid"));
     }
 
     const estimatedValue = valueRaw ? parseFloat(valueRaw) : null;
@@ -145,6 +149,7 @@ export const handler = define.handlers({
       categoryId,
       roomId: roomId || null,
       boxId: boxId || null,
+      quantity,
       estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
         ? null
         : estimatedValue,

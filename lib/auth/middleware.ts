@@ -135,7 +135,7 @@ export function applySecurityHeaders(response: Response): Response {
       "default-src 'self'",
       "img-src 'self' data:",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",

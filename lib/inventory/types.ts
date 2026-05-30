@@ -40,6 +40,7 @@ export interface Item {
   categoryId: string | null;
   roomId: string | null;
   boxId: string | null;
+  quantity: number;
   estimatedValue: number | null;
   photoKey: string | null;
   status: ItemStatus;
