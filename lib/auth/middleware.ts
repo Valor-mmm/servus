@@ -172,7 +172,9 @@ export function securityHeaders(): Handler {
 export function requireAuth(): Handler {
   return async (ctx) => {
     const result = await applyRequireAuth(ctx.req, SESSION_KEY());
-    if (!result.pass) return result.response!;
+    if (!result.pass) {
+      return result.response!;
+    }
     if (result.user) {
       ctx.state.user = result.user;
       // Populate csrfToken in state for layout meta tag rendering

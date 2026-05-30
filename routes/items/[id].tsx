@@ -3,16 +3,18 @@ import { t } from "@/lib/i18n/t.ts";
 import { deleteItem, findItem } from "@/lib/inventory/itemRepo.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom } from "@/lib/inventory/roomRepo.ts";
-import type { Category, Item, Room } from "@/lib/inventory/types.ts";
+import { findBox } from "@/lib/inventory/boxRepo.ts";
+import type { Box, Category, Item, Room } from "@/lib/inventory/types.ts";
 
 interface PageProps {
   item: Item;
   category: Category | null;
   room: Room | null;
+  box: Box | null;
   csrfToken: string;
 }
 
-function ItemDetailPage({ item, category, room, csrfToken }: PageProps) {
+function ItemDetailPage({ item, category, room, box, csrfToken }: PageProps) {
   return (
     <main class="page">
       <h1>{t("items.detail_title")}: {item.name}</h1>
@@ -21,8 +23,24 @@ function ItemDetailPage({ item, category, room, csrfToken }: PageProps) {
         <dt>{t("items.category_label")}</dt>
         <dd>{category?.name ?? "–"}</dd>
 
-        <dt>{t("items.room_label")}</dt>
-        <dd>{room?.name ?? t("items.no_room")}</dd>
+        {box
+          ? (
+            <>
+              <dt>{t("items.in_box")}</dt>
+              <dd>
+                <a href={`/boxes/${box.id}`}>
+                  {box.code}
+                  {box.label ? ` – ${box.label}` : ""}
+                </a>
+              </dd>
+            </>
+          )
+          : (
+            <>
+              <dt>{t("items.room_label")}</dt>
+              <dd>{room?.name ?? t("items.no_room")}</dd>
+            </>
+          )}
 
         {item.estimatedValue !== null && (
           <>
@@ -63,15 +81,17 @@ export const handler = define.handlers({
     if (!item) {
       return new Response(t("error.not_found"), { status: 404 });
     }
-    const [category, room] = await Promise.all([
-      findCategory(item.categoryId),
+    const [category, room, box] = await Promise.all([
+      item.categoryId ? findCategory(item.categoryId) : Promise.resolve(null),
       item.roomId ? findRoom(item.roomId) : Promise.resolve(null),
+      item.boxId ? findBox(item.boxId) : Promise.resolve(null),
     ]);
     return ctx.render(
       <ItemDetailPage
         item={item}
         category={category}
         room={room}
+        box={box}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
     );

@@ -17,6 +17,7 @@ export default define.page(function App({ Component, state }) {
         {state.user && (
           <nav>
             <a href="/items">{t("nav.items")}</a>
+            <a href="/boxes">{t("nav.boxes")}</a>
             <a href="/categories">{t("nav.categories")}</a>
             <a href="/rooms">{t("nav.rooms")}</a>
             <form method="post" action="/logout">
