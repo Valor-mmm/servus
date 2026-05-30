@@ -99,7 +99,7 @@ Capability gained: **boxes**.
 - Box list and detail views with item counts, per-item remove action, edit form.
 
 **Non-goals:** weight/dimension tracking, photo-first bulk capture (future
-M4/M6).
+M7/M8).
 
 ### M4 — `box-lifecycle-and-label` ✓
 
@@ -119,12 +119,9 @@ Capability gained: **moving flow**.
 
 **Non-goals:** multi-truck logistics, mover assignments, scheduling, re-packing.
 
-### M_design — `design-overhaul` _(next)_
+### M5 — `design-overhaul` ✓
 
 Capability gained: **polished, mobile-ready UI**.
-
-Inserted ahead of M5 (item photos) because M5 requires Cloudflare R2
-infrastructure setup that is not yet in place.
 
 - Mobile-first layout with bottom navigation bar (thumb-reachable).
 - Bavarian-inspired color palette: rich blue, warm parchment white background,
@@ -141,6 +138,22 @@ infrastructure setup that is not yet in place.
 
 **Non-goals:** custom font loading, theming UI, service worker, offline data.
 
+### M6 — `add-item-quantity` ✓
+
+Capability gained: **quantity tracking** (extension of `inventory`).
+
+- `Item` gains a `quantity` field: positive integer, default `1`, minimum `1`.
+- Item creation and edit forms expose a quantity input with increment/decrement
+  controls; server-side validation rejects values below `1`.
+- Item list shows quantity next to each item name.
+- Box detail shows per-item quantity so packers know how many units are packed.
+- Inline `−` / `+` buttons on both the item list and box detail views allow
+  one-tap quantity adjustment without navigating to the edit form; implemented
+  as a Fresh 2 island for immediate feedback.
+
+**Non-goals:** per-box quantity splits, fractional quantities, automatic
+decrement on box transfer.
+
 ---
 
 ## Optional milestones
@@ -148,7 +161,7 @@ infrastructure setup that is not yet in place.
 These are useful but the move works fine without them. Implement when time
 allows.
 
-### M5 — `add-item-photos` _(blocked — needs Cloudflare R2 setup)_
+### M7 — `add-item-photos`
 
 Capability gained: **item photos**.
 
@@ -160,7 +173,7 @@ Capability gained: **item photos**.
 
 **Non-goals:** multiple photos per item, image search.
 
-### M6 — `add-item-classification`
+### M8 — `add-item-classification`
 
 Capability gained: **item-classification**.
 
@@ -180,7 +193,7 @@ Capability gained: **item-classification**.
 
 **Non-goals:** on-device classification, paid vision APIs, multiple photos.
 
-### M7 — `add-invite-codes`
+### M9 — `add-invite-codes`
 
 Capability gained: **invites**.
 
@@ -205,12 +218,12 @@ Capability gained: **invites**.
   platform; vendor risk and dependency churn outweigh the convenience.
 - **D4.** No invoices / purchase history. Easy to add later as additional fields
   on `Item`.
-- **D5.** Invite codes deferred to optional M7. Invite infrastructure is not
+- **D5.** Invite codes deferred to optional M9. Invite infrastructure is not
   needed until helpers are added during the move; the two primary users are
   seeded via env vars.
-- **D6.** Photo-first capture and AI classification planned for M5/M6 (after
-  Cloudflare R2 setup). Text bulk-add covers the packing workflow for MVP.
-- **D7.** AI classification is optional (M6) and fully async — the move works
+- **D6.** Photo-first capture and AI classification planned for M7/M8. Text
+  bulk-add covers the packing workflow for MVP.
+- **D7.** AI classification is optional (M8) and fully async — the move works
   with unnamed items. Classification enriches data after the fact.
 - **D8.** Classification via Cloudflare Workers AI (LLaVA, free tier) + Google
   Books ISBN API (free, no auth). Stays within the free-forever constraint.
@@ -218,9 +231,10 @@ Capability gained: **invites**.
   friction with no benefit. `delivered` replaces the old `unpacked`/`in-transit`
   pair: it is set manually when the box arrives, which is the signal that
   triggers the unpack flow.
-- **D10.** Design overhaul (M_design) inserted before M5 item photos. M5 is
-  blocked on Cloudflare R2 infrastructure setup; the design work is
-  self-contained and immediately improves usability for the move.
+- **D10.** Design overhaul shipped as M5 ahead of item photos (M7). The design
+  work was self-contained and immediately improved usability for the move.
+  Item quantity (M6) was an in-flight extension to inventory rather than a
+  pre-planned milestone; recorded here so the roadmap reflects what shipped.
 
 ## Beyond MVP
 
