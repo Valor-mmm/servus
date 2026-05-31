@@ -137,15 +137,18 @@ export function applySecurityHeaders(
   // (for presigned GET thumbnails) when the bucket is configured.
   const r2Base = Deno.env.get("R2_PUBLIC_URL") ?? "";
   // Fresh 2 puts a per-request nonce on its <script type="module"> boot tag.
-  // Include it in script-src so CSP-strict browsers (Firefox) don't block it.
-  const nonceSrc = cspNonce ? ` 'nonce-${cspNonce}'` : "";
+  // 'unsafe-inline' is ignored by browsers when a nonce-source is present, so
+  // we only emit it on pages without islands (no nonce) as a fallback.
+  const scriptSrc = cspNonce
+    ? `script-src 'self' 'nonce-${cspNonce}'`
+    : `script-src 'self' 'unsafe-inline'`;
   headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
       `img-src 'self' data: blob:${r2Base ? ` ${r2Base}` : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      `script-src 'self' 'unsafe-inline'${nonceSrc}`,
+      scriptSrc,
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
@@ -156,6 +159,11 @@ export function applySecurityHeaders(
       "media-src 'self' data: blob:",
     ].join("; "),
   );
+  // Prevent CDN/edge caches from storing HTML and serving a stale nonce that
+  // no longer matches the nonce in the response body.
+  if (cspNonce) {
+    headers.set("Cache-Control", "no-store");
+  }
   headers.set(
     "Permissions-Policy",
     "camera=(self), geolocation=(), microphone=()",

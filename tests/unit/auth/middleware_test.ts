@@ -174,9 +174,24 @@ Deno.test("securityHeaders: adds required headers to a response", () => {
   assertEquals(csp.includes("media-src"), true);
 });
 
-Deno.test("securityHeaders: nonce included in script-src when provided", () => {
+Deno.test("securityHeaders: nonce replaces unsafe-inline in script-src", () => {
   const response = new Response("ok");
   const result = applySecurityHeaders(response, "abc123");
   const csp = result.headers.get("content-security-policy") ?? "";
   assertEquals(csp.includes("'nonce-abc123'"), true);
+  // unsafe-inline must NOT appear in script-src alongside a nonce (browsers
+  // ignore it and warn; style-src still uses it which is fine)
+  const scriptSrcDirective =
+    csp.split(";").find((d) => d.trim().startsWith("script-src")) ?? "";
+  assertEquals(scriptSrcDirective.includes("'unsafe-inline'"), false);
+  assertEquals(result.headers.get("cache-control"), "no-store");
+});
+
+Deno.test("securityHeaders: no nonce → unsafe-inline used, no Cache-Control override", () => {
+  const response = new Response("ok");
+  const result = applySecurityHeaders(response);
+  const csp = result.headers.get("content-security-policy") ?? "";
+  assertEquals(csp.includes("'unsafe-inline'"), true);
+  assertEquals(csp.includes("nonce"), false);
+  assertEquals(result.headers.get("cache-control"), null);
 });
