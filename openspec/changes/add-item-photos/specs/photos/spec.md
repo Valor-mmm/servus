@@ -11,8 +11,8 @@ retrieve private home-inventory imagery.
 
 - **WHEN** an unauthenticated HTTP client requests `<R2_PUBLIC_URL>/<any-key>`
   without a signed query string
-- **THEN** the response is `401` or `403` from R2 and no object bytes are
-  returned
+- **THEN** the response is `4xx` (Cloudflare R2 returns `400` in practice) from
+  R2 and no object bytes are returned
 
 #### Scenario: Direct unauthenticated PUT to bucket origin is rejected
 
