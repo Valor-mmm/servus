@@ -7,13 +7,12 @@
  *   deno test --allow-env --allow-read --allow-net \
  *     --env-file=.env tests/integration/r2_live_test.ts
  */
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import { presignGet, presignPut } from "@/lib/photos/signing.ts";
 import type { R2Config } from "@/lib/photos/config.ts";
 
 const PUBLIC_URL = Deno.env.get("R2_PUBLIC_URL") ?? "";
-const SKIP =
-  !PUBLIC_URL ||
+const SKIP = !PUBLIC_URL ||
   PUBLIC_URL.includes("example.com") ||
   !Deno.env.get("R2_ACCESS_KEY_ID") ||
   !Deno.env.get("R2_SECRET_ACCESS_KEY");
