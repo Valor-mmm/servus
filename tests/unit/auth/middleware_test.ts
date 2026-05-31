@@ -170,4 +170,13 @@ Deno.test("securityHeaders: adds required headers to a response", () => {
   const pp = result.headers.get("permissions-policy") ?? "";
   assertEquals(pp.includes("geolocation=()"), true);
   assertEquals(pp.includes("microphone=()"), true);
+  // media-src must be present so capture input doesn't trigger violations
+  assertEquals(csp.includes("media-src"), true);
+});
+
+Deno.test("securityHeaders: nonce included in script-src when provided", () => {
+  const response = new Response("ok");
+  const result = applySecurityHeaders(response, "abc123");
+  const csp = result.headers.get("content-security-policy") ?? "";
+  assertEquals(csp.includes("'nonce-abc123'"), true);
 });

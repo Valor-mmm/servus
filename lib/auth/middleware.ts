@@ -120,7 +120,10 @@ export async function applyCsrfGuard(
   return { pass: true };
 }
 
-export function applySecurityHeaders(response: Response): Response {
+export function applySecurityHeaders(
+  response: Response,
+  cspNonce?: string,
+): Response {
   const headers = new Headers(response.headers);
 
   headers.set(
@@ -133,18 +136,24 @@ export function applySecurityHeaders(response: Response): Response {
   // Include R2 host in connect-src (for presigned PUT uploads) and img-src
   // (for presigned GET thumbnails) when the bucket is configured.
   const r2Base = Deno.env.get("R2_PUBLIC_URL") ?? "";
+  // Fresh 2 puts a per-request nonce on its <script type="module"> boot tag.
+  // Include it in script-src so CSP-strict browsers (Firefox) don't block it.
+  const nonceSrc = cspNonce ? ` 'nonce-${cspNonce}'` : "";
   headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
       `img-src 'self' data: blob:${r2Base ? ` ${r2Base}` : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${nonceSrc}`,
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
       "form-action 'self'",
       `connect-src 'self'${r2Base ? ` ${r2Base}` : ""}`,
+      // media-src covers <video>/<audio>; camera capture on some browsers
+      // checks this directive even for <input capture="environment">.
+      "media-src 'self' data: blob:",
     ].join("; "),
   );
   headers.set(
@@ -170,7 +179,27 @@ type Handler = (
 export function securityHeaders(): Handler {
   return async (ctx) => {
     const response = await ctx.next();
-    return applySecurityHeaders(response);
+
+    // Fresh puts a per-request nonce on <script type="module"> tags but doesn't
+    // expose it via the context. Buffer HTML responses to extract it and
+    // include it in script-src so browsers honour the nonce-carrying scripts.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/html") || response.body === null) {
+      return applySecurityHeaders(response);
+    }
+
+    const body = await response.text();
+    const nonceMatch = body.match(/\snonce="([0-9a-f]{20,})"/);
+    const nonce = nonceMatch?.[1];
+
+    return applySecurityHeaders(
+      new Response(body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      }),
+      nonce,
+    );
   };
 }
 
