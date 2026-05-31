@@ -15,7 +15,7 @@ export async function deleteObject(
   key: string,
   fetchFn: FetchLike = fetch,
 ): Promise<DeleteResult> {
-  const _url = `${cfg.publicUrlBase}/${key}`;
+  const _url = `${cfg.publicUrl}/${key}`;
   // Build a presigned DELETE URL using the same SigV4 pattern as PUT.
   // We re-use presignPut's URL-building logic with method=DELETE inline here
   // because aws4fetch's presign requires an actual Request object.
@@ -44,7 +44,7 @@ function _presignDelete(cfg: R2Config, key: string): string {
   const service = "s3";
   const ttl = 300;
 
-  const url = new URL(`${cfg.publicUrlBase}/${key}`);
+  const url = new URL(`${cfg.publicUrl}/${key}`);
   url.searchParams.set("X-Amz-Expires", String(ttl));
   url.searchParams.set("X-Amz-Algorithm", "AWS4-HMAC-SHA256");
   url.searchParams.set(

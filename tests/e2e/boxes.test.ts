@@ -67,7 +67,9 @@ test("create box with label and destination room — appears in list", async ({ 
   await expect(page.locator(`text=${boxLabel}`)).toBeVisible();
   await expect(page.locator("span.meta", { hasText: roomName })).toBeVisible();
   // Item count shows 0
-  await expect(page.locator("text=0").first()).toBeVisible();
+  await expect(
+    page.locator("li", { hasText: boxLabel }).locator("span.meta"),
+  ).toContainText("Gegenstände: 0");
 });
 
 // ── 12.3: Label page — QR code and short code visible ────────────────────────

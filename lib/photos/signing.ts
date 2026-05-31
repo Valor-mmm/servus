@@ -18,7 +18,7 @@ export function presignPut(
   contentType: string,
   ttl = 300,
 ): string {
-  const url = new URL(`${cfg.publicUrlBase}/${key}`);
+  const url = new URL(`${cfg.publicUrl}/${key}`);
   url.searchParams.set("X-Amz-Expires", String(ttl));
   const now = new Date();
   const dateStr = now.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
@@ -54,7 +54,7 @@ export function presignGet(
   const expiresAt = windowStart + GET_WINDOW_SECONDS;
   const ttl = expiresAt - windowStart;
 
-  const url = new URL(`${cfg.publicUrlBase}/${key}`);
+  const url = new URL(`${cfg.publicUrl}/${key}`);
   url.searchParams.set("X-Amz-Expires", String(ttl));
   const dateObj = new Date(windowStart * 1000);
   const dateStr = dateObj.toISOString().replace(/[-:]/g, "").split(".")[0] +

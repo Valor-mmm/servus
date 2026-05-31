@@ -4,11 +4,9 @@ import { applyCsrfGuard, applyRequireAuth } from "@/lib/auth/middleware.ts";
 import type { R2Config } from "@/lib/photos/config.ts";
 
 const R2_CFG: R2Config = {
-  accountId: "testaccount",
   accessKeyId: "AKIAIOSFODNN7EXAMPLE",
   secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-  bucket: "test-bucket",
-  publicUrlBase: "https://testaccount.r2.cloudflarestorage.com/test-bucket",
+  publicUrl: "https://testaccount.r2.cloudflarestorage.com/test-bucket",
 };
 
 Deno.test("upload-url: returns key and url for valid jpeg request", () => {

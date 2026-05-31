@@ -3,11 +3,9 @@ import { presignGet, presignPut } from "@/lib/photos/signing.ts";
 import type { R2Config } from "@/lib/photos/config.ts";
 
 const cfg: R2Config = {
-  accountId: "testaccount",
   accessKeyId: "AKIAIOSFODNN7EXAMPLE",
   secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-  bucket: "test-bucket",
-  publicUrlBase: "https://testaccount.r2.cloudflarestorage.com/test-bucket",
+  publicUrl: "https://testaccount.r2.cloudflarestorage.com/test-bucket",
 };
 
 Deno.test("presignPut URL contains the key", () => {

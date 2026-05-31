@@ -9,15 +9,15 @@ read access MUST require a presigned URL produced by the application.
 
 #### Scenario: Direct unauthenticated GET to bucket origin is rejected
 
-- **WHEN** an unauthenticated HTTP client requests
-  `<R2_PUBLIC_URL_BASE>/<any-key>` without a signed query string
+- **WHEN** an unauthenticated HTTP client requests `<R2_PUBLIC_URL>/<any-key>`
+  without a signed query string
 - **THEN** the response is `401` or `403` from R2 and no object bytes are
   returned
 
 #### Scenario: Direct unauthenticated PUT to bucket origin is rejected
 
 - **WHEN** an unauthenticated HTTP client attempts to PUT to
-  `<R2_PUBLIC_URL_BASE>/<any-key>` without a signed query string
+  `<R2_PUBLIC_URL>/<any-key>` without a signed query string
 - **THEN** the response is `401` or `403` from R2 and no object is written
 
 ---

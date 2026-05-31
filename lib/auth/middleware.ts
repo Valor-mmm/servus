@@ -132,7 +132,7 @@ export function applySecurityHeaders(response: Response): Response {
 
   // Include R2 host in connect-src (for presigned PUT uploads) and img-src
   // (for presigned GET thumbnails) when the bucket is configured.
-  const r2Base = Deno.env.get("R2_PUBLIC_URL_BASE") ?? "";
+  const r2Base = Deno.env.get("R2_PUBLIC_URL") ?? "";
   headers.set(
     "Content-Security-Policy",
     [

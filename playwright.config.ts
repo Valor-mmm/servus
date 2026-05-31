@@ -61,11 +61,9 @@ export default defineConfig({
       // Fake R2 credentials so presignGet/presignPut produce real URLs in tests.
       // The upload PUT is mocked by page.route() in photo specs; thumbnails render
       // as broken images (src exists but 404s), which is sufficient for assertions.
-      R2_ACCOUNT_ID: "e2e-test-account",
       R2_ACCESS_KEY_ID: "e2e-test-access-key",
       R2_SECRET_ACCESS_KEY: "e2e-test-secret-key",
-      R2_BUCKET: "e2e-test-bucket",
-      R2_PUBLIC_URL_BASE: "https://r2-e2e.example.com",
+      R2_PUBLIC_URL: "https://r2-e2e.example.com",
     },
   },
 });

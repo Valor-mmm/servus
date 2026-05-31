@@ -15,11 +15,9 @@ async function withKv(fn: () => Promise<void>): Promise<void> {
 }
 
 const R2_CFG: R2Config = {
-  accountId: "test",
   accessKeyId: "AKID",
   secretAccessKey: "secret",
-  bucket: "test-bucket",
-  publicUrlBase: "https://test.r2.cloudflarestorage.com/test-bucket",
+  publicUrl: "https://test.r2.cloudflarestorage.com/test-bucket",
 };
 
 Deno.test("remove-photo: removes specified key from photos array", async () => {

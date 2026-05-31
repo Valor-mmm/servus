@@ -8,7 +8,7 @@
  *     preflight) + PUT (upload) + GET (thumbnail) from the browser.
  *   - /api/items/create-from-photo → hits the real in-memory server.
  *
- * With R2_PUBLIC_URL_BASE=https://r2-e2e.example.com set in the test server
+ * With R2_PUBLIC_URL=https://r2-e2e.example.com set in the test server
  * env, presignGet produces real thumbnail URLs pointing at that host.
  */
 import { expect, test } from "@playwright/test";
