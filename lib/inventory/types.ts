@@ -42,7 +42,7 @@ export interface Item {
   boxId: string | null;
   quantity: number;
   estimatedValue: number | null;
-  photoKey: string | null;
+  photos: string[];
   status: ItemStatus;
   createdAt: number;
   updatedAt: number;

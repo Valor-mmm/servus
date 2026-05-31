@@ -95,37 +95,204 @@ Records persisted before this field was introduced MUST be read back as
   (pre-migration)
 - **THEN** `findItem` and `listItems` return that item with `quantity: 1`
 
+### Requirement: Item photos collection
+
+Every `Item` record MUST have a `photos` field of type `string[]`: an ordered
+list of R2 object keys. The first element (`photos[0]`) is the primary / cover
+photo displayed in list and box-detail thumbnails. The default value when no
+photos are present MUST be `[]`. Records persisted before this field was
+introduced MUST be read back as `photos: []` (coerced at read time).
+
+#### Scenario: New item without photos has empty list
+
+- **WHEN** an authenticated user creates an item through the standard edit form
+  without uploading any photo
+- **THEN** the persisted record has `photos: []`
+
+#### Scenario: Appended photo lands at the end of the list
+
+- **WHEN** an authenticated user adds a second photo to an item that already has
+  one
+- **THEN** the persisted record's `photos` array contains the original key at
+  index `0` and the new key at index `1`
+
+#### Scenario: Removing the first photo promotes the next
+
+- **WHEN** an authenticated user removes `photos[0]` from an item with three
+  photos `[A, B, C]`
+- **THEN** the persisted record has `photos: [B, C]` and the list/detail views
+  display `B` as the cover
+
+#### Scenario: Legacy record without photos field reads as empty list
+
+- **WHEN** an item record exists in KV without a `photos` field (pre-migration)
+- **THEN** `findItem` and `listItems` return that item with `photos: []`
+
+---
+
+### Requirement: Photo-first item creation
+
+The system MUST provide a `POST /api/items/create-from-photo` endpoint that,
+given a previously uploaded R2 photo key and an optional `boxId`, creates a new
+item with `name: ""`, `categoryId: null`, `photos: [<key>]`,
+`status:
+"pending"`, `quantity: 1`, and `estimatedValue: null`. The endpoint
+MUST require an authenticated session and a valid CSRF token.
+
+#### Scenario: Create item from photo with no box
+
+- **WHEN** an authenticated user POSTs to `/api/items/create-from-photo` with a
+  valid photo key and no `boxId`
+- **THEN** an item record is created with empty name, null category,
+  `quantity:
+  1`, `photos: [<key>]`, `status: "pending"`, and appears in the
+  item list and in the pending list
+
+#### Scenario: Create item from photo into a box
+
+- **WHEN** an authenticated user POSTs to `/api/items/create-from-photo` with a
+  valid photo key and `boxId: "B"`
+- **THEN** an item record is created with `boxId: "B"`, `roomId: null`,
+  `photos: [<key>]`, `status: "pending"`, and the box's status auto-tracks to
+  `"packed"` if it was previously `"empty"`
+
+#### Scenario: Create-from-photo requires authentication
+
+- **WHEN** an unauthenticated client POSTs to `/api/items/create-from-photo`
+- **THEN** the response is `401` and no item is created
+
+---
+
+### Requirement: Append photo to existing item
+
+The system MUST provide a `POST /api/items/append-photo` endpoint that appends a
+previously uploaded R2 photo key to an existing item's `photos` array. The
+endpoint MUST require an authenticated session and a valid CSRF token. Status
+MUST NOT change.
+
+#### Scenario: Append photo to confirmed item
+
+- **WHEN** an authenticated user appends a new photo to a `confirmed` item that
+  already has one photo
+- **THEN** the item's `photos` array has two elements; `status` remains
+  `"confirmed"`
+
+#### Scenario: Append photo to pending item
+
+- **WHEN** an authenticated user appends a new photo to a `pending` item
+- **THEN** the item's `photos` array grows by one and `status` remains
+  `"pending"`
+
+---
+
+### Requirement: Remove photo from item
+
+The system MUST allow authenticated users to remove a single photo from an
+item's `photos` array. The removed R2 object MUST be deleted via a best-effort
+delete. Status MUST NOT change as a consequence of removing a photo.
+
+#### Scenario: Remove a non-primary photo
+
+- **WHEN** an authenticated user removes `photos[1]` from an item with three
+  photos
+- **THEN** the persisted `photos` array has two elements and a best-effort R2
+  DELETE is issued for the removed key
+
+#### Scenario: Remove the only photo of a pending item
+
+- **WHEN** an authenticated user removes the only photo from a `pending` item
+- **THEN** the persisted `photos` array is empty and `status` remains
+  `"pending"`
+
+---
+
+### Requirement: Pending status for photo-first items
+
+Items created through `/api/items/create-from-photo` MUST have
+`status:
+"pending"`. Pending items MUST remain in `pending` state regardless of
+edits to name, category, room, box, quantity, or photos made in the standard
+edit form. While pending, an item behaves identically to a `confirmed` item for
+box assignment, room assignment, quantity actions, and inclusion in lists.
+
+#### Scenario: Pending item with name remains pending
+
+- **WHEN** an authenticated user edits a `pending` item and gives it a name
+- **THEN** the persisted record has the new name and `status: "pending"`
+
+#### Scenario: Pending item counts toward box packed status
+
+- **WHEN** a photo-first capture creates a `pending` item assigned to an empty
+  box
+- **THEN** the box's status auto-transitions from `"empty"` to `"packed"`
+
+---
+
+### Requirement: Pending-items triage list
+
+The system MUST provide a route `/items/pending` that lists all items with
+`status: "pending"`, ordered by creation time (newest first). Each row MUST show
+the item's primary photo as a thumbnail, the display name (`(unbenannt)` if
+`name` is empty), the box assignment if any, the quantity, and a link to edit.
+
+#### Scenario: Pending list shows only pending items
+
+- **WHEN** an authenticated user visits `/items/pending` with five items in the
+  system (three `pending`, two `confirmed`)
+- **THEN** exactly three item rows are shown
+
+#### Scenario: Pending list ordering
+
+- **WHEN** an authenticated user visits `/items/pending` with multiple pending
+  items
+- **THEN** rows appear with the most recently created item first
+
+---
+
 ### Requirement: Item creation
 
-The system MUST allow authenticated users to create items with a name, category,
-optional room assignment, optional box assignment, optional estimated value, and
-a quantity (positive integer, default `1`). On creation the system MUST set
-`status` to `"confirmed"` and `photoKey` to `null`.
+The system MUST allow authenticated users to create items through the standard
+create form with a name, category, optional room assignment, optional box
+assignment, optional estimated value, and a quantity (positive integer, default
+`1`). On creation through the standard form the system MUST set `status` to
+`"confirmed"`, `photos` to `[]`, and timestamps to the current time.
+
+Items MAY also be created through `/api/items/create-from-photo` (see
+"Photo-first item creation" above), which sets `status: "pending"`, `name: ""`,
+`categoryId: null`, and `photos: [<key>]`.
 
 #### Scenario: Create an item with required fields
 
 - **WHEN** an authenticated user submits a new item form with a non-empty name
   and a valid category (no quantity specified)
-- **THEN** an item record is created with `status: "confirmed"`,
-  `photoKey: null`, `quantity: 1`, and timestamps set to the current time
+- **THEN** an item record is created with `status: "confirmed"`, `photos: []`,
+  `quantity: 1`, and timestamps set to the current time
 
 #### Scenario: Create an item with all optional fields
 
 - **WHEN** an authenticated user submits a new item with name, category, room,
   estimated value, and `quantity: 4`
-- **THEN** the item record contains all provided values including `quantity: 4`
-  and appears in the item list
+- **THEN** the item record contains all provided values including `quantity: 4`,
+  `photos: []`, and appears in the item list
 
-#### Scenario: Item name is required
+#### Scenario: Item name is required for standard creation
 
 - **WHEN** an authenticated user submits a new item form with an empty name
 - **THEN** the system returns a validation error and no record is created
 
+#### Scenario: Empty name is permitted for photo-first creation
+
+- **WHEN** an authenticated user creates an item through
+  `/api/items/create-from-photo`
+- **THEN** an item record is created with `name: ""` and the standard
+  name-required validation does NOT apply
+
 ### Requirement: Item editing
 
 The system MUST allow authenticated users to edit an item's name, category, room
-assignment, estimated value, and quantity. Index entries MUST be updated
-atomically with the primary record.
+assignment, estimated value, quantity, and `photos` (add or remove individual
+photos). Index entries MUST be updated atomically with the primary record.
+Editing an item MUST NOT change its `status`.
 
 #### Scenario: Change an item's category
 
@@ -151,10 +318,20 @@ atomically with the primary record.
 - **THEN** the updated quantity is persisted and shown in the item list and box
   detail
 
+#### Scenario: Editing does not transition status
+
+- **WHEN** an authenticated user edits the name of a `pending` item to a
+  non-empty value
+- **THEN** the persisted record has `status: "pending"` (status is unchanged by
+  editing)
+
 ### Requirement: Item deletion
 
 The system MUST allow authenticated users to delete an item. Deletion MUST
-atomically remove the primary record and all index entries.
+atomically remove the primary record and all index entries. After the KV write
+commits, the system MUST issue a best-effort R2 DELETE for every key in the
+deleted item's `photos` array; R2 delete failures MUST be logged but MUST NOT
+cause the user-facing operation to fail.
 
 #### Scenario: Delete an item
 
@@ -162,22 +339,54 @@ atomically remove the primary record and all index entries.
 - **THEN** the item record and all index entries for that item are removed and
   the item no longer appears in any list or filter view
 
+#### Scenario: Deleting an item with photos issues R2 deletes
+
+- **WHEN** an authenticated user deletes an item whose `photos` array has two
+  keys
+- **THEN** two R2 DELETE requests are issued after the KV write commits
+
+#### Scenario: R2 delete failure does not block item deletion
+
+- **WHEN** an authenticated user deletes an item whose photos cannot be removed
+  from R2
+- **THEN** the item record is still removed from KV and the user-facing response
+  is success
+
 ### Requirement: Item list with search and filter
 
 The system MUST provide a list view of all items with server-side search by name
 (case-insensitive substring) and filter by category and by room. Each item row
-MUST display the item's quantity and MUST provide inline `−` and `+` actions to
-decrement or increment the quantity by 1. The quantity MUST NOT be decremented
-below `1`; a decrement request when quantity is already `1` MUST be silently
-ignored. The `+`/`−` actions MUST update the displayed quantity in-place without
-a full-page reload (implemented via the `QuantityControl` island and the
-`/api/items/adjust-quantity` endpoint).
+MUST display the item's primary photo (`photos[0]`) as a thumbnail when present,
+its display name (`(unbenannt)` if `name` is empty and `status` is `"pending"`,
+otherwise the name), category, room, and quantity. Items with
+`status: "pending"` MUST be visually distinguishable from `confirmed` items.
+Each row MUST provide inline `−` and `+` actions to decrement or increment the
+quantity by 1.
 
 #### Scenario: List all items shows quantity
 
 - **WHEN** an authenticated user visits `/items` with no filters
-- **THEN** all items are displayed, each showing name, category, room, and
-  quantity
+- **THEN** all items are displayed, each showing display name, category, room,
+  and quantity
+
+#### Scenario: List shows thumbnails for items with photos
+
+- **WHEN** an authenticated user visits `/items` and at least one item has a
+  non-empty `photos` array
+- **THEN** that item's row renders an `<img>` element whose `src` is a presigned
+  GET URL for `photos[0]`
+
+#### Scenario: List shows placeholder name for pending unnamed item
+
+- **WHEN** an authenticated user visits `/items` and at least one item has
+  `status: "pending"` and `name: ""`
+- **THEN** that item's row shows the placeholder display name `(unbenannt)`
+
+#### Scenario: Pending items are visually distinguishable
+
+- **WHEN** an authenticated user visits `/items` with a mix of `pending` and
+  `confirmed` items
+- **THEN** pending rows display a status indicator distinct from confirmed rows
 
 #### Scenario: Increment quantity from item list
 

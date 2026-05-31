@@ -100,6 +100,24 @@ const de = {
   "items.no_box": "Kein Karton",
   "items.in_box": "In Karton",
 
+  // ── Photos / capture ─────────────────────────────────────────────────────
+  "items.placeholderName": "(unbenannt)",
+  "items.captureButton": "Foto aufnehmen",
+  "items.captureFailed":
+    "Foto konnte nicht hochgeladen werden. Bitte erneut versuchen.",
+  "items.captureTooLarge":
+    "Das Foto ist zu groß. Bitte ein kleineres Bild aufnehmen.",
+  "items.captureWrongType":
+    "Dieser Dateityp wird nicht unterstützt. Bitte ein JPEG, PNG oder WebP aufnehmen.",
+  "items.addPhoto": "Foto hinzufügen",
+  "items.removePhoto": "Foto entfernen",
+  "items.pending": "Ausstehend",
+  "items.needsReview": "Zur Überprüfung",
+  "items.pending_title": "Ausstehende Gegenstände",
+  "items.pending_empty": "Keine ausstehenden Gegenstände.",
+  "items.quick_add_title": "Schnellerfassung",
+  "nav.quickAdd": "Schnellerfassung",
+
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
   "boxes.add": "Karton hinzufügen",

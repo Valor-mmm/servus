@@ -29,6 +29,7 @@
     "npm:@preact/signals@^2.5.1": "2.9.1_preact@10.29.2",
     "npm:@preact/signals@^2.9.0": "2.9.1_preact@10.29.2",
     "npm:@types/qrcode@1.5.5": "1.5.5",
+    "npm:aws4fetch@1.0.20": "1.0.20",
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.7",
@@ -318,6 +319,9 @@
         "color-convert"
       ]
     },
+    "aws4fetch@1.0.20": {
+      "integrity": "sha512-/djoAN709iY65ETD6LKCtyyEI04XIBP5xVvfmNxsEP0uJB5tyaGBztSryRr4HqMStr9R06PisQE7m9zDTXKu6g=="
+    },
     "camelcase@5.3.1": {
       "integrity": "sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg=="
     },
@@ -535,6 +539,7 @@
       "npm:@playwright/test@^1.44.0",
       "npm:@preact/signals@^2.9.0",
       "npm:@types/qrcode@1.5.5",
+      "npm:aws4fetch@1.0.20",
       "npm:hash-wasm@4.12.0",
       "npm:preact@^10.29.1",
       "npm:qrcode@1.5.4"

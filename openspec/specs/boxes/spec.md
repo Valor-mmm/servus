@@ -56,7 +56,7 @@ items are added to or removed from the box.
 
 #### Scenario: Status becomes packed when first item added
 
-- **WHEN** the first item is added to a box (via bulk-add or item edit)
+- **WHEN** the first item is added to a box (via photo capture or item edit)
 - **THEN** the box status changes to `"packed"`
 
 #### Scenario: Status reverts to empty when last item removed
@@ -85,27 +85,71 @@ optional label, destination room (if assigned), status, and item count.
 
 ---
 
+### Requirement: Photo-first capture from box detail
+
+The system MUST provide a camera affordance on the detail page of every box
+whose status is not `"delivered"`. When activated it opens the device camera
+(`<input type="file" accept="image/*" capture="environment">`) and creates a new
+item assigned to the current box from the captured photo. Each created item MUST
+have `status: "pending"`, `name: ""`, `categoryId: null`,
+`boxId: <current
+box>`, and `photos: [<uploaded key>]`. The box's `packed`
+status MUST auto-track as items are added. The affordance MUST NOT be shown when
+the box is in `"delivered"` state.
+
+#### Scenario: Camera capture on empty box creates pending item and packs box
+
+- **WHEN** an authenticated user on an empty box's detail page captures one
+  photo through the camera affordance
+- **THEN** one item is created with `status: "pending"`, `name: ""`, `boxId` set
+  to the current box, and `photos: [<key>]`; the box's status transitions from
+  `"empty"` to `"packed"`
+
+#### Scenario: Camera affordance is hidden on delivered boxes
+
+- **WHEN** an authenticated user views the detail page of a `"delivered"` box
+- **THEN** the camera affordance is not rendered
+
+---
+
 ### Requirement: Box detail view
 
 The system MUST provide a detail page for each box showing its short code,
 label, destination room, status, and the list of items currently assigned to it.
-Each item row MUST display the item's quantity and have a remove (unbox) action
-when the box is not in `"delivered"` state. Each item row MUST provide inline
-`−` and `+` actions to adjust quantity by 1. A decrement request when quantity
-is already `1` MUST be silently ignored. The `−`/`+` actions MUST NOT be
-available when the box is in `"delivered"` state.
+Each item row MUST display:
+
+- the item's primary photo (`photos[0]`) as a thumbnail when present,
+- the item's display name (`(unbenannt)` if `name` is empty and `status` is
+  `"pending"`, otherwise the name),
+- the item's category and quantity,
+- a remove (unbox) action when the box is not in `"delivered"` state,
+- inline `−` and `+` actions to adjust quantity by 1 (not available when
+  `"delivered"`).
 
 #### Scenario: View box contents
 
 - **WHEN** an authenticated user visits `/boxes/:id`
 - **THEN** the page shows the box short code, label, destination room, status,
-  and all items assigned to the box with their names and categories
+  and all items assigned to the box with their display names and categories
 
 #### Scenario: View box contents shows item quantity
 
 - **WHEN** an authenticated user visits `/boxes/:id`
 - **THEN** the page shows all items assigned to the box, each row displaying the
-  item's name, category, and quantity
+  item's display name, category, and quantity
+
+#### Scenario: View box contents shows item thumbnails when present
+
+- **WHEN** an authenticated user visits `/boxes/:id` and at least one item in
+  the box has a non-empty `photos` array
+- **THEN** that item's row renders an `<img>` element whose `src` is a presigned
+  GET URL for `photos[0]`
+
+#### Scenario: View box contents shows pending placeholder
+
+- **WHEN** an authenticated user visits `/boxes/:id` and at least one item has
+  `status: "pending"` and `name: ""`
+- **THEN** that item's row shows the placeholder display name `(unbenannt)`
 
 #### Scenario: Increment quantity from box detail
 
@@ -280,38 +324,6 @@ destination room.
 - **WHEN** an authenticated user clears the destination room field
 - **THEN** `box.destinationRoomId` is `null` and no room is shown on the detail
   page or label page
-
----
-
-### Requirement: Bulk-add items to a box (create-only)
-
-The system MUST allow authenticated users to add multiple items to a box in a
-single operation by entering item names in a textarea (comma-separated or
-one-per-line). Each non-empty name MUST create a new item with that name
-assigned to the box. No matching against existing items is performed. All new
-items are created with `status: "confirmed"`, `categoryId: null`,
-`roomId:
-null`, and `boxId` set to the current box.
-
-#### Scenario: Bulk-add creates new items
-
-- **WHEN** an authenticated user submits a textarea with three item names to a
-  box
-- **THEN** three new items are created, each assigned to that box, and all three
-  appear in the box detail view
-
-#### Scenario: Bulk-add with blank lines is ignored
-
-- **WHEN** the textarea contains blank lines or extra whitespace between item
-  names
-- **THEN** blank entries are silently skipped and only non-empty names are
-  processed
-
-#### Scenario: Bulk-add result summary
-
-- **WHEN** a bulk-add POST completes
-- **THEN** the detail page is re-rendered showing the newly added items and a
-  summary of how many items were added
 
 ---
 

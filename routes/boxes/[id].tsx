@@ -7,15 +7,14 @@ import {
   updateBox,
   updateBoxStatus,
 } from "@/lib/inventory/boxRepo.ts";
-import {
-  createItem,
-  listItemsByBox,
-  updateItem,
-} from "@/lib/inventory/itemRepo.ts";
+import { listItemsByBox, updateItem } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
 import QuantityControl from "@/islands/QuantityControl.tsx";
+import PhotoCapture from "@/islands/PhotoCapture.tsx";
+import { getR2Config } from "@/lib/photos/config.ts";
+import { presignGet } from "@/lib/photos/signing.ts";
 
 interface PageProps {
   box: Box;
@@ -23,10 +22,16 @@ interface PageProps {
   destinationRoom: Room | null;
   rooms: Room[];
   error: string | null;
-  addedCount: number | null;
   csrfToken: string;
   categoryMap: Record<string, string>;
   showConfetti: boolean;
+  thumbnailUrls: Record<string, string>;
+}
+
+function displayName(item: Item): string {
+  if (item.name) return item.name;
+  if (item.status === "pending") return t("items.placeholderName");
+  return "–";
 }
 
 function BoxDetailPage(
@@ -36,10 +41,10 @@ function BoxDetailPage(
     destinationRoom,
     rooms,
     error,
-    addedCount,
     csrfToken,
     categoryMap,
     showConfetti,
+    thumbnailUrls,
   }: PageProps,
 ) {
   return (
@@ -99,11 +104,6 @@ function BoxDetailPage(
         </div>
 
         {error && <p class="error">{error}</p>}
-        {addedCount !== null && (
-          <p class="success">
-            {t("boxes.bulk_add_result", { count: String(addedCount) })}
-          </p>
-        )}
 
         {box.status === "delivered" && box.destinationRoomId === null && (
           <section class="assign-room-section">
@@ -126,6 +126,14 @@ function BoxDetailPage(
           </section>
         )}
 
+        {box.status !== "delivered" && (
+          <PhotoCapture
+            mode="create"
+            boxId={box.id}
+            csrfToken={csrfToken}
+          />
+        )}
+
         <h2>{t("boxes.item_count")}</h2>
 
         {items.length === 0
@@ -133,8 +141,26 @@ function BoxDetailPage(
           : (
             <ul class="item-list">
               {items.map((item) => (
-                <li key={item.id} class="item-row">
-                  <a href={`/items/${item.id}`}>{item.name}</a>
+                <li
+                  key={item.id}
+                  class={`item-row${
+                    item.status === "pending" ? " item-pending" : ""
+                  }`}
+                >
+                  {thumbnailUrls[item.id] && (
+                    <img
+                      src={thumbnailUrls[item.id]}
+                      alt=""
+                      class="item-thumbnail"
+                      loading="lazy"
+                    />
+                  )}
+                  <a href={`/items/${item.id}`}>{displayName(item)}</a>
+                  {item.status === "pending" && (
+                    <span class="badge badge-pending">
+                      {t("items.pending")}
+                    </span>
+                  )}
                   <span class="meta">
                     {item.categoryId
                       ? (categoryMap[item.categoryId] ?? "–")
@@ -229,50 +255,25 @@ function BoxDetailPage(
             </button>
           </form>
         )}
-
-        {box.status !== "delivered" && (
-          <>
-            <h2>{t("boxes.bulk_add_label")}</h2>
-            <form method="post" action={`/boxes/${box.id}`}>
-              <input type="hidden" name="csrf_token" value={csrfToken} />
-              <input type="hidden" name="_action" value="bulk_add" />
-              <textarea
-                name="names"
-                rows={6}
-                placeholder={t("boxes.bulk_add_placeholder")}
-              />
-              <button type="submit" class="btn-primary">
-                {t("boxes.bulk_add_submit")}
-              </button>
-            </form>
-          </>
-        )}
       </main>
     </>
   );
 }
 
-async function bulkAddItems(
-  boxId: string,
-  rawNames: string,
-): Promise<number> {
-  const names = rawNames
-    .split(/[\n,]/)
-    .map((n) => n.trim())
-    .filter((n) => n.length > 0);
-
-  let added = 0;
-  for (const name of names) {
-    await createItem({
-      name,
-      categoryId: null,
-      roomId: null,
-      boxId,
-      estimatedValue: null,
-    });
-    added++;
+function buildThumbnailUrls(items: Item[]): Record<string, string> {
+  try {
+    const r2cfg = getR2Config();
+    const nowSec = Math.floor(Date.now() / 1000);
+    const urls: Record<string, string> = {};
+    for (const item of items) {
+      if (item.photos.length > 0) {
+        urls[item.id] = presignGet(r2cfg, item.photos[0], nowSec);
+      }
+    }
+    return urls;
+  } catch {
+    return {};
   }
-  return added;
 }
 
 export const handler = define.handlers({
@@ -292,8 +293,6 @@ export const handler = define.handlers({
     const categoryMap = Object.fromEntries(
       categories.map((c) => [c.id, c.name]),
     );
-    const addedParam = ctx.url.searchParams.get("added");
-    const addedCount = addedParam !== null ? Number(addedParam) : null;
     const showConfetti = ctx.url.searchParams.has("delivered");
 
     return ctx.render(
@@ -303,10 +302,10 @@ export const handler = define.handlers({
         destinationRoom={destinationRoom}
         rooms={rooms}
         error={null}
-        addedCount={addedCount}
         csrfToken={ctx.state.csrfToken ?? ""}
         categoryMap={categoryMap}
         showConfetti={showConfetti}
+        thumbnailUrls={buildThumbnailUrls(items)}
       />,
     );
   },
@@ -338,10 +337,10 @@ export const handler = define.handlers({
             destinationRoom={destinationRoom}
             rooms={rooms}
             error={t("boxes.error.not_empty")}
-            addedCount={null}
             csrfToken={ctx.state.csrfToken ?? ""}
             categoryMap={categoryMap}
             showConfetti={false}
+            thumbnailUrls={buildThumbnailUrls(currentItems)}
           />,
         );
       }
@@ -421,15 +420,6 @@ export const handler = define.handlers({
       return new Response(null, {
         status: 302,
         headers: { Location: `/boxes/${box.id}` },
-      });
-    }
-
-    if (action === "bulk_add") {
-      const rawNames = (form.get("names") as string | null) ?? "";
-      const added = await bulkAddItems(box.id, rawNames);
-      return new Response(null, {
-        status: 302,
-        headers: { Location: `/boxes/${box.id}?added=${added}` },
       });
     }
 

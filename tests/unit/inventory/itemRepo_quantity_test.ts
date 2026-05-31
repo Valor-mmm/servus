@@ -50,7 +50,7 @@ Deno.test("legacy record without quantity field reads back as quantity: 1", asyn
       roomId: null,
       boxId: null,
       estimatedValue: null,
-      photoKey: null,
+      photos: [],
       status: "confirmed",
       createdAt: Date.now(),
       updatedAt: Date.now(),

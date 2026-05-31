@@ -129,17 +129,22 @@ export function applySecurityHeaders(response: Response): Response {
   );
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "same-origin");
+
+  // Include R2 host in connect-src (for presigned PUT uploads) and img-src
+  // (for presigned GET thumbnails) when the bucket is configured.
+  const r2Base = Deno.env.get("R2_PUBLIC_URL_BASE") ?? "";
   headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "img-src 'self' data:",
+      `img-src 'self' data: blob:${r2Base ? ` ${r2Base}` : ""}`,
       "style-src 'self' 'unsafe-inline'",
       "script-src 'self' 'unsafe-inline'",
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
       "form-action 'self'",
+      `connect-src 'self'${r2Base ? ` ${r2Base}` : ""}`,
     ].join("; "),
   );
   headers.set(

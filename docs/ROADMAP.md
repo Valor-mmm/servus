@@ -161,17 +161,28 @@ decrement on box transfer.
 These are useful but the move works fine without them. Implement when time
 allows.
 
-### M7 — `add-item-photos`
+### M7 — `add-item-photos` ✓
 
-Capability gained: **item photos**.
+Capability gained: **item photos** (photo-first workflow).
 
-- One photo per item captured from mobile camera
-  (`<input type="file" capture>`).
-- Storage: Cloudflare R2 free tier; presigned PUT URL from server.
-- Thumbnail generated server-side on upload (small WebP).
-- Item view shows photo; list view shows thumbnail.
+- Photo-first capture: shoot first, name later. Items created immediately with
+  `status: "pending"` and `name: ""`. A `(unbenannt)` placeholder appears in all
+  lists until the user fills in the name.
+- Multiple photos per item (gallery on detail/edit pages with per-photo remove).
+- Storage: Cloudflare R2 free tier; presigned PUT URL from server; presigned GET
+  URLs with a 15-minute window for CDN cache stability.
+- PhotoCapture island (`<input type="file" capture="environment">`): client-side
+  JPEG resize to ≤ 1600 px long edge via Canvas, then PUT directly to R2.
+- Thumbnails in item list, box detail, and pending-items triage page.
+- Pending-items triage list at `/items/pending` (newest-first).
+- Quick-add entry in bottom nav (`+`) → `/items/quick-add`.
+- Bulk-add textarea removed from box detail (replaced by photo-first capture).
 
-**Non-goals:** multiple photos per item, image search.
+**Decision:** workflow turned out photo-first rather than "photo as a field".
+The original one-photo-per-item + server-side thumbnail design was replaced by a
+multi-photo, client-resize, R2-private approach. See decision log entry D11.
+
+**Non-goals:** image search, on-device classification (deferred to M8).
 
 ### M8 — `add-item-classification`
 
@@ -235,6 +246,14 @@ Capability gained: **invites**.
   work was self-contained and immediately improved usability for the move. Item
   quantity (M6) was an in-flight extension to inventory rather than a
   pre-planned milestone; recorded here so the roadmap reflects what shipped.
+- **D11.** M7 shipped as photo-first + multi-photo + R2-private rather than
+  "photo as a field". Three key divergences from the original plan: (1) items
+  are created with `status:"pending"` immediately when the photo is captured —
+  no name required upfront; (2) multiple photos per item are supported (gallery
+  - per-photo remove); (3) display URLs are presigned S3 GET URLs with a 15-min
+    window cache rather than public R2 URLs or server-side thumbnails. The
+    bulk-add textarea on box detail was removed and replaced by photo-first
+    capture as the primary item-entry affordance.
 
 ## Beyond MVP
 

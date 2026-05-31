@@ -38,6 +38,21 @@ async function createBox(
   await expect(page).toHaveURL(/\/boxes\/.+/);
 }
 
+/** Add a named item to a box via the /items/new form. Returns to /items on success. */
+async function addItemToBox(
+  page: import("@playwright/test").Page,
+  boxId: string,
+  itemName: string,
+  catName: string,
+) {
+  await page.goto("/items/new");
+  await page.fill('[name="name"]', itemName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
+  await page.selectOption('[name="boxId"]', boxId);
+  await page.click('main [type="submit"]');
+  await expect(page).toHaveURL("/items");
+}
+
 // ── 12.1: Create box with label and destination room ─────────────────────────
 
 test("create box with label and destination room — appears in list", async ({ page }) => {
@@ -53,36 +68,6 @@ test("create box with label and destination room — appears in list", async ({ 
   await expect(page.locator("span.meta", { hasText: roomName })).toBeVisible();
   // Item count shows 0
   await expect(page.locator("text=0").first()).toBeVisible();
-});
-
-// ── 12.2: Bulk-add items to a box ────────────────────────────────────────────
-
-test("bulk-add three item names — all appear in box detail", async ({ page }) => {
-  const boxLabel = `Küche-${RUN}`;
-  const items = [
-    `Teller-${RUN}`,
-    `Tasse-${RUN}`,
-    `Topf-${RUN}`,
-  ];
-
-  await createBox(page, boxLabel);
-
-  // Fill bulk-add textarea
-  await page.fill('[name="names"]', items.join("\n"));
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
-
-  // All three items appear on the detail page
-  for (const name of items) {
-    await expect(page.locator(`text=${name}`)).toBeVisible();
-  }
-
-  // Navigate to each item's detail page to confirm box assignment
-  await page.click(`text=${items[0]}`);
-  await expect(page.locator("text=In Karton")).toBeVisible();
-  await expect(page.locator(`text=${boxLabel}`)).toBeVisible();
 });
 
 // ── 12.3: Label page — QR code and short code visible ────────────────────────
@@ -120,17 +105,17 @@ test("label page shows QR code SVG and short code", async ({ page }) => {
 // ── 12.4: Unbox item from box detail ─────────────────────────────────────────
 
 test("unbox item from box detail — item gone from box but still in item list", async ({ page }) => {
+  const catName = `Kat-12-4-${RUN}`;
   const boxLabel = `Schlafzimmer-${RUN}`;
   const itemName = `Kissen-${RUN}`;
 
+  await createCategory(page, catName);
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
-  // Bulk-add one item
-  await page.fill('[name="names"]', itemName);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, itemName, catName);
+  await page.goto(boxUrl);
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 
   // Click remove button for the item
@@ -187,17 +172,17 @@ test("assign item with room to box — room cleared, item in box detail", async 
 // ── 12.6: Delete non-empty box — error shown, box persists ───────────────────
 
 test("delete non-empty box shows error and box persists", async ({ page }) => {
+  const catName = `Kat-12-6-${RUN}`;
   const boxLabel = `Voll-${RUN}`;
   const itemName = `Lampe-${RUN}`;
 
+  await createCategory(page, catName);
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
-  // Add an item via bulk-add
-  await page.fill('[name="names"]', itemName);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, itemName, catName);
+  await page.goto(boxUrl);
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 
   // Delete button should NOT be visible while items exist
@@ -226,18 +211,19 @@ test("delete empty box — box no longer in list", async ({ page }) => {
 // ── 8.1: Status changes to packed after item added ────────────────────────────
 
 test("adding item to box changes status to Gepackt in detail and list", async ({ page }) => {
+  const catName = `Kat-8-1-${RUN}`;
   const boxLabel = `Status-${RUN}`;
 
+  await createCategory(page, catName);
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
+
   // Detail page: status is Leer initially
   await expect(page.locator("dd", { hasText: "Leer" })).toBeVisible();
 
-  // Bulk-add one item
-  await page.fill('[name="names"]', `Teller-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Teller-${RUN}`, catName);
+  await page.goto(boxUrl);
 
   // Detail page: status is now Gepackt
   await expect(page.locator("dd", { hasText: "Gepackt" })).toBeVisible();
@@ -251,16 +237,16 @@ test("adding item to box changes status to Gepackt in detail and list", async ({
 // ── 8.2: Mark packed box as delivered ─────────────────────────────────────────
 
 test("mark packed box as delivered — status shows Geliefert", async ({ page }) => {
+  const catName = `Kat-8-2-${RUN}`;
   const boxLabel = `Delivered-${RUN}`;
 
+  await createCategory(page, catName);
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
-  // Add item to make box packed
-  await page.fill('[name="names"]', `Item-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Item-${RUN}`, catName);
+  await page.goto(boxUrl);
   await expect(page.locator("dd", { hasText: "Gepackt" })).toBeVisible();
 
   // Click "Als geliefert markieren"
@@ -278,18 +264,19 @@ test("mark packed box as delivered — status shows Geliefert", async ({ page })
 // ── 8.3: Place single item from delivered box into a room ─────────────────────
 
 test("place item from delivered box into room — item leaves box, appears in items list", async ({ page }) => {
+  const catName = `Kat-8-3-${RUN}`;
   const roomName = `Küche-place-${RUN}`;
   const boxLabel = `PlaceBox-${RUN}`;
   const itemName = `Tasse-place-${RUN}`;
 
+  await createCategory(page, catName);
   await createRoom(page, roomName);
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
-  await page.fill('[name="names"]', itemName);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, itemName, catName);
+  await page.goto(boxUrl);
 
   // Mark as delivered
   await page.locator("button", { hasText: "Als geliefert markieren" }).click();
@@ -313,18 +300,20 @@ test("place item from delivered box into room — item leaves box, appears in it
 // ── 8.4: Unpack all items from delivered box with destination room ─────────────
 
 test("unpack all from delivered box — box gone, items in room", async ({ page }) => {
+  const catName = `Kat-8-4-${RUN}`;
   const roomName = `Wohnzimmer-unpack-${RUN}`;
   const boxLabel = `UnpackAll-${RUN}`;
 
+  await createCategory(page, catName);
   await createRoom(page, roomName);
   await createBox(page, boxLabel, roomName);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
   // Add two items
-  await page.fill('[name="names"]', `Item1-${RUN}\nItem2-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Item1-${RUN}`, catName);
+  await addItemToBox(page, boxId, `Item2-${RUN}`, catName);
+  await page.goto(boxUrl);
 
   // Mark as delivered
   await page.locator("button", { hasText: "Als geliefert markieren" }).click();
@@ -347,19 +336,19 @@ test("unpack all from delivered box — box gone, items in room", async ({ page 
 // ── 8.5: Delivered box without destination room — assign room flow ─────────────
 
 test("delivered box without room: assign-room shown; after assign, unpack-all appears", async ({ page }) => {
+  const catName = `Kat-8-5-${RUN}`;
   const roomName = `Schlafzimmer-assign-${RUN}`;
   const boxLabel = `NoRoom-${RUN}`;
 
+  await createCategory(page, catName);
   await createRoom(page, roomName);
   // Create box WITHOUT destination room
   await createBox(page, boxLabel);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
-  // Add item and mark delivered
-  await page.fill('[name="names"]', `Buch-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Buch-${RUN}`, catName);
+  await page.goto(boxUrl);
   await page.locator("button", { hasText: "Als geliefert markieren" }).click();
   await expect(page.locator("dd", { hasText: "Geliefert" })).toBeVisible();
 
@@ -388,21 +377,22 @@ test("delivered box without room: assign-room shown; after assign, unpack-all ap
 // ── 8.6: Label page shows room icon, room name, and item count badge ───────────
 
 test("label page shows room icon, large room name, and item count badge", async ({ page }) => {
+  const catName = `Kat-8-6-${RUN}`;
   const roomName = `Küche-label-${RUN}`;
   const boxLabel = `LabelIcon-${RUN}`;
 
+  await createCategory(page, catName);
   await createRoom(page, roomName);
   await createBox(page, boxLabel, roomName);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
 
   // Add 2 items
-  await page.fill('[name="names"]', `Teller-${RUN}\nTasse-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Teller-${RUN}`, catName);
+  await addItemToBox(page, boxId, `Tasse-${RUN}`, catName);
 
-  const boxUrl = page.url().replace(/\?.*/, "");
-  await page.goto(`${boxUrl}/label`);
+  const labelUrl = `${boxUrl}/label`;
+  await page.goto(labelUrl);
 
   // Room icon element is present
   await expect(page.locator(".room-icon")).toBeVisible();

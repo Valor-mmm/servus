@@ -1,5 +1,28 @@
 import { expect, test } from "@playwright/test";
 
+async function addItemToBox(
+  page: import("@playwright/test").Page,
+  boxId: string,
+  itemName: string,
+  catName: string,
+) {
+  await page.goto("/items/new");
+  await page.fill('[name="name"]', itemName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
+  await page.selectOption('[name="boxId"]', boxId);
+  await page.click('main [type="submit"]');
+  await expect(page).toHaveURL("/items");
+}
+
+async function ensureCategory(
+  page: import("@playwright/test").Page,
+  name: string,
+) {
+  await page.goto("/categories");
+  await page.fill('main [name="name"]', name);
+  await page.click('main [type="submit"]');
+}
+
 // ── D1: Bottom nav on mobile, top nav on desktop ──────────────────────────────
 
 test("bottom nav visible on mobile viewport, top nav hidden", async ({ page }) => {
@@ -22,36 +45,36 @@ test("top nav visible on desktop viewport, bottom nav hidden", async ({ page }) 
 
 test("packed box shows .badge-packed class", async ({ page }) => {
   const RUN = Date.now().toString(36);
+  const catName = `Kat-badge-${RUN}`;
 
-  // Create a box and add an item to make it packed
+  await ensureCategory(page, catName);
   await page.goto("/boxes");
   await page.fill('[name="label"]', `Badge-Test-${RUN}`);
   await page.click('main [type="submit"]');
   await expect(page).toHaveURL(/\/boxes\/.+/);
+  const boxId = new URL(page.url()).pathname.split("/").pop()!;
+  const boxUrl = page.url();
 
-  await page.fill('[name="names"]', `Item-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
+  await addItemToBox(page, boxId, `Item-${RUN}`, catName);
+  await page.goto(boxUrl);
 
   await expect(page.locator(".badge-packed")).toBeVisible();
 });
 
 test("delivered box shows .badge-delivered class", async ({ page }) => {
   const RUN = Date.now().toString(36);
+  const catName = `Kat-dlv-${RUN}`;
 
+  await ensureCategory(page, catName);
   await page.goto("/boxes");
   await page.fill('[name="label"]', `Delivered-Badge-${RUN}`);
   await page.click('main [type="submit"]');
   await expect(page).toHaveURL(/\/boxes\/.+/);
+  const boxId = new URL(page.url()).pathname.split("/").pop()!;
+  const boxUrl = page.url();
 
-  await page.fill('[name="names"]', `Item-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
-
+  await addItemToBox(page, boxId, `Item-${RUN}`, catName);
+  await page.goto(boxUrl);
   await page.locator("button", { hasText: "Als geliefert markieren" }).click();
 
   await expect(page.locator(".badge-delivered")).toBeVisible();
@@ -88,18 +111,18 @@ test("GET /manifest.json returns valid JSON with required fields", async ({ page
 
 test("box detail page with ?delivered=1 includes confetti script tag", async ({ page }) => {
   const RUN = Date.now().toString(36);
+  const catName = `Kat-cft-${RUN}`;
 
+  await ensureCategory(page, catName);
   await page.goto("/boxes");
   await page.fill('[name="label"]', `Confetti-${RUN}`);
   await page.click('main [type="submit"]');
   await expect(page).toHaveURL(/\/boxes\/.+/);
+  const boxId = new URL(page.url()).pathname.split("/").pop()!;
+  const boxUrl = page.url();
 
-  await page.fill('[name="names"]', `Item-${RUN}`);
-  await Promise.all([
-    page.waitForURL(/\/boxes\/[^/?]+\?added=\d+/),
-    page.click("button.btn-primary"),
-  ]);
-
+  await addItemToBox(page, boxId, `Item-${RUN}`, catName);
+  await page.goto(boxUrl);
   await page.locator("button", { hasText: "Als geliefert markieren" }).click();
 
   // Should be redirected to ?delivered=1

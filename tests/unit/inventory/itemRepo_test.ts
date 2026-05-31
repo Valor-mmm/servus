@@ -25,7 +25,7 @@ const CAT_B = "cat-b";
 const ROOM_X = "room-x";
 const ROOM_Y = "room-y";
 
-Deno.test("createItem sets status:confirmed and photoKey:null", async () => {
+Deno.test("createItem sets status:confirmed and photos:[]", async () => {
   await withKv(async () => {
     const item = await createItem({
       name: "Sofa",
@@ -35,7 +35,7 @@ Deno.test("createItem sets status:confirmed and photoKey:null", async () => {
     });
     assertExists(item.id);
     assertEquals(item.status, "confirmed");
-    assertEquals(item.photoKey, null);
+    assertEquals(item.photos, []);
     assertEquals(item.name, "Sofa");
     assertEquals(item.categoryId, CAT_A);
     assertEquals(item.roomId, ROOM_X);

@@ -1,6 +1,8 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { deleteItem, findItem } from "@/lib/inventory/itemRepo.ts";
+import { getR2Config } from "@/lib/photos/config.ts";
+import { presignGet } from "@/lib/photos/signing.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom } from "@/lib/inventory/roomRepo.ts";
 import { findBox } from "@/lib/inventory/boxRepo.ts";
@@ -12,12 +14,35 @@ interface PageProps {
   room: Room | null;
   box: Box | null;
   csrfToken: string;
+  photoUrls: string[];
 }
 
-function ItemDetailPage({ item, category, room, box, csrfToken }: PageProps) {
+function ItemDetailPage(
+  { item, category, room, box, csrfToken, photoUrls }: PageProps,
+) {
+  const displayName = item.name ||
+    (item.status === "pending" ? t("items.placeholderName") : "–");
   return (
     <main class="page">
-      <h1>{t("items.detail_title")}: {item.name}</h1>
+      <h1>
+        {t("items.detail_title")}: {displayName}
+        {item.status === "pending" && (
+          <span class="badge badge-pending">{t("items.pending")}</span>
+        )}
+      </h1>
+      {photoUrls.length > 0 && (
+        <div class="photo-gallery">
+          {photoUrls.map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt=""
+              class="photo-gallery-img"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      )}
 
       <dl class="detail-list">
         <dt>{t("items.category_label")}</dt>
@@ -86,6 +111,13 @@ export const handler = define.handlers({
       item.roomId ? findRoom(item.roomId) : Promise.resolve(null),
       item.boxId ? findBox(item.boxId) : Promise.resolve(null),
     ]);
+    let photoUrls: string[] = [];
+    try {
+      const r2cfg = getR2Config();
+      const nowSec = Math.floor(Date.now() / 1000);
+      photoUrls = item.photos.map((key) => presignGet(r2cfg, key, nowSec));
+    } catch { /* R2 not configured */ }
+
     return ctx.render(
       <ItemDetailPage
         item={item}
@@ -93,6 +125,7 @@ export const handler = define.handlers({
         room={room}
         box={box}
         csrfToken={ctx.state.csrfToken ?? ""}
+        photoUrls={photoUrls}
       />,
     );
   },
@@ -102,7 +135,11 @@ export const handler = define.handlers({
     const action = form.get("_action") as string;
 
     if (action === "delete") {
-      await deleteItem(ctx.params.id);
+      let r2cfg = null;
+      try {
+        r2cfg = getR2Config();
+      } catch { /* R2 not configured */ }
+      await deleteItem(ctx.params.id, r2cfg);
       return new Response(null, {
         status: 302,
         headers: { Location: "/items" },

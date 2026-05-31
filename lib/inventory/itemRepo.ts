@@ -1,6 +1,10 @@
 import { getKv } from "@/lib/kv/client.ts";
 import type { Item } from "@/lib/inventory/types.ts";
 import { updateBoxStatus } from "@/lib/inventory/boxRepo.ts";
+import { deleteObject } from "@/lib/photos/r2.ts";
+import type { R2Config } from "@/lib/photos/config.ts";
+
+type FetchLike = (url: string | URL, init?: RequestInit) => Promise<Response>;
 
 const ITEM_KEY = (id: string): Deno.KvKey => ["item", id];
 const CAT_IDX_KEY = (catId: string, itemId: string): Deno.KvKey => [
@@ -26,6 +30,8 @@ export interface CreateItemInput {
   boxId?: string | null;
   quantity?: number;
   estimatedValue: number | null;
+  photos?: string[];
+  status?: "pending" | "confirmed";
 }
 
 export interface UpdateItemInput {
@@ -35,6 +41,7 @@ export interface UpdateItemInput {
   boxId?: string | null;
   quantity?: number;
   estimatedValue?: number | null;
+  photos?: string[];
 }
 
 function coerceQuantity(raw: unknown): number {
@@ -59,8 +66,8 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     boxId,
     quantity: coerceQuantity(input.quantity),
     estimatedValue: input.estimatedValue,
-    photoKey: null,
-    status: "confirmed",
+    photos: input.photos ?? [],
+    status: input.status ?? "confirmed",
     createdAt: now,
     updatedAt: now,
   };
@@ -82,8 +89,15 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
   return item;
 }
 
-function normalizeItem(raw: Item): Item {
-  return { ...raw, quantity: coerceQuantity(raw.quantity) };
+// deno-lint-ignore no-explicit-any
+function normalizeItem(raw: any): Item {
+  return {
+    ...raw,
+    quantity: coerceQuantity(raw.quantity),
+    // Legacy records missing `photos` or carrying the old `photoKey` field
+    // are coerced to an empty array at read time. No write-side migration needed.
+    photos: Array.isArray(raw.photos) ? raw.photos : [],
+  };
 }
 
 export async function findItem(id: string): Promise<Item | null> {
@@ -172,6 +186,7 @@ export async function updateItem(
     estimatedValue: input.estimatedValue !== undefined
       ? input.estimatedValue
       : existing.estimatedValue,
+    photos: input.photos !== undefined ? input.photos : existing.photos,
     updatedAt: Date.now(),
   };
 
@@ -218,7 +233,11 @@ export async function adjustQuantity(
   return updateItem(id, { quantity: item.quantity + delta });
 }
 
-export async function deleteItem(id: string): Promise<void> {
+export async function deleteItem(
+  id: string,
+  r2cfg?: R2Config | null,
+  fetchFn: FetchLike = fetch,
+): Promise<void> {
   const kv = await getKv();
   const item = await findItem(id);
   if (!item) return;
@@ -229,6 +248,16 @@ export async function deleteItem(id: string): Promise<void> {
   if (item.roomId) op.delete(ROOM_IDX_KEY(item.roomId, id));
   if (item.boxId) op.delete(BOX_IDX_KEY(item.boxId, id));
 
+  // KV commit first — orphan cleanup is best-effort and must not block deletion
   await op.commit();
   if (item.boxId) await updateBoxStatus(item.boxId);
+
+  // Fire R2 deletes after KV commit; failures are logged and never surface to caller
+  if (r2cfg && item.photos.length > 0) {
+    for (const key of item.photos) {
+      deleteObject(r2cfg, key, fetchFn).catch((err) => {
+        console.warn(`[photos] best-effort delete failed for ${key}:`, err);
+      });
+    }
+  }
 }
