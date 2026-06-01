@@ -83,7 +83,14 @@ test("photo capture on box creates pending item; editing name keeps pending stat
   const fileInput = page.locator(".photo-capture input[type=file]");
   await fileInput.setInputFiles(FIXTURE);
 
-  // Island processes, uploads, and reloads — wait for the pending item row
+  // After the first create, the island shows "Weiteres Foto" + "Fertig" instead
+  // of reloading immediately. Tap Fertig to commit and reload the page.
+  await expect(page.locator("button", { hasText: "Fertig" })).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.locator("button", { hasText: "Fertig" }).click();
+
+  // Box detail reloads — wait for the pending item row
   await expect(
     page.locator("li.item-row"),
     "pending item row should appear after capture",

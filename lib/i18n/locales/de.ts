@@ -111,6 +111,8 @@ const de = {
     "Dieser Dateityp wird nicht unterstützt. Bitte ein JPEG, PNG oder WebP aufnehmen.",
   "items.addPhoto": "Foto hinzufügen",
   "items.removePhoto": "Foto entfernen",
+  "items.addAnotherPhoto": "Weiteres Foto",
+  "items.captureFinished": "Fertig",
   "items.pending": "Ausstehend",
   "items.needsReview": "Zur Überprüfung",
   "items.pending_title": "Ausstehende Gegenstände",

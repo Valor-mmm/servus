@@ -1,3 +1,4 @@
+import { useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { t } from "@/lib/i18n/t.ts";
 import { calculateTargetDimensions } from "@/lib/photos/resizeHelper.ts";
@@ -49,20 +50,21 @@ export default function PhotoCapture(
 ) {
   const busy = useSignal(false);
   const error = useSignal<string | null>(null);
-  const done = useSignal(false);
+  // After a successful create, holds the new item's id so subsequent photos
+  // append to the same item rather than creating a second one.
+  const createdItemId = useSignal<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    // Reset input so the same file can be selected again on error
     input.value = "";
 
     busy.value = true;
     error.value = null;
 
     try {
-      // Validate type before resize
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
         error.value = t("items.captureWrongType");
         return;
@@ -108,7 +110,25 @@ export default function PhotoCapture(
       }
 
       // 3. Link key to item
-      if (mode === "create") {
+      // Use createdItemId if we already made an item this session (append more
+      // photos to it); otherwise follow the mode prop.
+      const existingId = createdItemId.value ?? itemId;
+      if (existingId && (mode === "append" || createdItemId.value !== null)) {
+        const appendResp = await fetch("/api/items/append-photo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-csrf-token": csrfToken,
+          },
+          body: JSON.stringify({ itemId: existingId, photoKey: key }),
+        });
+        if (!appendResp.ok) {
+          error.value = t("items.captureFailed");
+          return;
+        }
+        // Stay in multi-photo state; let user tap "Fertig" to reload.
+      } else {
+        // mode === "create" and no item created yet in this session
         const createResp = await fetch("/api/items/create-from-photo", {
           method: "POST",
           headers: {
@@ -121,30 +141,52 @@ export default function PhotoCapture(
           error.value = t("items.captureFailed");
           return;
         }
-      } else {
-        // append mode — itemId is required
-        const appendResp = await fetch("/api/items/append-photo", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-csrf-token": csrfToken,
-          },
-          body: JSON.stringify({ itemId, photoKey: key }),
-        });
-        if (!appendResp.ok) {
-          error.value = t("items.captureFailed");
-          return;
-        }
+        const data = (await createResp.json()) as { item: { id: string } };
+        createdItemId.value = data.item.id;
+        // Don't reload yet — show "Weiteres Foto" / "Fertig" so the user can
+        // add more photos to this item before leaving the capture screen.
+        return;
       }
-
-      done.value = true;
-      // Reload so the new item/photo appears
-      globalThis.location?.reload();
     } catch {
       error.value = t("items.captureFailed");
     } finally {
       busy.value = false;
     }
+  }
+
+  function handleFinished() {
+    globalThis.location?.reload();
+  }
+
+  // After a create-mode first photo: let user add more or finish.
+  if (createdItemId.value !== null) {
+    return (
+      <div class="photo-capture photo-capture--multi">
+        <label
+          class={`btn-primary capture-btn${busy.value ? " disabled" : ""}`}
+        >
+          <span>{busy.value ? "…" : t("items.addAnotherPhoto")}</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style="display:none"
+            disabled={busy.value}
+            onChange={handleFileChange}
+          />
+        </label>
+        <button
+          type="button"
+          class="btn-secondary"
+          onClick={handleFinished}
+          disabled={busy.value}
+        >
+          {t("items.captureFinished")}
+        </button>
+        {error.value && <p class="capture-error">{error.value}</p>}
+      </div>
+    );
   }
 
   return (

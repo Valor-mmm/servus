@@ -51,14 +51,14 @@ test("quick-add bottom-nav link opens capture page; photo creates unboxed pendin
   await page.waitForLoadState("networkidle");
 
   const fileInput = page.locator(".photo-capture input[type=file]");
-  // Register navigation wait BEFORE setInputFiles so we don't race with reload
-  const reloaded = page.waitForNavigation({
-    waitUntil: "networkidle",
+  await fileInput.setInputFiles(FIXTURE);
+  // After the first create the island shows "Weiteres Foto" + "Fertig".
+  // Tap Fertig to commit and let the page reload.
+  await expect(page.locator("button", { hasText: "Fertig" })).toBeVisible({
     timeout: 20_000,
   });
-  await fileInput.setInputFiles(FIXTURE);
-  // location.reload() is called by the island after create-from-photo succeeds
-  await reloaded;
+  await page.locator("button", { hasText: "Fertig" }).click();
+  await page.waitForLoadState("networkidle");
 
   // Verify item shows in /items with pending badge
   await page.goto("/items");
