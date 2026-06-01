@@ -1,4 +1,6 @@
-## ADDED Requirements
+# Inventory Specification
+
+## Requirements
 
 ### Requirement: Category management
 
