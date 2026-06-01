@@ -135,7 +135,10 @@ export function applySecurityHeaders(
 
   // Include R2 host in connect-src (for presigned PUT uploads) and img-src
   // (for presigned GET thumbnails) when the bucket is configured.
+  // Trailing slash makes CSP treat this as a path prefix, matching any object
+  // key under the bucket (e.g. /bucket/key?sig…) not just the bare bucket URL.
   const r2Base = Deno.env.get("R2_PUBLIC_URL") ?? "";
+  const r2Src = r2Base ? r2Base.replace(/\/*$/, "/") : "";
   // Fresh 2 puts a per-request nonce on its <script type="module"> boot tag.
   // 'unsafe-inline' is ignored by browsers when a nonce-source is present, so
   // we only emit it on pages without islands (no nonce) as a fallback.
@@ -146,14 +149,14 @@ export function applySecurityHeaders(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      `img-src 'self' data: blob:${r2Base ? ` ${r2Base}` : ""}`,
+      `img-src 'self' data: blob:${r2Src ? ` ${r2Src}` : ""}`,
       "style-src 'self' 'unsafe-inline'",
       scriptSrc,
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
       "form-action 'self'",
-      `connect-src 'self'${r2Base ? ` ${r2Base}` : ""}`,
+      `connect-src 'self'${r2Src ? ` ${r2Src}` : ""}`,
       // media-src covers <video>/<audio>; camera capture on some browsers
       // checks this directive even for <input capture="environment">.
       "media-src 'self' data: blob:",
