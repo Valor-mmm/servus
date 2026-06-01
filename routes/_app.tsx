@@ -1,13 +1,22 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 
-export default define.page(function App({ Component, state }) {
+function navActive(current: string, href: string): string {
+  const match = current === href || current.startsWith(href + "/");
+  return match ? " nav-active" : "";
+}
+
+export default define.page(function App({ Component, state, url }) {
+  const path = url?.pathname ?? "/";
+
   return (
     <html lang="de">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{t("app.name")}</title>
+        {/* Anti-flash: set html.dark before stylesheet to prevent theme flicker */}
+        <script src="/theme-init.js" />
         {state.csrfToken && (
           <meta name="csrf-token" content={state.csrfToken} />
         )}
@@ -27,43 +36,96 @@ export default define.page(function App({ Component, state }) {
           <>
             {/* Desktop top nav */}
             <nav class="top-nav">
-              <a href="/items" class="nav-logo">
+              <a
+                href="/items"
+                class="nav-logo"
+                title={t("app.name")}
+              >
                 <img src="/lion.svg" alt="" aria-hidden="true" />
                 {t("app.name")}
               </a>
-              <a href="/items">{t("nav.items")}</a>
-              <a href="/boxes">{t("nav.boxes")}</a>
-              <a href="/categories">{t("nav.categories")}</a>
-              <a href="/rooms">{t("nav.rooms")}</a>
+              <a
+                href="/items"
+                class={navActive(path, "/items").trim() || undefined}
+                title={t("nav.items")}
+              >
+                {t("nav.items")}
+              </a>
+              <a
+                href="/boxes"
+                class={navActive(path, "/boxes").trim() || undefined}
+                title={t("nav.boxes")}
+              >
+                {t("nav.boxes")}
+              </a>
+              <a
+                href="/categories"
+                class={navActive(path, "/categories").trim() || undefined}
+                title={t("nav.categories")}
+              >
+                {t("nav.categories")}
+              </a>
+              <a
+                href="/rooms"
+                class={navActive(path, "/rooms").trim() || undefined}
+                title={t("nav.rooms")}
+              >
+                {t("nav.rooms")}
+              </a>
+              <button
+                type="button"
+                class="theme-toggle"
+                aria-label={t("nav.toggleTheme")}
+                data-theme-toggle
+              >
+                🌙
+              </button>
               <form method="post" action="/logout">
                 <input
                   type="hidden"
                   name="csrf_token"
                   value={state.csrfToken ?? ""}
                 />
-                <button type="submit">{t("auth.logout")}</button>
+                <button type="submit" title={t("auth.logout")}>
+                  {t("auth.logout")}
+                </button>
               </form>
             </nav>
 
             {/* Mobile bottom nav */}
             <nav class="bottom-nav">
-              <a href="/items">
+              <a
+                href="/items"
+                class={navActive(path, "/items").trim() || undefined}
+              >
                 <span class="nav-icon">📦</span>
                 {t("nav.items")}
               </a>
-              <a href="/boxes">
+              <a
+                href="/boxes"
+                class={navActive(path, "/boxes").trim() || undefined}
+              >
                 <span class="nav-icon">🗃️</span>
                 {t("nav.boxes")}
               </a>
-              <a href="/items/quick-add" class="nav-quick-add">
+              <a
+                href="/items/quick-add"
+                class={`nav-quick-add${navActive(path, "/items/quick-add")}`}
+              >
                 <span class="nav-icon">➕</span>
                 {t("nav.quickAdd")}
               </a>
-              <a href="/categories">
+              <a
+                href="/categories"
+                class={navActive(path, "/categories").trim() || undefined}
+              >
                 <span class="nav-icon">🏷️</span>
                 {t("nav.categories")}
               </a>
-              <a href="/rooms">
+              <a
+                href="/rooms"
+                class={navActive(path, "/rooms").trim() || undefined}
+              >
                 <span class="nav-icon">🏠</span>
                 {t("nav.rooms")}
               </a>
@@ -79,9 +141,22 @@ export default define.page(function App({ Component, state }) {
                 </button>
               </form>
             </nav>
+
+            {/* Mobile theme toggle FAB */}
+            <button
+              type="button"
+              class="theme-toggle-fab"
+              aria-label={t("nav.toggleTheme")}
+              data-theme-toggle
+            >
+              🌙
+            </button>
           </>
         )}
         <Component />
+
+        {/* Lazy-load thumbnails + theme toggle wiring + presigned URL error handling */}
+        <script src="/app-init.js" />
       </body>
     </html>
   );

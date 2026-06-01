@@ -119,6 +119,7 @@ const de = {
   "items.pending_empty": "Keine ausstehenden Gegenstände.",
   "items.quick_add_title": "Schnellerfassung",
   "nav.quickAdd": "Schnellerfassung",
+  "nav.toggleTheme": "Design umschalten",
 
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
