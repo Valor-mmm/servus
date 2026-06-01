@@ -53,6 +53,8 @@ export default function PhotoCapture(
   // After a successful create, holds the new item's id so subsequent photos
   // append to the same item rather than creating a second one.
   const createdItemId = useSignal<string | null>(null);
+  // Blob URLs of successfully uploaded photos in this session for inline preview.
+  const capturedBlobs = useSignal<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: Event) {
@@ -126,7 +128,11 @@ export default function PhotoCapture(
           error.value = t("items.captureFailed");
           return;
         }
-        // Stay in multi-photo state; let user tap "Fertig" to reload.
+        // Add preview thumbnail for this successfully uploaded photo.
+        capturedBlobs.value = [
+          ...capturedBlobs.value,
+          URL.createObjectURL(blob),
+        ];
       } else {
         // mode === "create" and no item created yet in this session
         const createResp = await fetch("/api/items/create-from-photo", {
@@ -143,6 +149,8 @@ export default function PhotoCapture(
         }
         const data = (await createResp.json()) as { item: { id: string } };
         createdItemId.value = data.item.id;
+        // Add preview thumbnail for the first photo.
+        capturedBlobs.value = [URL.createObjectURL(blob)];
         // Don't reload yet — show "Weiteres Foto" / "Fertig" so the user can
         // add more photos to this item before leaving the capture screen.
         return;
@@ -160,12 +168,22 @@ export default function PhotoCapture(
 
   // After a create-mode first photo: let user add more or finish.
   if (createdItemId.value !== null) {
+    const count = capturedBlobs.value.length;
     return (
       <div class="photo-capture photo-capture--multi">
+        {count > 0 && (
+          <div class="capture-preview-strip">
+            {capturedBlobs.value.map((src, i) => (
+              <img key={i} src={src} alt="" class="capture-preview-thumb" />
+            ))}
+          </div>
+        )}
         <label
           class={`btn-primary capture-btn${busy.value ? " disabled" : ""}`}
         >
-          <span>{busy.value ? "…" : t("items.addAnotherPhoto")}</span>
+          <span>
+            {busy.value ? "…" : `${t("items.addAnotherPhoto")} (${count})`}
+          </span>
           <input
             ref={fileInputRef}
             type="file"

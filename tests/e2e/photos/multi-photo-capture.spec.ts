@@ -77,15 +77,33 @@ test("two quick-add photos attach to one item, not two", async ({ page }) => {
     "multi-photo container must appear after 1st photo",
   ).toBeVisible({ timeout: 20_000 });
   await expect(finishBtn).toBeVisible();
-  await expect(multiContainer.locator("span", { hasText: "Weiteres Foto" }))
+
+  // ── Preview strip after first photo ──────────────────────────────────────
+  const strip = page.locator(".capture-preview-strip");
+  await expect(strip, "preview strip must be visible after 1st photo")
     .toBeVisible();
+  expect(
+    await strip.locator("img").count(),
+    "strip must contain exactly 1 thumbnail after 1st photo",
+  ).toBe(1);
+  // Count badge shows (1) next to Weiteres Foto
+  await expect(
+    multiContainer.locator("span", { hasText: "Weiteres Foto (1)" }),
+  ).toBeVisible();
 
   // ── Second photo (append to same item) ───────────────────────────────────
   const secondInput = page.locator(".photo-capture--multi input[type=file]");
   await secondInput.setInputFiles(FIXTURE);
 
-  // Multi-photo container should still be present after appending
-  await expect(multiContainer).toBeVisible({ timeout: 10_000 });
+  // Strip grows to 2 thumbnails and count badge updates
+  await expect(strip.locator("img").nth(1)).toBeVisible({ timeout: 10_000 });
+  expect(
+    await strip.locator("img").count(),
+    "strip must contain 2 thumbnails after 2nd photo",
+  ).toBe(2);
+  await expect(
+    multiContainer.locator("span", { hasText: "Weiteres Foto (2)" }),
+  ).toBeVisible();
 
   // ── Finish and reload ────────────────────────────────────────────────────
   await finishBtn.click();
