@@ -5,6 +5,8 @@ import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
 import QuantityControl from "@/islands/QuantityControl.tsx";
+import { getR2Config } from "@/lib/photos/config.ts";
+import { presignGet } from "@/lib/photos/signing.ts";
 
 interface PageProps {
   items: Item[];
@@ -14,11 +16,26 @@ interface PageProps {
   categoryId: string;
   roomId: string;
   csrfToken: string;
+  thumbnailUrls: Record<string, string>; // itemId → presigned URL
+}
+
+function displayName(item: Item): string {
+  if (item.name) return item.name;
+  if (item.status === "pending") return t("items.placeholderName");
+  return "–";
 }
 
 function ItemsPage(
-  { items, categories, rooms, search, categoryId, roomId, csrfToken }:
-    PageProps,
+  {
+    items,
+    categories,
+    rooms,
+    search,
+    categoryId,
+    roomId,
+    csrfToken,
+    thumbnailUrls,
+  }: PageProps,
 ) {
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
   const roomMap = Object.fromEntries(rooms.map((r) => [r.id, r.name]));
@@ -70,8 +87,24 @@ function ItemsPage(
         : (
           <ul class="item-list">
             {items.map((item) => (
-              <li key={item.id} class="item-row">
-                <a href={`/items/${item.id}`}>{item.name}</a>
+              <li
+                key={item.id}
+                class={`item-row${
+                  item.status === "pending" ? " item-pending" : ""
+                }`}
+              >
+                {thumbnailUrls[item.id] && (
+                  <img
+                    src={thumbnailUrls[item.id]}
+                    alt=""
+                    class="item-thumbnail"
+                    loading="lazy"
+                  />
+                )}
+                <a href={`/items/${item.id}`}>{displayName(item)}</a>
+                {item.status === "pending" && (
+                  <span class="badge badge-pending">{t("items.pending")}</span>
+                )}
                 <span class="meta">
                   {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
                   {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
@@ -114,6 +147,19 @@ export const handler = define.handlers({
       items = items.filter((i) => i.roomId === roomFilter);
     }
 
+    const thumbnailUrls: Record<string, string> = {};
+    try {
+      const r2cfg = getR2Config();
+      const nowSec = Math.floor(Date.now() / 1000);
+      for (const item of items) {
+        if (item.photos.length > 0) {
+          thumbnailUrls[item.id] = presignGet(r2cfg, item.photos[0], nowSec);
+        }
+      }
+    } catch {
+      // R2 not configured — thumbnails silently absent
+    }
+
     return ctx.render(
       <ItemsPage
         items={items}
@@ -123,6 +169,7 @@ export const handler = define.handlers({
         categoryId={catFilter}
         roomId={roomFilter}
         csrfToken={ctx.state.csrfToken ?? ""}
+        thumbnailUrls={thumbnailUrls}
       />,
     );
   },

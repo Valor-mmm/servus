@@ -55,6 +55,10 @@ export default define.page(function App({ Component, state }) {
                 <span class="nav-icon">🗃️</span>
                 {t("nav.boxes")}
               </a>
+              <a href="/items/quick-add" class="nav-quick-add">
+                <span class="nav-icon">➕</span>
+                {t("nav.quickAdd")}
+              </a>
               <a href="/categories">
                 <span class="nav-icon">🏷️</span>
                 {t("nav.categories")}

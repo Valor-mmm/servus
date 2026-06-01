@@ -120,7 +120,10 @@ export async function applyCsrfGuard(
   return { pass: true };
 }
 
-export function applySecurityHeaders(response: Response): Response {
+export function applySecurityHeaders(
+  response: Response,
+  cspNonce?: string,
+): Response {
   const headers = new Headers(response.headers);
 
   headers.set(
@@ -129,19 +132,41 @@ export function applySecurityHeaders(response: Response): Response {
   );
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "same-origin");
+
+  // Include R2 host in connect-src (for presigned PUT uploads) and img-src
+  // (for presigned GET thumbnails) when the bucket is configured.
+  // Trailing slash makes CSP treat this as a path prefix, matching any object
+  // key under the bucket (e.g. /bucket/key?sig…) not just the bare bucket URL.
+  const r2Base = Deno.env.get("R2_PUBLIC_URL") ?? "";
+  const r2Src = r2Base ? r2Base.replace(/\/*$/, "/") : "";
+  // Fresh 2 puts a per-request nonce on its <script type="module"> boot tag.
+  // 'unsafe-inline' is ignored by browsers when a nonce-source is present, so
+  // we only emit it on pages without islands (no nonce) as a fallback.
+  const scriptSrc = cspNonce
+    ? `script-src 'self' 'nonce-${cspNonce}'`
+    : `script-src 'self' 'unsafe-inline'`;
   headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "img-src 'self' data:",
+      `img-src 'self' data: blob:${r2Src ? ` ${r2Src}` : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline'",
+      scriptSrc,
       "object-src 'none'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
       "form-action 'self'",
+      `connect-src 'self'${r2Src ? ` ${r2Src}` : ""}`,
+      // media-src covers <video>/<audio>; camera capture on some browsers
+      // checks this directive even for <input capture="environment">.
+      "media-src 'self' data: blob:",
     ].join("; "),
   );
+  // Prevent CDN/edge caches from storing HTML and serving a stale nonce that
+  // no longer matches the nonce in the response body.
+  if (cspNonce) {
+    headers.set("Cache-Control", "no-store");
+  }
   headers.set(
     "Permissions-Policy",
     "camera=(self), geolocation=(), microphone=()",
@@ -165,7 +190,27 @@ type Handler = (
 export function securityHeaders(): Handler {
   return async (ctx) => {
     const response = await ctx.next();
-    return applySecurityHeaders(response);
+
+    // Fresh puts a per-request nonce on <script type="module"> tags but doesn't
+    // expose it via the context. Buffer HTML responses to extract it and
+    // include it in script-src so browsers honour the nonce-carrying scripts.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/html") || response.body === null) {
+      return applySecurityHeaders(response);
+    }
+
+    const body = await response.text();
+    const nonceMatch = body.match(/\snonce="([0-9a-f]{20,})"/);
+    const nonce = nonceMatch?.[1];
+
+    return applySecurityHeaders(
+      new Response(body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      }),
+      nonce,
+    );
   };
 }
 

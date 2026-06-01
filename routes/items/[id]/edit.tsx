@@ -6,6 +6,9 @@ import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import { listBoxes } from "@/lib/inventory/boxRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
+import PhotoCapture from "@/islands/PhotoCapture.tsx";
+import { getR2Config } from "@/lib/photos/config.ts";
+import { presignGet } from "@/lib/photos/signing.ts";
 
 interface PageProps {
   item: Item;
@@ -14,15 +17,45 @@ interface PageProps {
   boxes: BoxWithItemCount[];
   error: string | null;
   csrfToken: string;
+  photoUrls: string[]; // presigned URLs for each photo in order
 }
 
 function EditItemPage(
-  { item, categories, rooms, boxes, error, csrfToken }: PageProps,
+  { item, categories, rooms, boxes, error, csrfToken, photoUrls }: PageProps,
 ) {
   return (
     <main class="page">
       <h1>{t("items.edit_title")}</h1>
       {error && <p class="error">{error}</p>}
+
+      {photoUrls.length > 0 && (
+        <section class="photo-gallery">
+          {photoUrls.map((url, i) => (
+            <div key={i} class="photo-gallery-item">
+              <img src={url} alt="" class="photo-gallery-img" loading="lazy" />
+              <form
+                method="post"
+                action={`/items/${item.id}/edit`}
+                style="display:inline"
+              >
+                <input type="hidden" name="csrf_token" value={csrfToken} />
+                <input type="hidden" name="_action" value="remove_photo" />
+                <input type="hidden" name="photoKey" value={item.photos[i]} />
+                <button type="submit" class="btn-small btn-danger">
+                  {t("items.removePhoto")}
+                </button>
+              </form>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <PhotoCapture
+        mode="append"
+        itemId={item.id}
+        csrfToken={csrfToken}
+      />
+
       <form method="post" action={`/items/${item.id}/edit`}>
         <input type="hidden" name="csrf_token" value={csrfToken} />
 
@@ -111,6 +144,16 @@ function EditItemPage(
   );
 }
 
+function buildPhotoUrls(photos: string[]): string[] {
+  try {
+    const r2cfg = getR2Config();
+    const nowSec = Math.floor(Date.now() / 1000);
+    return photos.map((key) => presignGet(r2cfg, key, nowSec));
+  } catch {
+    return photos.map(() => "");
+  }
+}
+
 export const handler = define.handlers({
   async GET(ctx) {
     const item = await findItem(ctx.params.id);
@@ -121,6 +164,7 @@ export const handler = define.handlers({
       listRooms(),
       listBoxes(),
     ]);
+    const photoUrls = buildPhotoUrls(item.photos);
     return ctx.render(
       <EditItemPage
         item={item}
@@ -129,6 +173,7 @@ export const handler = define.handlers({
         boxes={boxes}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
+        photoUrls={photoUrls}
       />,
     );
   },
@@ -138,6 +183,27 @@ export const handler = define.handlers({
     if (!item) return new Response(t("error.not_found"), { status: 404 });
 
     const form = await ctx.req.formData();
+    const action = (form.get("_action") as string | null) ?? "";
+
+    if (action === "remove_photo") {
+      const photoKey = (form.get("photoKey") as string | null) ?? "";
+      if (photoKey) {
+        const { handleRemovePhoto } = await import(
+          "@/lib/inventory/removePhotoApi.ts"
+        );
+        let r2cfg = null;
+        try {
+          const { getR2Config } = await import("@/lib/photos/config.ts");
+          r2cfg = getR2Config();
+        } catch { /* R2 not configured */ }
+        await handleRemovePhoto({ itemId: item.id, photoKey }, r2cfg);
+      }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/items/${item.id}/edit` },
+      });
+    }
+
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) || null;
     const roomId = (form.get("roomId") as string | null) ?? "";
@@ -159,6 +225,7 @@ export const handler = define.handlers({
           boxes={boxes}
           error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
+          photoUrls={buildPhotoUrls(item.photos)}
         />,
       );
     };
