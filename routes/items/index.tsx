@@ -95,10 +95,11 @@ function ItemsPage(
               >
                 {thumbnailUrls[item.id] && (
                   <img
-                    src={thumbnailUrls[item.id]}
+                    data-src={thumbnailUrls[item.id]}
                     alt=""
                     class="item-thumbnail"
-                    loading="lazy"
+                    width="40"
+                    height="40"
                   />
                 )}
                 <a href={`/items/${item.id}`}>{displayName(item)}</a>

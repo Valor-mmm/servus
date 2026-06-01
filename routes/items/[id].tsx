@@ -94,7 +94,7 @@ function ItemDetailPage(
           </button>
         </form>
 
-        <a href="/items">{t("action.back")}</a>
+        <a href="/items" class="btn-secondary">{t("action.back")}</a>
       </div>
     </main>
   );
