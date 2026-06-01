@@ -413,6 +413,14 @@ button.danger:hover, .btn-danger:hover {
   box-shadow: var(--servus-shadow-raised);
 }
 
+.item-thumbnail {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+  border-radius: calc(var(--servus-radius) - 2px);
+  flex-shrink: 0;
+}
+
 .item-row a {
   color: var(--servus-text);
   text-decoration: none;
