@@ -149,7 +149,8 @@ user-facing operation to fail.
 The presigned URL request handler MUST reject uploads whose declared
 `contentType` is not in an allowlist of image MIME types (at least `image/jpeg`,
 `image/png`, `image/webp`) and whose declared byte length exceeds 4 MiB. The
-presigned URL MUST encode a `Content-Type` constraint matching the declared type.
+presigned URL MUST encode a `Content-Type` constraint matching the declared
+type.
 
 This mitigates the threat of the bucket being used as arbitrary storage or being
 filled with oversized objects.

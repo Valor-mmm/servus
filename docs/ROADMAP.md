@@ -179,7 +179,8 @@ Capability gained: **item photos** (photo-first workflow).
 - Bulk-add textarea removed from box detail (replaced by photo-first capture).
 - Multi-photo capture in a single session: after the first photo the island
   switches to a multi-photo state with "Weiteres Foto (N)" and "Fertig" buttons,
-  appending each subsequent photo to the same item instead of creating a new one.
+  appending each subsequent photo to the same item instead of creating a new
+  one.
 - Inline preview strip during capture: each uploaded photo is shown as a
   thumbnail (from the in-memory blob URL) immediately after upload, so the user
   can see all photos captured so far before tapping "Fertig".
@@ -263,12 +264,12 @@ Capability gained: **invites**.
     capture as the primary item-entry affordance.
 - **D12.** Two UX improvements shipped as follow-on changes after M7: (1)
   `multi-photo-capture` — the capture island gained a multi-photo session mode
-  (append subsequent photos to the same item, "Weiteres Foto (N)" / "Fertig")
-  so users never have to navigate away mid-session to add more photos; (2)
-  `capture-photo-preview` — each uploaded photo is previewed inline via a
-  blob URL thumbnail strip so users can see what they have captured before
-  finishing the session. Both changes required no new API surface and no schema
-  changes; they are purely island-side UX.
+  (append subsequent photos to the same item, "Weiteres Foto (N)" / "Fertig") so
+  users never have to navigate away mid-session to add more photos; (2)
+  `capture-photo-preview` — each uploaded photo is previewed inline via a blob
+  URL thumbnail strip so users can see what they have captured before finishing
+  the session. Both changes required no new API surface and no schema changes;
+  they are purely island-side UX.
 
 ## Beyond MVP
 
