@@ -36,7 +36,11 @@ test("browse limit — load-all button reveals all items", async ({ page }) => {
 
   // Create 55 items (above the 50-item default limit)
   for (let i = 1; i <= 55; i++) {
-    await createItem(page, `BrowseItem-${RUN}-${String(i).padStart(3, "0")}`, catName);
+    await createItem(
+      page,
+      `BrowseItem-${RUN}-${String(i).padStart(3, "0")}`,
+      catName,
+    );
   }
 
   // Default view: browse limit note and load-all button are shown
@@ -103,7 +107,11 @@ test("text search finds items outside the recent 50", async ({ page }) => {
 
   // Create 55 more items so the target item falls outside the recent 50
   for (let i = 1; i <= 55; i++) {
-    await createItem(page, `${recentPrefix}-${String(i).padStart(3, "0")}`, catName);
+    await createItem(
+      page,
+      `${recentPrefix}-${String(i).padStart(3, "0")}`,
+      catName,
+    );
   }
 
   // Default view: target item should NOT appear (it's outside the recent 50)

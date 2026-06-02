@@ -27,10 +27,10 @@ atomically with the primary record in `deleteItem()`, using the item's stored
 ### Requirement: Recent items listing
 
 The system MUST provide a `listItemsRecent(limit: number): Promise<Item[]>`
-repository function that returns the most recently created items in
-descending creation order (newest first), up to `limit` items. The function
-MUST use `kv.list({ prefix: ["item-by-time"], limit, reverse: true })` and
-resolve each index entry to a full `Item` record via `findItem()`.
+repository function that returns the most recently created items in descending
+creation order (newest first), up to `limit` items. The function MUST use
+`kv.list({ prefix: ["item-by-time"], limit, reverse: true })` and resolve each
+index entry to a full `Item` record via `findItem()`.
 
 #### Scenario: Returns newest items first
 
@@ -73,14 +73,14 @@ consistency and MUST NOT fetch item values (key-only scan for efficiency).
 The system MUST select the most efficient load strategy for `GET /items` based
 on the active query parameters, according to the following rules:
 
-| Active params          | Load strategy                              |
-| ---------------------- | ------------------------------------------ |
-| None                   | `listItemsRecent(50)`                      |
-| `?all=1`               | `listItems()` (full load)                  |
-| `?cat=X`               | `listItemsByCategory(X)`                   |
-| `?room=Y`              | `listItemsByRoom(Y)`                       |
-| `?q=text`              | `listItems()` + server-side substring filter |
-| `?q=text` + `?cat=X`  | `listItemsByCategory(X)` + server-side substring filter |
+| Active params        | Load strategy                                           |
+| -------------------- | ------------------------------------------------------- |
+| None                 | `listItemsRecent(50)`                                   |
+| `?all=1`             | `listItems()` (full load)                               |
+| `?cat=X`             | `listItemsByCategory(X)`                                |
+| `?room=Y`            | `listItemsByRoom(Y)`                                    |
+| `?q=text`            | `listItems()` + server-side substring filter            |
+| `?q=text` + `?cat=X` | `listItemsByCategory(X)` + server-side substring filter |
 
 Text search MUST always be performed server-side against the full loaded set.
 Client-side filtering of a limited result set is explicitly forbidden.
@@ -132,8 +132,8 @@ active), the system MUST:
 - Display a `"Alle Gegenstände laden"` button below the item list that navigates
   to `/items?all=1`.
 
-When `?all=1` is active or any filter is applied, both the count header note
-and the "load all" button MUST be hidden.
+When `?all=1` is active or any filter is applied, both the count header note and
+the "load all" button MUST be hidden.
 
 #### Scenario: Limited view shows count note and load-all button
 

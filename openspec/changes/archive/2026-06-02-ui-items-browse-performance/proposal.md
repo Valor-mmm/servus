@@ -10,9 +10,10 @@ the route.
 ## What Changes
 
 - **New KV secondary index** `["item-by-time", timestamp, id]` maintained on
-  every item create/delete, enabling time-ordered listing without a full KV scan.
-- **New repository function** `listItemsRecent(limit)` that returns the `N`
-  most recently created items using the new index.
+  every item create/delete, enabling time-ordered listing without a full KV
+  scan.
+- **New repository function** `listItemsRecent(limit)` that returns the `N` most
+  recently created items using the new index.
 - **New repository function** `countItems()` that returns the total item count
   via a prefix scan (no value fetch, cheap).
 - **Route load strategy** on `GET /items` is made filter-aware: no params →
@@ -24,9 +25,9 @@ the route.
   shows `"50 neueste Gegenstände"` with an approximate total count and a
   `"Alle Gegenstände laden"` button below the list. Both are hidden when
   `?all=1` is active.
-- **Filter form behavior**: dropdown selects auto-submit on `change` (no
-  Filtern button needed); text search submits explicitly via a search icon
-  button; the Filtern button is removed.
+- **Filter form behavior**: dropdown selects auto-submit on `change` (no Filtern
+  button needed); text search submits explicitly via a search icon button; the
+  Filtern button is removed.
 
 ## Capabilities
 
@@ -40,10 +41,10 @@ the route.
 
 - `inventory`: The "Item list with search and filter" requirement changes: the
   default view now loads the 50 most recently created items (not all items);
-  filtering by category or room uses existing secondary indexes server-side; text
-  search triggers a full load; the Filtern button is replaced by auto-submit
-  dropdowns and a search icon button. The KV index consistency requirement gains
-  the new `item-by-time` index.
+  filtering by category or room uses existing secondary indexes server-side;
+  text search triggers a full load; the Filtern button is replaced by
+  auto-submit dropdowns and a search icon button. The KV index consistency
+  requirement gains the new `item-by-time` index.
 
 ## Impact
 

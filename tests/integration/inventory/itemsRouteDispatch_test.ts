@@ -34,7 +34,12 @@ async function makeItem(
   cat: string | null,
   room: string | null,
 ): Promise<void> {
-  await createItem({ name, categoryId: cat, roomId: room, estimatedValue: null });
+  await createItem({
+    name,
+    categoryId: cat,
+    roomId: room,
+    estimatedValue: null,
+  });
   await new Promise((r) => setTimeout(r, 1));
 }
 
