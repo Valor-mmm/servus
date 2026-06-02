@@ -6,6 +6,7 @@ import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import { listBoxes } from "@/lib/inventory/boxRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { Category, Room } from "@/lib/inventory/types.ts";
+import CaptureSurface from "@/components/CaptureSurface.tsx";
 
 interface PageProps {
   categories: Category[];
@@ -87,6 +88,8 @@ function NewItemPage(
         <button type="submit">{t("action.save")}</button>
         <a href="/items">{t("action.cancel")}</a>
       </form>
+
+      <CaptureSurface csrfToken={csrfToken} />
     </main>
   );
 }

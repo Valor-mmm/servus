@@ -148,6 +148,18 @@ const de = {
   "invite.error.rate_limited":
     "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
 
+  // ── Continuous capture ────────────────────────────────────────────────────
+  "capture.activate": "Kamera aktivieren",
+  "capture.shutterLabel": "Aufnehmen",
+  "capture.confirmLabel": "✓ Fertig",
+  "capture.closeLabel": "✕ Schließen",
+  "capture.permissionDeniedHint":
+    "Kamerazugriff verweigert. Bitte erlaube den Zugriff in den Browser-Einstellungen und versuche es erneut.",
+  "capture.noCameraHint":
+    "Keine Kamera gefunden. Bitte verwende die Dateiauswahl.",
+  "capture.unsupportedHint":
+    "Dein Browser unterstützt keinen direkten Kamerazugriff. Bitte verwende die Dateiauswahl.",
+
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
   "boxes.add": "Karton hinzufügen",

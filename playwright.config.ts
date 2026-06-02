@@ -47,6 +47,30 @@ export default defineConfig({
       dependencies: ["setup"],
       testIgnore: /auth\.(test|setup)\.ts/,
     },
+    // WebKit project for continuous-capture spec (getUserMedia surface).
+    // Grants camera permission so the permission prompt is bypassed.
+    {
+      name: "webkit-capture",
+      use: {
+        ...devices["iPhone 13"],
+        storageState: "tests/e2e/.auth/user.json",
+        permissions: ["camera"],
+      },
+      dependencies: ["setup"],
+      testMatch: /continuous-capture\.spec\.ts/,
+    },
+    // Chromium project for continuous-capture spec — used for local dev
+    // (WebKit requires sudo for dependency install on non-Ubuntu hosts).
+    {
+      name: "chromium-capture",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "tests/e2e/.auth/user.json",
+        permissions: ["camera"],
+      },
+      dependencies: ["setup"],
+      testMatch: /continuous-capture\.spec\.ts/,
+    },
   ],
 
   webServer: {

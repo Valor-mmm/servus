@@ -1,7 +1,7 @@
 import { useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { t } from "@/lib/i18n/t.ts";
-import { calculateTargetDimensions } from "@/lib/photos/resizeHelper.ts";
+import { resizeBlobToJpeg } from "@/lib/photos/resizeHelper.ts";
 
 interface Props {
   boxId?: string | null;
@@ -9,40 +9,6 @@ interface Props {
   mode: "create" | "append";
   itemId?: string; // required when mode === "append"
   csrfToken: string;
-}
-
-const JPEG_QUALITY = 0.85;
-
-/** Resize a captured file to ≤1600px on the long edge and re-encode as JPEG. */
-export function resizeAndEncode(file: File): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const { width, height } = calculateTargetDimensions(
-        img.naturalWidth,
-        img.naturalHeight,
-      );
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        reject(new Error("canvas 2d context unavailable"));
-        return;
-      }
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("canvas.toBlob returned null"));
-        },
-        "image/jpeg",
-        JPEG_QUALITY,
-      );
-    };
-    img.onerror = () => reject(new Error("failed to load image"));
-    img.src = URL.createObjectURL(file);
-  });
 }
 
 export default function PhotoCapture(
@@ -72,7 +38,7 @@ export default function PhotoCapture(
         return;
       }
 
-      const blob = await resizeAndEncode(file);
+      const blob = await resizeBlobToJpeg(file);
 
       if (blob.size > 4 * 1024 * 1024) {
         error.value = t("items.captureTooLarge");

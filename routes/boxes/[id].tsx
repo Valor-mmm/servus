@@ -12,7 +12,7 @@ import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
 import QuantityControl from "@/islands/QuantityControl.tsx";
-import PhotoCapture from "@/islands/PhotoCapture.tsx";
+import CaptureSurface from "@/components/CaptureSurface.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 
@@ -127,11 +127,7 @@ function BoxDetailPage(
         )}
 
         {box.status !== "delivered" && (
-          <PhotoCapture
-            mode="create"
-            boxId={box.id}
-            csrfToken={csrfToken}
-          />
+          <CaptureSurface boxId={box.id} csrfToken={csrfToken} />
         )}
 
         <h2>{t("boxes.item_count")}</h2>
