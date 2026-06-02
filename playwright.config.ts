@@ -55,6 +55,8 @@ export default defineConfig({
         ...devices["iPhone 13"],
         storageState: "tests/e2e/.auth/user.json",
         permissions: ["camera"],
+        // Override global launchOptions — --no-sandbox is Chromium-only and crashes WebKit.
+        launchOptions: {},
       },
       dependencies: ["setup"],
       testMatch: /continuous-capture\.spec\.ts/,
