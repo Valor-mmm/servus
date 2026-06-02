@@ -49,7 +49,7 @@ export async function captureAndUpload(
     },
     body: JSON.stringify({ contentType: "image/jpeg", bytes: blob.size }),
   });
-  if (!urlResp.ok) throw new Error("upload-url request failed");
+  if (!urlResp.ok) throw new Error(`upload-url:${urlResp.status}`);
   const { key, url } = (await urlResp.json()) as { key: string; url: string };
 
   // PUT blob to R2
@@ -58,7 +58,7 @@ export async function captureAndUpload(
     headers: { "Content-Type": "image/jpeg" },
     body: blob,
   });
-  if (!putResp.ok) throw new Error("R2 PUT failed");
+  if (!putResp.ok) throw new Error(`r2-put:${putResp.status}`);
 
   return { key, blob };
 }

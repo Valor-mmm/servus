@@ -114,7 +114,7 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
             },
             body: JSON.stringify({ photoKey, boxId: boxId ?? null }),
           });
-          if (!resp.ok) throw new Error("create-from-photo failed");
+          if (!resp.ok) throw new Error(`create-from-photo:${resp.status}`);
           const data = (await resp.json()) as { item: { id: string } };
           itemId.value = data.item.id;
           thumbnails.value = [thumbUrl];
@@ -129,11 +129,31 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
             },
             body: JSON.stringify({ itemId: itemId.value, photoKey }),
           });
-          if (!resp.ok) throw new Error("append-photo failed");
+          if (!resp.ok) throw new Error(`append-photo:${resp.status}`);
           thumbnails.value = [...thumbnails.value, thumbUrl];
         }
-      } catch {
-        error.value = t("items.captureFailed");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        console.error("[ContinuousCapture] upload error", msg);
+        if (msg.startsWith("upload-url:")) {
+          error.value = t("items.captureFailedPresign", {
+            status: msg.slice("upload-url:".length),
+          });
+        } else if (msg.startsWith("r2-put:")) {
+          error.value = t("items.captureFailedR2", {
+            status: msg.slice("r2-put:".length),
+          });
+        } else if (msg.startsWith("create-from-photo:")) {
+          error.value = t("items.captureFailedCreate", {
+            status: msg.slice("create-from-photo:".length),
+          });
+        } else if (msg.startsWith("append-photo:")) {
+          error.value = t("items.captureFailedAppend", {
+            status: msg.slice("append-photo:".length),
+          });
+        } else {
+          error.value = t("items.captureFailed");
+        }
       } finally {
         busy.value = false;
       }

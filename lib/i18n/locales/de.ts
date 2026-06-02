@@ -103,8 +103,15 @@ const de = {
   // ── Photos / capture ─────────────────────────────────────────────────────
   "items.placeholderName": "(unbenannt)",
   "items.captureButton": "Foto aufnehmen",
-  "items.captureFailed":
-    "Foto konnte nicht hochgeladen werden. Bitte erneut versuchen.",
+  "items.captureFailed": "Upload fehlgeschlagen. Bitte erneut versuchen.",
+  "items.captureFailedPresign":
+    "Upload-URL fehlgeschlagen (HTTP {status}). R2-Konfiguration prüfen.",
+  "items.captureFailedR2":
+    "R2-Upload fehlgeschlagen (HTTP {status}). CORS oder Credentials prüfen.",
+  "items.captureFailedCreate":
+    "Gegenstand konnte nicht gespeichert werden (HTTP {status}).",
+  "items.captureFailedAppend":
+    "Foto konnte nicht angehängt werden (HTTP {status}).",
   "items.captureTooLarge":
     "Das Foto ist zu groß. Bitte ein kleineres Bild aufnehmen.",
   "items.captureWrongType":

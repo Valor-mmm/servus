@@ -56,7 +56,10 @@ export default function PhotoCapture(
       });
 
       if (!urlResp.ok) {
-        error.value = t("items.captureFailed");
+        console.error("[PhotoCapture] upload-url failed", urlResp.status);
+        error.value = t("items.captureFailedPresign", {
+          status: String(urlResp.status),
+        });
         return;
       }
 
@@ -73,7 +76,10 @@ export default function PhotoCapture(
       });
 
       if (!putResp.ok) {
-        error.value = t("items.captureFailed");
+        console.error("[PhotoCapture] R2 PUT failed", putResp.status);
+        error.value = t("items.captureFailedR2", {
+          status: String(putResp.status),
+        });
         return;
       }
 
@@ -91,7 +97,13 @@ export default function PhotoCapture(
           body: JSON.stringify({ itemId: existingId, photoKey: key }),
         });
         if (!appendResp.ok) {
-          error.value = t("items.captureFailed");
+          console.error(
+            "[PhotoCapture] append-photo failed",
+            appendResp.status,
+          );
+          error.value = t("items.captureFailedAppend", {
+            status: String(appendResp.status),
+          });
           return;
         }
         // Add preview thumbnail for this successfully uploaded photo.
@@ -110,7 +122,13 @@ export default function PhotoCapture(
           body: JSON.stringify({ photoKey: key, boxId: boxId ?? null }),
         });
         if (!createResp.ok) {
-          error.value = t("items.captureFailed");
+          console.error(
+            "[PhotoCapture] create-from-photo failed",
+            createResp.status,
+          );
+          error.value = t("items.captureFailedCreate", {
+            status: String(createResp.status),
+          });
           return;
         }
         const data = (await createResp.json()) as { item: { id: string } };
@@ -121,7 +139,8 @@ export default function PhotoCapture(
         // add more photos to this item before leaving the capture screen.
         return;
       }
-    } catch {
+    } catch (err) {
+      console.error("[PhotoCapture] unexpected error", err);
       error.value = t("items.captureFailed");
     } finally {
       busy.value = false;
