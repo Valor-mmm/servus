@@ -63,4 +63,12 @@
   } else {
     document.querySelectorAll("img[data-src]").forEach(loadImg);
   }
+
+  /* ── Auto-submit filter dropdowns ── */
+  document.querySelectorAll("select[data-autosubmit]").forEach(function (sel) {
+    sel.addEventListener("change", function () {
+      const form = sel.closest("form");
+      if (form) form.requestSubmit();
+    });
+  });
 })();

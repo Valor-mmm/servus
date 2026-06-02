@@ -1,12 +1,20 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
-import { listItems } from "@/lib/inventory/itemRepo.ts";
+import {
+  countItems,
+  listItems,
+  listItemsByCategory,
+  listItemsByRoom,
+  listItemsRecent,
+} from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Category, Item, Room } from "@/lib/inventory/types.ts";
 import QuantityControl from "@/islands/QuantityControl.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
+
+const RECENT_LIMIT = 50;
 
 interface PageProps {
   items: Item[];
@@ -16,7 +24,9 @@ interface PageProps {
   categoryId: string;
   roomId: string;
   csrfToken: string;
-  thumbnailUrls: Record<string, string>; // itemId → presigned URL
+  thumbnailUrls: Record<string, string>;
+  isLimitedView: boolean;
+  totalCount: number;
 }
 
 function displayName(item: Item): string {
@@ -35,6 +45,8 @@ function ItemsPage(
     roomId,
     csrfToken,
     thumbnailUrls,
+    isLimitedView,
+    totalCount,
   }: PageProps,
 ) {
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
@@ -43,18 +55,31 @@ function ItemsPage(
   return (
     <main class="page">
       <div class="page-header">
-        <h1>{t("items.title")}</h1>
+        <h1>
+          {isLimitedView
+            ? `${RECENT_LIMIT} ${t("items.recentCount")} (${totalCount})`
+            : t("items.title")}
+        </h1>
         <a href="/items/new" class="btn-primary">{t("items.add")}</a>
       </div>
 
       <form method="get" action="/items" class="filter-form">
-        <input
-          type="text"
-          name="q"
-          value={search}
-          placeholder={t("items.search_placeholder")}
-        />
-        <select name="cat">
+        <div class="filter-search">
+          <input
+            type="text"
+            name="q"
+            value={search}
+            placeholder={t("items.search_placeholder")}
+          />
+          <button
+            type="submit"
+            class="btn-icon"
+            aria-label={t("action.search")}
+          >
+            🔍
+          </button>
+        </div>
+        <select name="cat" data-autosubmit>
           <option value="">
             {t("items.filter_all")} {t("items.filter_category")}
           </option>
@@ -64,7 +89,7 @@ function ItemsPage(
             </option>
           ))}
         </select>
-        <select name="room">
+        <select name="room" data-autosubmit>
           <option value="">
             {t("items.filter_all")} {t("items.filter_room")}
           </option>
@@ -74,7 +99,6 @@ function ItemsPage(
             </option>
           ))}
         </select>
-        <button type="submit">{t("action.filter")}</button>
       </form>
 
       {items.length === 0
@@ -120,6 +144,14 @@ function ItemsPage(
             ))}
           </ul>
         )}
+
+      {isLimitedView && (
+        <div class="load-all-container">
+          <a href="/items?all=1" class="btn-secondary">
+            {t("items.loadAll")}
+          </a>
+        </div>
+      )}
     </main>
   );
 }
@@ -129,24 +161,44 @@ export const handler = define.handlers({
     const q = ctx.url.searchParams.get("q") ?? "";
     const catFilter = ctx.url.searchParams.get("cat") ?? "";
     const roomFilter = ctx.url.searchParams.get("room") ?? "";
+    const loadAll = ctx.url.searchParams.get("all") === "1";
 
-    const [allItems, categories, rooms] = await Promise.all([
-      listItems(),
-      listCategories(),
-      listRooms(),
-    ]);
+    const hasFilter = !!(q || catFilter || roomFilter || loadAll);
+    const isLimitedView = !hasFilter;
 
-    let items = allItems;
-    if (q) {
+    // Filter-aware dispatch: use narrowest available index
+    let items: Item[];
+    if (loadAll) {
+      items = await listItems();
+    } else if (catFilter && q) {
+      items = await listItemsByCategory(catFilter);
       const lower = q.toLowerCase();
       items = items.filter((i) => i.name.toLowerCase().includes(lower));
+    } else if (catFilter) {
+      items = await listItemsByCategory(catFilter);
+    } else if (roomFilter && q) {
+      items = await listItemsByRoom(roomFilter);
+      const lower = q.toLowerCase();
+      items = items.filter((i) => i.name.toLowerCase().includes(lower));
+    } else if (roomFilter) {
+      items = await listItemsByRoom(roomFilter);
+    } else if (q) {
+      items = await listItems();
+      const lower = q.toLowerCase();
+      items = items.filter((i) => i.name.toLowerCase().includes(lower));
+    } else {
+      items = await listItemsRecent(RECENT_LIMIT);
+      // Fallback for items created before the time index existed
+      if (items.length === 0) {
+        items = await listItems();
+      }
     }
-    if (catFilter) {
-      items = items.filter((i) => i.categoryId === catFilter);
-    }
-    if (roomFilter) {
-      items = items.filter((i) => i.roomId === roomFilter);
-    }
+
+    const [categories, rooms, totalCount] = await Promise.all([
+      listCategories(),
+      listRooms(),
+      isLimitedView ? countItems() : Promise.resolve(0),
+    ]);
 
     const thumbnailUrls: Record<string, string> = {};
     try {
@@ -171,6 +223,8 @@ export const handler = define.handlers({
         roomId={roomFilter}
         csrfToken={ctx.state.csrfToken ?? ""}
         thumbnailUrls={thumbnailUrls}
+        isLimitedView={isLimitedView}
+        totalCount={totalCount}
       />,
     );
   },
