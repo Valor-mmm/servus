@@ -54,7 +54,9 @@ export default defineConfig({
       use: {
         ...devices["iPhone 13"],
         storageState: "tests/e2e/.auth/user.json",
-        permissions: ["camera"],
+        // No `permissions: ["camera"]` — WebKit's Playwright driver doesn't support
+        // this permission key. The spec mocks getUserMedia entirely via addInitScript
+        // so no actual camera permission is needed.
         // Override global launchOptions — --no-sandbox is Chromium-only and crashes WebKit.
         launchOptions: {},
       },
