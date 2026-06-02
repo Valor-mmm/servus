@@ -13,6 +13,7 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
+import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -72,6 +73,7 @@ async function setupR2Mocks(page: import("@playwright/test").Page) {
 test("photo capture on box creates pending item; editing name keeps pending status", async ({ page }) => {
   const boxLabel = `PhotoBox-${RUN}`;
 
+  await denyGetUserMedia(page);
   await createBox(page, boxLabel);
   const boxUrl = page.url();
 

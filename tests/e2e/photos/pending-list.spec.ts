@@ -4,6 +4,7 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
+import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -49,6 +50,7 @@ async function captureOneItem(page: import("@playwright/test").Page) {
 }
 
 test("two quick-add photos appear in pending list and items list", async ({ page }) => {
+  await denyGetUserMedia(page);
   await setupR2Mocks(page);
 
   await page.goto("/items/quick-add", { waitUntil: "networkidle" });
