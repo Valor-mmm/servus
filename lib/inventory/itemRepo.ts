@@ -22,6 +22,11 @@ const BOX_IDX_KEY = (boxId: string, itemId: string): Deno.KvKey => [
   boxId,
   itemId,
 ];
+const TIME_IDX_KEY = (ts: number, itemId: string): Deno.KvKey => [
+  "item-by-time",
+  ts,
+  itemId,
+];
 
 export interface CreateItemInput {
   name: string;
@@ -74,6 +79,7 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
 
   const op = kv.atomic().set(ITEM_KEY(id), item);
 
+  op.set(TIME_IDX_KEY(now, id), true);
   if (item.categoryId) {
     op.set(CAT_IDX_KEY(item.categoryId, id), true);
   }
@@ -223,6 +229,31 @@ export async function updateItem(
   return updated;
 }
 
+export async function listItemsRecent(limit: number): Promise<Item[]> {
+  const kv = await getKv();
+  const index = kv.list<true>({ prefix: ["item-by-time"] }, {
+    limit,
+    reverse: true,
+  });
+  const items: Item[] = [];
+  for await (const entry of index) {
+    const itemId = entry.key[2] as string;
+    const item = await findItem(itemId);
+    if (item) items.push(item);
+  }
+  return items;
+}
+
+export async function countItems(): Promise<number> {
+  const kv = await getKv();
+  const entries = kv.list({ prefix: ["item"] }, { consistency: "eventual" });
+  let count = 0;
+  for await (const _entry of entries) {
+    count++;
+  }
+  return count;
+}
+
 export async function adjustQuantity(
   id: string,
   delta: 1 | -1,
@@ -244,6 +275,7 @@ export async function deleteItem(
 
   const op = kv.atomic().delete(ITEM_KEY(id));
 
+  op.delete(TIME_IDX_KEY(item.createdAt, id));
   if (item.categoryId) op.delete(CAT_IDX_KEY(item.categoryId, id));
   if (item.roomId) op.delete(ROOM_IDX_KEY(item.roomId, id));
   if (item.boxId) op.delete(BOX_IDX_KEY(item.boxId, id));

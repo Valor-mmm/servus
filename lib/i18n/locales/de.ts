@@ -118,6 +118,8 @@ const de = {
   "items.pending_title": "Ausstehende Gegenstände",
   "items.pending_empty": "Keine ausstehenden Gegenstände.",
   "items.quick_add_title": "Schnellerfassung",
+  "items.recentCount": "neueste Gegenstände",
+  "items.loadAll": "Alle Gegenstände laden",
   "nav.quickAdd": "Schnellerfassung",
   "nav.toggleTheme": "Design umschalten",
 

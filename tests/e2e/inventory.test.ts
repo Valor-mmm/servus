@@ -52,15 +52,16 @@ test("create category, room, item — item appears in list and filtered views", 
   // Unfiltered list: item visible
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 
-  // Filter by category via UI dropdown
+  // Filter by category via UI dropdown (auto-submits on change)
   await page.selectOption('[name="cat"]', { label: catName });
-  await page.click('main button[type="submit"]');
+  await page.waitForLoadState("networkidle");
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 
   // Filter by room via UI dropdown (clear category filter first)
   await page.selectOption('[name="cat"]', { value: "" });
+  await page.waitForLoadState("networkidle");
   await page.selectOption('[name="room"]', { label: roomName });
-  await page.click('main button[type="submit"]');
+  await page.waitForLoadState("networkidle");
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 });
 
@@ -84,12 +85,12 @@ test("edit item category — old filter gone, new filter shows item", async ({ p
   // Old category filter: item should NOT appear
   await page.goto("/items");
   await page.selectOption('[name="cat"]', { label: cat1 });
-  await page.click('main button[type="submit"]');
+  await page.waitForLoadState("networkidle");
   await expect(page.locator(`text=${itemName}`)).not.toBeVisible();
 
   // New category filter: item should appear
   await page.selectOption('[name="cat"]', { label: cat2 });
-  await page.click('main button[type="submit"]');
+  await page.waitForLoadState("networkidle");
   await expect(page.locator(`text=${itemName}`)).toBeVisible();
 });
 
@@ -143,7 +144,7 @@ test("search by name — only matching items shown", async ({ page }) => {
   // Search for itemA — only itemA should be visible
   await page.goto("/items");
   await page.fill('[name="q"]', "Mixer");
-  await page.click('main button[type="submit"]');
+  await page.click('main .btn-icon[type="submit"]');
   await expect(page.locator(`text=${itemA}`)).toBeVisible();
   await expect(page.locator(`text=${itemB}`)).not.toBeVisible();
 });
