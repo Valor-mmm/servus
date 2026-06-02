@@ -16,7 +16,7 @@ async function withKv(fn: () => Promise<void>): Promise<void> {
   }
 }
 
-// IP rate limit: 10 failures per 15-minute sliding window
+// IP rate limit: 30 failures per 15-minute sliding window
 
 Deno.test("checkAndIncrementIp allows first attempt", async () => {
   await withKv(async () => {
@@ -25,9 +25,9 @@ Deno.test("checkAndIncrementIp allows first attempt", async () => {
   });
 });
 
-Deno.test("checkAndIncrementIp blocks after 10 failures", async () => {
+Deno.test("checkAndIncrementIp blocks after 30 failures", async () => {
   await withKv(async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 30; i++) {
       await checkAndIncrementIp("5.6.7.8", "session-key");
     }
     const result = await checkAndIncrementIp("5.6.7.8", "session-key");
@@ -39,7 +39,7 @@ Deno.test("checkAndIncrementIp blocks after 10 failures", async () => {
 
 Deno.test("checkAndIncrementIp uses hashed IP (different IPs are independent)", async () => {
   await withKv(async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 30; i++) {
       await checkAndIncrementIp("10.0.0.1", "session-key");
     }
     // Different IP should still be allowed

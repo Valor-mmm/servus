@@ -123,6 +123,31 @@ const de = {
   "nav.quickAdd": "Schnellerfassung",
   "nav.toggleTheme": "Design umschalten",
 
+  // ── Invites ───────────────────────────────────────────────────────────────
+  "invites.title": "Einladungen",
+  "invites.empty": "Keine offenen Einladungen.",
+  "invites.create": "Neue Einladung erstellen",
+  "invites.expiry_label": "Gültigkeitsdauer (Tage)",
+  "invites.expiry_default": "7",
+  "invites.created_at_label": "Erstellt am",
+  "invites.expiry_date_label": "Läuft ab am",
+  "invites.revoke": "Widerrufen",
+  "invites.revoke_confirm": "Einladung wirklich widerrufen?",
+  "invites.code_warning":
+    "Bitte kopiere diesen Code jetzt — er wird nicht erneut angezeigt.",
+  "invites.code_label": "Einladungslink",
+  "invites.qr_label": "QR-Code für Einladungslink",
+  "invites.nav": "Einladungen",
+
+  // ── Invite registration ────────────────────────────────────────────────────
+  "invite.title": "Einladung",
+  "invite.confirm": "Einladung annehmen",
+  "invite.confirm_subtitle":
+    "Klicke auf den Button, um deinen Zugang zu aktivieren.",
+  "invite.error.invalid": "Ungültiger oder abgelaufener Einladungscode.",
+  "invite.error.rate_limited":
+    "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
+
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
   "boxes.add": "Karton hinzufügen",
