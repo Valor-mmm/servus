@@ -47,24 +47,7 @@ export default defineConfig({
       dependencies: ["setup"],
       testIgnore: /auth\.(test|setup)\.ts/,
     },
-    // WebKit project for continuous-capture spec (getUserMedia surface).
-    // Grants camera permission so the permission prompt is bypassed.
-    {
-      name: "webkit-capture",
-      use: {
-        ...devices["iPhone 13"],
-        storageState: "tests/e2e/.auth/user.json",
-        // No `permissions: ["camera"]` — WebKit's Playwright driver doesn't support
-        // this permission key. The spec mocks getUserMedia entirely via addInitScript
-        // so no actual camera permission is needed.
-        // Override global launchOptions — --no-sandbox is Chromium-only and crashes WebKit.
-        launchOptions: {},
-      },
-      dependencies: ["setup"],
-      testMatch: /continuous-capture\.spec\.ts/,
-    },
-    // Chromium project for continuous-capture spec — used for local dev
-    // (WebKit requires sudo for dependency install on non-Ubuntu hosts).
+    // Chromium project for continuous-capture spec.
     {
       name: "chromium-capture",
       use: {
