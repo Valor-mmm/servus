@@ -13,6 +13,7 @@ const PUBLIC_PATHS = new Set(["/login", "/logout", "/healthz"]);
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith("/static/")) return true;
+  if (pathname.startsWith("/invite/")) return true;
   return false;
 }
 

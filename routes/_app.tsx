@@ -72,6 +72,13 @@ export default define.page(function App({ Component, state, url }) {
               >
                 {t("nav.rooms")}
               </a>
+              <a
+                href="/admin/invites"
+                class={navActive(path, "/admin/invites").trim() || undefined}
+                title={t("invites.nav")}
+              >
+                {t("invites.nav")}
+              </a>
               <button
                 type="button"
                 class="theme-toggle"
