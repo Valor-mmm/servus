@@ -32,6 +32,10 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
     !isContinuousCaptureSupported() ? t("capture.unsupportedHint") : null,
   );
 
+  // True once at least one item has been created in this session.
+  // Used to decide whether handleClose() should reload to reveal new items.
+  const hadCaptures = useSignal(false);
+
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -118,6 +122,7 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
           const data = (await resp.json()) as { item: { id: string } };
           itemId.value = data.item.id;
           thumbnails.value = [thumbUrl];
+          hadCaptures.value = true;
           phase.value = "in-progress";
         } else {
           // Append photo to existing item
@@ -169,6 +174,9 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
   function handleClose() {
     cleanup();
     phase.value = "closed";
+    if (hadCaptures.value) {
+      globalThis.location?.reload();
+    }
   }
 
   // ── Render ────────────────────────────────────────────────────────────

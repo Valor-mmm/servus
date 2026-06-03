@@ -117,7 +117,7 @@
       box id flows to every created item.
 - [x] 10.3 Update the mobile footer quick-capture control to navigate to / mount
       a `<CaptureSurface>` (no box id).
-- [ ] 10.4 Manually verify each entry point in a desktop Chrome session.
+- [x] 10.4 Manually verify each entry point in a desktop Chrome session.
 
 ## 11. Playwright E2E (WebKit-specific)
 
@@ -132,6 +132,12 @@
       revokes `camera` from the context, taps activation, and asserts the
       file-input fallback control is rendered.
 - [x] 11.4 Make both E2E tests pass.
+
+## 13. Post-launch bugfix: item list refresh after capture
+
+- [x] 13.1 Track whether any item was created during the capture session
+      (`hadCaptures` signal); reload the page in `handleClose()` when true.
+      Add requirement and scenarios to the delta spec.
 
 ## 12. Finalise
 

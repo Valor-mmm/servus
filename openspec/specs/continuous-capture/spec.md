@@ -1,4 +1,6 @@
-## ADDED Requirements
+# Continuous Capture Specification
+
+## Requirements
 
 ### Requirement: Live in-app viewfinder uses the device camera
 
@@ -188,7 +190,7 @@ footer quick-capture control.
 #### Scenario: Create-item route uses continuous capture
 
 - **WHEN** a supported user navigates to the create-item route
-- **THEN** the page renders the continuous capture surface, not the file- input
+- **THEN** the page renders the continuous capture surface, not the file-input
   button
 
 #### Scenario: Box detail page uses continuous capture and propagates boxId
@@ -203,6 +205,28 @@ footer quick-capture control.
   layout
 - **THEN** the continuous capture surface opens with no box id, and items
   created in the session are not linked to any box
+
+---
+
+### Requirement: Captured items appear in the list after closing the capture surface
+
+When the user closes the continuous capture surface after having created at least
+one item during the session, the page MUST reload so that the server-rendered
+item list reflects the newly created items. If no item was created during the
+session, the surface MUST close without reloading.
+
+#### Scenario: Close after captures triggers a page reload
+
+- **WHEN** the user creates at least one item via the continuous capture surface
+  and then taps the close (✕) control
+- **THEN** the page reloads and the item list below the capture surface reflects
+  the newly created items
+
+#### Scenario: Close without captures does not reload
+
+- **WHEN** the user opens the continuous capture surface but does not capture any
+  photo and then taps the close (✕) control
+- **THEN** the surface closes without a page reload
 
 ---
 
