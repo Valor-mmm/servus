@@ -4,6 +4,7 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
+import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -57,6 +58,7 @@ async function createBox(
 test("two quick-add photos attach to one item, not two", async ({ page }) => {
   const boxLabel = `MultiPhoto-${RUN}`;
 
+  await denyGetUserMedia(page);
   await createBox(page, boxLabel);
   const boxUrl = page.url();
 

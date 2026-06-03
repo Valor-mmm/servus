@@ -7,6 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
+import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -42,6 +43,7 @@ test("quick-add bottom-nav link opens capture page; photo creates unboxed pendin
   // Set mobile viewport so the bottom nav is visible
   await page.setViewportSize({ width: 390, height: 844 });
 
+  await denyGetUserMedia(page);
   await setupR2Mocks(page);
 
   await page.goto("/items");

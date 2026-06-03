@@ -47,6 +47,17 @@ export default defineConfig({
       dependencies: ["setup"],
       testIgnore: /auth\.(test|setup)\.ts/,
     },
+    // Chromium project for continuous-capture spec.
+    {
+      name: "chromium-capture",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "tests/e2e/.auth/user.json",
+        permissions: ["camera"],
+      },
+      dependencies: ["setup"],
+      testMatch: /continuous-capture\.spec\.ts/,
+    },
   ],
 
   webServer: {

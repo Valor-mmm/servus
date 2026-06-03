@@ -103,8 +103,15 @@ const de = {
   // ── Photos / capture ─────────────────────────────────────────────────────
   "items.placeholderName": "(unbenannt)",
   "items.captureButton": "Foto aufnehmen",
-  "items.captureFailed":
-    "Foto konnte nicht hochgeladen werden. Bitte erneut versuchen.",
+  "items.captureFailed": "Upload fehlgeschlagen. Bitte erneut versuchen.",
+  "items.captureFailedPresign":
+    "Upload-URL fehlgeschlagen (HTTP {status}). R2-Konfiguration prüfen.",
+  "items.captureFailedR2":
+    "R2-Upload fehlgeschlagen (HTTP {status}). CORS oder Credentials prüfen.",
+  "items.captureFailedCreate":
+    "Gegenstand konnte nicht gespeichert werden (HTTP {status}).",
+  "items.captureFailedAppend":
+    "Foto konnte nicht angehängt werden (HTTP {status}).",
   "items.captureTooLarge":
     "Das Foto ist zu groß. Bitte ein kleineres Bild aufnehmen.",
   "items.captureWrongType":
@@ -147,6 +154,18 @@ const de = {
   "invite.error.invalid": "Ungültiger oder abgelaufener Einladungscode.",
   "invite.error.rate_limited":
     "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
+
+  // ── Continuous capture ────────────────────────────────────────────────────
+  "capture.activate": "Kamera aktivieren",
+  "capture.shutterLabel": "Aufnehmen",
+  "capture.confirmLabel": "✓ Fertig",
+  "capture.closeLabel": "✕ Schließen",
+  "capture.permissionDeniedHint":
+    "Kamerazugriff verweigert. Bitte erlaube den Zugriff in den Browser-Einstellungen und versuche es erneut.",
+  "capture.noCameraHint":
+    "Keine Kamera gefunden. Bitte verwende die Dateiauswahl.",
+  "capture.unsupportedHint":
+    "Dein Browser unterstützt keinen direkten Kamerazugriff. Bitte verwende die Dateiauswahl.",
 
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
