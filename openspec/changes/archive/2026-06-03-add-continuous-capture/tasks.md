@@ -136,8 +136,8 @@
 ## 13. Post-launch bugfix: item list refresh after capture
 
 - [x] 13.1 Track whether any item was created during the capture session
-      (`hadCaptures` signal); reload the page in `handleClose()` when true.
-      Add requirement and scenarios to the delta spec.
+      (`hadCaptures` signal); reload the page in `handleClose()` when true. Add
+      requirement and scenarios to the delta spec.
 
 ## 12. Finalise
 

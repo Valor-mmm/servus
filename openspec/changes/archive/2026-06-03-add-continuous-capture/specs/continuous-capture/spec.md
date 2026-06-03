@@ -208,10 +208,10 @@ footer quick-capture control.
 
 ### Requirement: Captured items appear in the list after closing the capture surface
 
-When the user closes the continuous capture surface after having created at least
-one item during the session, the page MUST reload so that the server-rendered
-item list reflects the newly created items. If no item was created during the
-session, the surface MUST close without reloading.
+When the user closes the continuous capture surface after having created at
+least one item during the session, the page MUST reload so that the
+server-rendered item list reflects the newly created items. If no item was
+created during the session, the surface MUST close without reloading.
 
 #### Scenario: Close after captures triggers a page reload
 
@@ -222,8 +222,8 @@ session, the surface MUST close without reloading.
 
 #### Scenario: Close without captures does not reload
 
-- **WHEN** the user opens the continuous capture surface but does not capture any
-  photo and then taps the close (✕) control
+- **WHEN** the user opens the continuous capture surface but does not capture
+  any photo and then taps the close (✕) control
 - **THEN** the surface closes without a page reload
 
 ---
