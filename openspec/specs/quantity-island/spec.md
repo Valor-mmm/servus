@@ -1,4 +1,13 @@
-## ADDED Requirements
+# Quantity Island Specification
+
+## Purpose
+
+Defines the JSON API and client-side island behavior that backs the +/− quantity
+adjustment control on item rows. The endpoint is the no-page-reload alternative
+to the full-page edit form; the island is the client-side component that calls
+it.
+
+## Requirements
 
 ### Requirement: JSON API for quantity adjustment
 
