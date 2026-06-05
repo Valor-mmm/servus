@@ -2,7 +2,7 @@ import { argon2Verify } from "hash-wasm";
 import { hashPassword } from "@/lib/auth/password.ts";
 import { generateCsrfToken } from "@/lib/auth/csrf.ts";
 import { COOKIE_NAME, signSessionId } from "@/lib/auth/sessionCookie.ts";
-import { createSession } from "@/lib/auth/sessionRepo.ts";
+import { ABSOLUTE_TTL_SECONDS, createSession } from "@/lib/auth/sessionRepo.ts";
 import { getKv } from "@/lib/kv/client.ts";
 import { computeLookup, generateInviteCode } from "@/lib/invites/generate.ts";
 import {
@@ -103,6 +103,7 @@ export async function consumeInvite(
     "Secure",
     "SameSite=Strict",
     "Path=/",
+    `Max-Age=${ABSOLUTE_TTL_SECONDS}`,
   ].join("; ");
 
   return { ok: true, cookie, csrfToken };

@@ -45,6 +45,31 @@ Deno.test("findSession returns null for unknown id", async () => {
   });
 });
 
+Deno.test("findSession reads with strong consistency", async () => {
+  await withKv(async () => {
+    const s = await createSession("strong", "csrf");
+
+    // Intercept kv.get on the cached client to observe options passed by
+    // findSession. The interception is per-test (withKv closes the kv after).
+    const kvMod = await import("@/lib/kv/client.ts");
+    const kv = await kvMod.getKv();
+    const seenOptions: ({ consistency?: string } | undefined)[] = [];
+    const originalGet = kv.get.bind(kv);
+    (kv as { get: typeof kv.get }).get = ((
+      key: Deno.KvKey,
+      opts?: { consistency?: "strong" | "eventual" },
+    ) => {
+      seenOptions.push(opts);
+      return originalGet(key, opts);
+    }) as typeof kv.get;
+
+    await findSession(s.sessionId);
+
+    assertEquals(seenOptions.length, 1);
+    assertEquals(seenOptions[0]?.consistency, "strong");
+  });
+});
+
 Deno.test("deleteSession removes the session record", async () => {
   await withKv(async () => {
     const s = await createSession("carol", "csrf");

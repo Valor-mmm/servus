@@ -83,6 +83,52 @@ Deno.test("requireAuth: public routes (login, healthz, static) pass through unau
   });
 });
 
+Deno.test("requireAuth: renews lastSeen when older than the throttle window", async () => {
+  await withKv(async () => {
+    const session = await createSession("renew-me", "csrf-token");
+    // Force lastSeen to be more than the 1-hour throttle window ago.
+    const kv = await import("@/lib/kv/client.ts").then((m) => m.getKv());
+    const stale = Date.now() - 2 * 60 * 60 * 1000;
+    await kv.set(["session", session.sessionId], {
+      ...session,
+      lastSeen: stale,
+    });
+
+    const cookieVal = await signSessionId(session.sessionId, SESSION_KEY);
+    const req = makeReq("GET", "/items", {
+      cookie: `servus_session=${cookieVal}`,
+    });
+    const result = await applyRequireAuth(req, SESSION_KEY);
+    assertEquals(result.pass, true);
+
+    const { findSession } = await import("@/lib/auth/sessionRepo.ts");
+    const after = await findSession(session.sessionId);
+    assertEquals(
+      (after?.lastSeen ?? 0) > stale,
+      true,
+      "lastSeen should have been bumped past the stale timestamp",
+    );
+  });
+});
+
+Deno.test("requireAuth: does not write when lastSeen is within the throttle window", async () => {
+  await withKv(async () => {
+    const session = await createSession("fresh-me", "csrf-token");
+    const originalLastSeen = session.lastSeen;
+
+    const cookieVal = await signSessionId(session.sessionId, SESSION_KEY);
+    const req = makeReq("GET", "/items", {
+      cookie: `servus_session=${cookieVal}`,
+    });
+    const result = await applyRequireAuth(req, SESSION_KEY);
+    assertEquals(result.pass, true);
+
+    const { findSession } = await import("@/lib/auth/sessionRepo.ts");
+    const after = await findSession(session.sessionId);
+    assertEquals(after?.lastSeen, originalLastSeen);
+  });
+});
+
 Deno.test("requireAuth: expired session is rejected and removed lazily", async () => {
   await withKv(async () => {
     const session = await createSession("bob", "csrf-token");

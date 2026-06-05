@@ -9,6 +9,8 @@ const SESSION_BY_USER_KEY = (
 
 // Absolute timeout: 60 days in ms
 const ABSOLUTE_TTL_MS = 60 * 24 * 60 * 60 * 1000;
+// Absolute timeout in seconds for use in Set-Cookie Max-Age.
+export const ABSOLUTE_TTL_SECONDS = ABSOLUTE_TTL_MS / 1000;
 // Idle timeout: 14 days in ms
 export const IDLE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 // lastSeen update throttle: 1 hour in ms
@@ -48,7 +50,9 @@ export async function createSession(
 
 export async function findSession(sessionId: string): Promise<Session | null> {
   const kv = await getKv();
-  const entry = await kv.get<Session>(SESSION_KEY(sessionId));
+  const entry = await kv.get<Session>(SESSION_KEY(sessionId), {
+    consistency: "strong",
+  });
   return entry.value;
 }
 

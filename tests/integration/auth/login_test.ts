@@ -40,6 +40,23 @@ Deno.test("POST /login: success sets session cookie and creates a session", asyn
   });
 });
 
+Deno.test("POST /login: cookie includes Max-Age aligned with absolute session timeout", async () => {
+  await withKv(async () => {
+    const hash = await hashPassword("correct");
+    await createUser("persist", hash);
+
+    const resp = await handleLoginPost(
+      { username: "persist", password: "correct", ip: "127.0.0.1" },
+      SESSION_KEY,
+    );
+
+    assertEquals(resp.success, true);
+    // 60 days absolute timeout = 5184000 seconds
+    assertMatch(resp.cookie ?? "", /Max-Age=5184000/);
+    assertMatch(resp.cookie ?? "", /Path=\//);
+  });
+});
+
 Deno.test("POST /login: wrong password returns failure", async () => {
   await withKv(async () => {
     const hash = await hashPassword("correct");
