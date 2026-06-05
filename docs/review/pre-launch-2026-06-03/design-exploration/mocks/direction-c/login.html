@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Anmelden — Direction C: Bergsteiger</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --schiefer: #1F2A35;
+    --schiefer-tief: #0E1620;
+    --gletscher: #3FA1B8;
+    --gletscher-hell: #5DC4DA;
+    --himmel: #DCE9F0;
+    --himmel-tief: #C4D6E1;
+    --firn: #F7FAFC;
+    --granit: #4A5567;
+    --granit-hell: #A4B0C0;
+    --fohn: #E8A540;
+    --enzian: #1F4E8C;
+    --almrot: #A04545;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter Tight", system-ui, sans-serif;
+    background: var(--himmel);
+    color: var(--schiefer);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stage {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* ── Map watermark layer ── */
+  .topo {
+    position: fixed; inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+  }
+  .topo svg { width: 100%; height: 100%; display: block; }
+
+  /* ── Header strip with coordinates ── */
+  header.strip {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid rgba(31, 42, 53, 0.15);
+    background: rgba(220, 233, 240, 0.6);
+    backdrop-filter: blur(8px);
+  }
+  .strip .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .strip .brand svg { width: 28px; height: 28px; }
+  .strip .coords {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--granit);
+  }
+  .strip .coords .blip { display: inline-block; width: 8px; height: 8px; background: var(--fohn); border-radius: 50%; vertical-align: middle; margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* ── Login card ── */
+  .center {
+    position: relative; z-index: 2;
+    display: grid; place-items: center;
+    padding: 40px 24px;
+  }
+  .card {
+    width: 100%; max-width: 460px;
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+    border-radius: 0;
+    box-shadow:
+      0 0 0 6px rgba(31,42,53,0.04),
+      24px 24px 0 -6px rgba(31,42,53,0.06);
+    padding: 0;
+    overflow: hidden;
+  }
+  .card .head {
+    background: var(--schiefer);
+    color: var(--firn);
+    padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--schiefer-tief);
+  }
+  .head .pitch {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gletscher-hell);
+  }
+  .head .grade {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    background: var(--gletscher);
+    color: var(--schiefer-tief);
+    padding: 3px 8px;
+    font-weight: 700;
+  }
+
+  .body { padding: 36px 32px 32px; }
+  h1 {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    font-size: 14px;
+    color: var(--granit);
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+  form { display: grid; gap: 18px; }
+  label {
+    display: grid; gap: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+    font-weight: 500;
+  }
+  input {
+    font: inherit;
+    font-family: "Inter Tight", sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    background: var(--firn);
+    border: 1.5px solid var(--schiefer);
+    color: var(--schiefer);
+    border-radius: 0;
+    outline: none;
+  }
+  input:focus {
+    border-color: var(--gletscher);
+    box-shadow: inset 0 0 0 2px rgba(63,161,184,0.15);
+  }
+  button.go {
+    margin-top: 6px;
+    font: inherit;
+    font-family: "Inter Tight", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 18px;
+    background: var(--schiefer);
+    color: var(--firn);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  button.go:hover { background: var(--enzian); }
+  button.go .arrow {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--gletscher-hell);
+  }
+
+  .meta-bar {
+    border-top: 1px solid rgba(31,42,53,0.1);
+    padding: 14px 24px;
+    background: var(--himmel);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--granit);
+  }
+  .meta-bar a { color: var(--enzian); text-decoration: none; }
+  .meta-bar a:hover { color: var(--schiefer); text-decoration: underline; }
+
+  /* ── Footer ── */
+  footer.strip {
+    position: relative; z-index: 2;
+    padding: 14px 32px;
+    border-top: 1px solid rgba(31,42,53,0.15);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--granit);
+    background: rgba(220,233,240,0.5);
+    backdrop-filter: blur(8px);
+  }
+  footer .scale {
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  footer .scale .bar {
+    display: inline-block; width: 60px; height: 6px;
+    background: linear-gradient(90deg, var(--schiefer) 50%, var(--firn) 50%);
+    border: 1px solid var(--schiefer);
+  }
+</style>
+</head>
+<body>
+
+  <div class="topo">
+    <!-- Topographic contour lines -->
+    <svg viewBox="0 0 1280 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="#1F2A35" stroke-width="0.6" fill="none" stroke-opacity="0.35">
+        <path d="M-20 200 Q 200 120, 420 220 T 800 240 T 1200 180 L 1300 180"/>
+        <path d="M-20 260 Q 220 180, 440 280 T 820 300 T 1200 240 L 1300 240"/>
+        <path d="M-20 330 Q 240 240, 460 350 T 840 370 T 1200 310 L 1300 310"/>
+        <path d="M-20 410 Q 260 320, 480 430 T 860 450 T 1200 390 L 1300 390"/>
+        <path d="M-20 500 Q 280 410, 500 520 T 880 540 T 1200 480 L 1300 480"/>
+        <path d="M-20 600 Q 300 510, 520 620 T 900 640 T 1200 580 L 1300 580"/>
+      </g>
+      <g stroke="#1F2A35" stroke-width="0.4" fill="none" stroke-opacity="0.22">
+        <path d="M-20 230 Q 200 150, 420 250 T 800 270 T 1200 210 L 1300 210"/>
+        <path d="M-20 290 Q 220 210, 440 310 T 820 330 T 1200 270 L 1300 270"/>
+        <path d="M-20 360 Q 240 270, 460 380 T 840 400 T 1200 340 L 1300 340"/>
+      </g>
+      <!-- Two triangular peaks suggested -->
+      <g fill="#1F2A35" fill-opacity="0.06">
+        <polygon points="380,200 540,500 220,500"/>
+        <polygon points="780,140 980,500 580,500"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="stage">
+
+    <header class="strip">
+      <div class="brand">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="24,6 42,40 6,40" fill="none" stroke="#1F2A35" stroke-width="2"/>
+          <polygon points="24,16 36,40 12,40" fill="#3FA1B8"/>
+          <circle cx="24" cy="32" r="3" fill="#E8A540"/>
+        </svg>
+        servus
+      </div>
+      <div class="coords"><span class="blip"></span>48.137° N · 11.575° E · 524 m ü.NN</div>
+    </header>
+
+    <div class="center">
+      <div class="card">
+        <div class="head">
+          <span class="pitch">Anmeldung · Pitch 01</span>
+          <span class="grade">privat</span>
+        </div>
+        <div class="body">
+          <h1>Servus.</h1>
+          <p class="sub">Privates Haushaltssystem. Anmeldung mit deinen Zugangsdaten oder Einladungscode.</p>
+          <form onsubmit="event.preventDefault()">
+            <label>
+              Benutzer
+              <input type="text" value="monster" autocomplete="username">
+            </label>
+            <label>
+              Passwort
+              <input type="password" value="••••••••" autocomplete="current-password">
+            </label>
+            <button class="go" type="submit"><span>Anmelden</span><span class="arrow">→</span></button>
+          </form>
+        </div>
+        <div class="meta-bar">
+          <span>SESSION · 30 min idle</span>
+          <a href="#">Einladungscode einlösen ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <footer class="strip">
+      <span>SERVUS · v0.9 · München</span>
+      <span class="scale"><span class="bar"></span> 100 m</span>
+      <span>BUILD 2026-06-04</span>
+    </footer>
+
+  </div>
+
+</body>
+</html>
