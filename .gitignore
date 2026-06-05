@@ -17,3 +17,6 @@ vendor/
 test-results/
 playwright-report/
 tests/e2e/.auth/
+
+# Playwright MCP scratch (screenshots, console logs, page snapshots)
+.playwright-mcp/
