@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { type Browser, expect, test } from "@playwright/test";
 
 const USER = "testuser";
 const PASS = "TestPw!1234";
@@ -66,4 +66,42 @@ test("after 6 wrong attempts for a user the form shows a rate-limit error", asyn
   }
   // After 6 failures, the error message should include lockout/rate info
   await expect(page.locator(".error")).toBeVisible();
+});
+
+// ── Persistent session: cookie survives browser-process restart ──────────────
+// Simulates iOS Safari being evicted from memory and cold-started: cookies
+// only persist if Set-Cookie included Max-Age, which Playwright's storageState
+// preserves only for persistent cookies. A session cookie (no Max-Age) would
+// be dropped by storageState and the second context would land on /login.
+
+test("session cookie survives a simulated browser restart", async ({ browser }: { browser: Browser }) => {
+  // Log in with a fresh context to get a clean cookie jar.
+  const firstContext = await browser.newContext();
+  const firstPage = await firstContext.newPage();
+  await firstPage.goto("/login");
+  await firstPage.fill('[name="username"]', USER);
+  await firstPage.fill('[name="password"]', PASS);
+  await firstPage.click('[type="submit"]');
+  await expect(firstPage).toHaveURL("/");
+
+  // Snapshot the cookie jar. Persistent cookies (Max-Age set) are kept;
+  // non-persistent session cookies are dropped — that's the behavior we rely on.
+  const state = await firstContext.storageState();
+  const sessionCookie = state.cookies.find((c) => c.name === "servus_session");
+  expect(sessionCookie, "session cookie must be present in stored state")
+    .toBeDefined();
+  expect(
+    sessionCookie!.expires,
+    "session cookie must have an expiry (persistent)",
+  ).toBeGreaterThan(0);
+  await firstContext.close();
+
+  // Open a fresh context populated from the stored state — equivalent to
+  // Safari cold-starting after the OS reclaimed memory.
+  const secondContext = await browser.newContext({ storageState: state });
+  const secondPage = await secondContext.newPage();
+  await secondPage.goto("/");
+  await expect(secondPage).toHaveURL("/");
+  await expect(secondPage.locator("nav.top-nav")).toBeVisible();
+  await secondContext.close();
 });

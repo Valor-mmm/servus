@@ -45,6 +45,17 @@ Deno.test("valid code: returns session cookie and csrf token", async () => {
   });
 });
 
+Deno.test("valid code: cookie includes Max-Age aligned with absolute session timeout", async () => {
+  await withKv(async () => {
+    const { rawCode } = await mintInvite(7);
+    const result = await consumeInvite(rawCode, TEST_SESSION_KEY);
+    assertEquals(result.ok, true);
+    if (!result.ok) return;
+    // 60 days absolute timeout = 5184000 seconds
+    assertMatch(result.cookie, /Max-Age=5184000/);
+  });
+});
+
 Deno.test("valid code: invite is burned after successful consumption", async () => {
   await withKv(async () => {
     const { rawCode } = await mintInvite(7);

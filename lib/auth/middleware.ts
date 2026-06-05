@@ -5,6 +5,7 @@ import {
   deleteSession,
   findSession,
   IDLE_TTL_MS,
+  touchSession,
 } from "@/lib/auth/sessionRepo.ts";
 import { verifyCsrfToken } from "@/lib/auth/csrf.ts";
 
@@ -89,6 +90,15 @@ export async function applyRequireAuth(
       };
     }
     return { pass: false, response: new Response(null, { status: 401 }) };
+  }
+
+  // Roll the idle window forward. touchSession self-throttles to ≤1 write per
+  // hour. A KV write failure here must not log the user out — best-effort.
+  try {
+    await touchSession(session.sessionId);
+  } catch (_err) {
+    // Swallow: lastSeen will simply not advance on this request; the next
+    // request past the throttle window will retry.
   }
 
   return { pass: true, user: { username: session.username } };

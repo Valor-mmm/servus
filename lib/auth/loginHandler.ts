@@ -1,6 +1,6 @@
 import { verifyPassword } from "@/lib/auth/password.ts";
 import { findUser } from "@/lib/auth/userRepo.ts";
-import { createSession } from "@/lib/auth/sessionRepo.ts";
+import { ABSOLUTE_TTL_SECONDS, createSession } from "@/lib/auth/sessionRepo.ts";
 import {
   checkAndIncrementIp,
   checkAndIncrementUser,
@@ -84,6 +84,7 @@ export async function handleLoginPost(
     "Secure",
     "SameSite=Strict",
     "Path=/",
+    `Max-Age=${ABSOLUTE_TTL_SECONDS}`,
   ].join("; ");
 
   return {
