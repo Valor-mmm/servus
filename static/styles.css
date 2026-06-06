@@ -1,72 +1,140 @@
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
+/* Structural / theme-agnostic tokens. Two themes (Raute light, Sternenhimmel
+   dark) override the palette tokens below in their html.theme-* blocks.
+   Adding a third theme later means a new html.theme-* block — components
+   never reference theme names. */
 :root {
-  /* Colors — Bavarian palette */
-  --servus-bg: #fdf8f0;
-  --servus-surface: #ffffff;
-  --servus-surface-raised: #fef9f2;
-  --servus-text: #1c1612;
-  --servus-text-muted: #6b5e4e;
-  --servus-primary: #1a5fa8;
-  --servus-primary-hover: #154d8a;
-  --servus-primary-text: #ffffff;
-  --servus-accent: #c5900a;
-  --servus-accent-hover: #a37508;
-  --servus-danger: #c0392b;
-  --servus-danger-hover: #a93226;
-  --servus-success: #2e7d32;
-  --servus-border: #d9cfc2;
-  --servus-border-focus: #1a5fa8;
-  --servus-shadow: 0 1px 3px rgba(28, 22, 18, 0.10);
-  --servus-shadow-raised: 0 4px 12px rgba(28, 22, 18, 0.12);
+  /* Spacing scale */
+  --servus-space-1: 0.25rem;
+  --servus-space-2: 0.5rem;
+  --servus-space-3: 0.75rem;
+  --servus-space-4: 1rem;
+  --servus-space-5: 1.25rem;
+  --servus-space-6: 1.5rem;
+  --servus-space-7: 2rem;
+  --servus-space-8: 3rem;
+
+  /* Radii */
   --servus-radius: 0.5rem;
   --servus-radius-sm: 0.25rem;
   --servus-radius-pill: 999px;
 
-  /* Badge colors */
-  --servus-badge-empty-bg: #e8e0d8;
-  --servus-badge-empty-text: #5a4f45;
-  --servus-badge-packed-bg: #1a5fa8;
-  --servus-badge-packed-text: #ffffff;
-  --servus-badge-delivered-bg: #2e7d32;
-  --servus-badge-delivered-text: #ffffff;
+  /* Type families. Display family default is the Raute (DIN) stack; the
+     Sternenhimmel block below overrides it to Roboto Condensed. */
+  --servus-type-body-family:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --servus-type-display-family:
+    "DIN Alternate", "DIN Pro", "Roboto Condensed", system-ui;
 
-  /* Nav */
-  --servus-nav-bg: #1a5fa8;
-  --servus-nav-text: #ffffff;
-  --servus-nav-active: #c5900a;
+  /* Layout */
   --servus-bottom-nav-height: 4rem;
 }
 
-/* ── Dark mode — Bavarian warm tones ───────────────────────────────────────── */
-html.dark {
-  --servus-bg: #1a1410;
-  --servus-surface: #251e18;
-  --servus-surface-raised: #2e2419;
-  --servus-text: #f0e6d4;
-  --servus-text-muted: #9d8873;
-  --servus-primary: #4a8fd4;
-  --servus-primary-hover: #3a7dc4;
+/* ── Theme: Raute (light, heraldic Bavarian flag) ──────────────────────────── */
+html.theme-raute {
+  --servus-bg: #f4ecda;
+  --servus-surface: #ffffff;
+  --servus-surface-raised: #faf5e8;
+  --servus-text: #0a1a2e;
+  --servus-text-muted: #7b8b9e;
+  --servus-primary: #0e4fa0;
+  --servus-primary-hover: #093c7c;
   --servus-primary-text: #ffffff;
-  --servus-accent: #e0a820;
-  --servus-accent-hover: #c8941a;
-  --servus-danger: #e05252;
-  --servus-danger-hover: #cc3d3d;
-  --servus-success: #52c87a;
-  --servus-border: #3d2f24;
-  --servus-border-focus: #4a8fd4;
+  --servus-accent: #e5a82e;
+  --servus-accent-hover: #c9931f;
+  --servus-danger: #b4332d;
+  --servus-danger-hover: #962416;
+  --servus-success: #2e7d32;
+  --servus-border: #d5c9a8;
+  --servus-border-focus: #0e4fa0;
+  --servus-shadow: 0 1px 3px rgba(10, 26, 46, 0.10);
+  --servus-shadow-raised: 0 4px 12px rgba(10, 26, 46, 0.12);
+
+  --servus-badge-empty-bg: #e8e0d8;
+  --servus-badge-empty-text: #5a4f45;
+  --servus-badge-packed-bg: #0e4fa0;
+  --servus-badge-packed-text: #ffffff;
+  --servus-badge-delivered-bg: #2e7d32;
+  --servus-badge-delivered-text: #ffffff;
+  --servus-badge-pending-bg: #fef3c7;
+  --servus-badge-pending-text: #92400e;
+  --servus-badge-pending-border: rgba(229, 168, 46, 0.50);
+
+  --servus-nav-bg: #0e4fa0;
+  --servus-nav-text: #ffffff;
+  --servus-nav-active: #e5a82e;
+
+  /* Heraldic-motif tokens (used by section breaks, login splash, lozenge). */
+  --servus-motif-stroke: #ffffff;
+  --servus-horizon-fill: #ffffff;
+  --servus-spark: #e5a82e;
+
+  /* Feedback (error/success/banner) — token-driven so themes adapt. */
+  --servus-error-bg: #fde8e8;
+  --servus-error-text: #b4332d;
+  --servus-error-border: #f5b8b8;
+  --servus-success-bg: #e8f5e9;
+  --servus-success-text: #2e7d32;
+  --servus-success-border: #a5d6a7;
+  --servus-warn-bg: #fef3c7;
+  --servus-warn-border: #f59e0b;
+  --servus-warn-text: #78350f;
+}
+
+/* ── Theme: Sternenhimmel (dark, alpine starry night — sibling of Raute) ───── */
+html.theme-sternenhimmel {
+  --servus-bg: #0e1830;
+  --servus-surface: #161a23;
+  --servus-surface-raised: #1c2230;
+  --servus-text: #c5cfdc;
+  --servus-text-muted: #8c97a9;
+  --servus-primary: #f0d87a;
+  --servus-primary-hover: #c9b452;
+  --servus-primary-text: #0e1830;
+  --servus-accent: #f0d87a;
+  --servus-accent-hover: #c9b452;
+  --servus-danger: #b85050;
+  --servus-danger-hover: #963535;
+  --servus-success: #5a7848;
+  --servus-border: #1a2942;
+  --servus-border-focus: #f0d87a;
   --servus-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   --servus-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.6);
 
-  --servus-badge-empty-bg: #3d2f24;
-  --servus-badge-empty-text: #c9bfb3;
-  --servus-badge-packed-bg: #1f4daa;
-  --servus-badge-packed-text: #ffffff;
-  --servus-badge-delivered-bg: #1a5a34;
-  --servus-badge-delivered-text: #a5f3c0;
+  --servus-badge-empty-bg: #1a2942;
+  --servus-badge-empty-text: #8c97a9;
+  --servus-badge-packed-bg: #f0d87a;
+  --servus-badge-packed-text: #0e1830;
+  --servus-badge-delivered-bg: rgba(90, 120, 72, 0.22);
+  --servus-badge-delivered-text: #9db779;
+  --servus-badge-pending-bg: rgba(217, 119, 43, 0.18);
+  --servus-badge-pending-text: #f0b98a;
+  --servus-badge-pending-border: rgba(217, 119, 43, 0.45);
 
-  --servus-nav-bg: #0f0c09;
-  --servus-nav-text: #f0e6d4;
-  --servus-nav-active: #e0a820;
+  --servus-nav-bg: #060c1a;
+  --servus-nav-text: #c5cfdc;
+  --servus-nav-active: #f0d87a;
+
+  /* Heraldic motif at night: lozenge stroke goes muted-flag-blue. */
+  --servus-motif-stroke: #2d5f8c;
+  --servus-horizon-fill: #1a2942;
+  --servus-spark: #d9772b;
+
+  --servus-error-bg: rgba(184, 80, 80, 0.18);
+  --servus-error-text: #f5a8a8;
+  --servus-error-border: rgba(184, 80, 80, 0.40);
+  --servus-success-bg: rgba(90, 120, 72, 0.18);
+  --servus-success-text: #a8c593;
+  --servus-success-border: rgba(90, 120, 72, 0.40);
+  --servus-warn-bg: rgba(217, 119, 43, 0.18);
+  --servus-warn-border: rgba(217, 119, 43, 0.45);
+  --servus-warn-text: #f0b98a;
+
+  /* Display type switches to Roboto Condensed at night (loaded conditionally
+     by the pre-paint script and the toggle handler). */
+  --servus-type-display-family:
+    "Roboto Condensed", "DIN Alternate", "DIN Pro", system-ui;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────────────────── */
@@ -470,13 +538,9 @@ button.danger:hover, .btn-danger:hover {
 }
 
 .badge-pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-html.dark .badge-pending {
-  background: #3d2a0a;
-  color: #fcd34d;
+  background: var(--servus-badge-pending-bg);
+  color: var(--servus-badge-pending-text);
+  border: 1px solid var(--servus-badge-pending-border);
 }
 
 /* ── Lists ─────────────────────────────────────────────────────────────────── */
@@ -682,9 +746,9 @@ html.dark .badge-pending {
 
 /* ── Feedback messages ─────────────────────────────────────────────────────── */
 .error {
-  background: #fde8e8;
-  color: var(--servus-danger);
-  border: 1px solid #f5b8b8;
+  background: var(--servus-error-bg);
+  color: var(--servus-error-text);
+  border: 1px solid var(--servus-error-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
@@ -692,25 +756,13 @@ html.dark .badge-pending {
 }
 
 .success {
-  background: #e8f5e9;
-  color: var(--servus-success);
-  border: 1px solid #a5d6a7;
+  background: var(--servus-success-bg);
+  color: var(--servus-success-text);
+  border: 1px solid var(--servus-success-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
   font-weight: 500;
-}
-
-html.dark .error {
-  background: rgba(224, 82, 82, 0.15);
-  border-color: rgba(224, 82, 82, 0.4);
-  color: #ff9999;
-}
-
-html.dark .success {
-  background: rgba(82, 200, 122, 0.15);
-  border-color: rgba(82, 200, 122, 0.4);
-  color: #a5f3c0;
 }
 
 /* ── Meta / secondary text ─────────────────────────────────────────────────── */
@@ -868,20 +920,14 @@ html.dark .success {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
+  background: var(--servus-warn-bg);
+  border: 1px solid var(--servus-warn-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #78350f;
-}
-
-html.dark .photo-error-banner {
-  background: rgba(224, 168, 32, 0.15);
-  border-color: rgba(224, 168, 32, 0.4);
-  color: #fcd34d;
+  color: var(--servus-warn-text);
 }
 
 .photo-error-banner a {

@@ -1,17 +1,55 @@
 (function () {
-  /* ── Theme toggle ── */
-  const isDark = document.documentElement.classList.contains("dark");
-  function syncIcons(d) {
+  /* ── Theme toggle (Raute light ↔ Sternenhimmel dark) ── */
+  const KEY = "servus-theme";
+  const RAUTE_CLS = "theme-raute";
+  const STERN_CLS = "theme-sternenhimmel";
+  const META_COLOR = {
+    "theme-raute": "#0E4FA0",
+    "theme-sternenhimmel": "#0E1830",
+  };
+  const html = document.documentElement;
+
+  function currentTheme() {
+    return html.classList.contains(STERN_CLS) ? "sternenhimmel" : "raute";
+  }
+  function icon(theme) {
+    return theme === "sternenhimmel" ? "☀️" : "🌙";
+  }
+  function syncIcons() {
+    const t = currentTheme();
     document.querySelectorAll("[data-theme-toggle]").forEach(function (b) {
-      b.textContent = d ? "☀️" : "🌙";
+      b.textContent = icon(t);
     });
   }
-  syncIcons(isDark);
+  function ensureStarFont() {
+    if (document.getElementById("servus-font-roboto-condensed")) return;
+    const link = document.createElement("link");
+    link.id = "servus-font-roboto-condensed";
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700;900&display=swap";
+    document.head.appendChild(link);
+  }
+  function applyTheme(name) {
+    const cls = name === "sternenhimmel" ? STERN_CLS : RAUTE_CLS;
+    html.classList.remove(RAUTE_CLS, STERN_CLS, "dark");
+    html.classList.add(cls);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", META_COLOR[cls]);
+    if (name === "sternenhimmel") ensureStarFont();
+    try {
+      localStorage.setItem(KEY, name);
+    } catch (_e) { /* private mode */ }
+    syncIcons();
+  }
+
+  syncIcons();
   document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      const d = document.documentElement.classList.toggle("dark");
-      localStorage.setItem("servus-theme", d ? "dark" : "light");
-      syncIcons(d);
+      const next = currentTheme() === "sternenhimmel"
+        ? "raute"
+        : "sternenhimmel";
+      applyTheme(next);
     });
   });
 

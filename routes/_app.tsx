@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { classNameFor, THEME_COLOR, THEME_RAUTE } from "@/lib/styles/theme.ts";
 
 function navActive(current: string, href: string): string {
   const match = current === href || current.startsWith(href + "/");
@@ -8,21 +9,25 @@ function navActive(current: string, href: string): string {
 
 export default define.page(function App({ Component, state, url }) {
   const path = url?.pathname ?? "/";
+  // SSR can't know the user's preference; render the default and let the
+  // pre-paint script swap before first paint.
+  const initialTheme = THEME_RAUTE;
+  const initialClass = classNameFor(initialTheme);
 
   return (
-    <html lang="de">
+    <html lang="de" class={initialClass}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{t("app.name")}</title>
-        {/* Anti-flash: set html.dark before stylesheet to prevent theme flicker */}
+        {/* Anti-flash: apply html.theme-* before the stylesheet loads. */}
         <script src="/theme-init.js" />
         {state.csrfToken && (
           <meta name="csrf-token" content={state.csrfToken} />
         )}
         <link rel="stylesheet" href="/styles.css" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1a5fa8" />
+        <meta name="theme-color" content={THEME_COLOR[initialTheme]} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
