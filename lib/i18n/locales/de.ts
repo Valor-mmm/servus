@@ -169,6 +169,33 @@ const de = {
   "capture.unsupportedHint":
     "Dein Browser unterstützt keinen direkten Kamerazugriff. Bitte verwende die Dateiauswahl.",
 
+  // ── Admin ─────────────────────────────────────────────────────────────────
+  "admin.title": "Verwaltung",
+  "admin.nav": "Verwaltung",
+  "admin.export.heading": "Daten exportieren",
+  "admin.export.description":
+    "Lädt eine vollständige Sicherungskopie aller Daten als NDJSON-Datei herunter.",
+  "admin.export.button": "Daten herunterladen",
+  "admin.import.heading": "Daten importieren",
+  "admin.import.description":
+    "Stellt Daten aus einer zuvor exportierten NDJSON-Datei wieder her.",
+  "admin.import.file_label": "Sicherungsdatei (.ndjson)",
+  "admin.import.button": "Importieren",
+  "admin.import.success":
+    "{imported} Einträge importiert, {skipped} übersprungen.",
+  "admin.import.error": "Import fehlgeschlagen: {message}",
+  "admin.delete.heading": "Alle Daten löschen",
+  "admin.delete.description":
+    "Löscht unwiderruflich alle Gegenstände, Kartons, Räume, Kategorien und weitere Daten. Sitzungen bleiben erhalten.",
+  "admin.delete.button": "Alle Daten löschen …",
+  "admin.delete.success": "{deleted} Einträge gelöscht.",
+  "admin.delete_confirm.title": "Alle Daten löschen",
+  "admin.delete_confirm.warning":
+    "Diese Aktion ist unwiderruflich. Alle Gegenstände, Kartons, Räume, Kategorien und weiteren Daten werden dauerhaft gelöscht.",
+  "admin.delete_confirm.count": "Davon betroffen: {count} Einträge.",
+  "admin.delete_confirm.button": "Ja, alle Daten unwiderruflich löschen",
+  "admin.delete_confirm.cancel": "Abbrechen",
+
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
   "boxes.add": "Karton hinzufügen",
