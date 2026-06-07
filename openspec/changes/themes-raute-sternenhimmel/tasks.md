@@ -58,63 +58,63 @@
 
 ## 4. Button class variants
 
-- [ ] 4.1 Add a failing unit test asserting `.btn-primary`, `.btn-secondary`,
+- [x] 4.1 Add a failing unit test asserting `.btn-primary`, `.btn-secondary`,
       `.btn-danger`, and `.btn-small` resolve to non-empty computed styles and
       `.btn-primary` uses `--servus-primary` as `background-color`
-- [ ] 4.2 Implement the four button class variants in the new stylesheet,
+- [x] 4.2 Implement the four button class variants in the new stylesheet,
       reading all colors from tokens; corner radius uses `--servus-radius`
-- [ ] 4.3 Add a failing E2E test asserting that the same `.btn-primary` on
+- [x] 4.3 Add a failing E2E test asserting that the same `.btn-primary` on
       `/login` renders blue under Raute and gold under Sternenhimmel (verified
       by computed background colour)
-- [ ] 4.4 Add a focus-visible outline rule for `.btn-*` using `--servus-accent`
+- [x] 4.4 Add a focus-visible outline rule for `.btn-*` using `--servus-accent`
       with 3 px outline-offset; verified by a unit test
 
 ## 5. Box status badges
 
-- [ ] 5.1 Add a failing unit test asserting `.badge-empty`, `.badge-packed`,
+- [x] 5.1 Add a failing unit test asserting `.badge-empty`, `.badge-packed`,
       `.badge-delivered`, and `.badge-pending` each render a leading shape
       indicator (an SVG or pseudo-element with non-zero dimensions) before the
       status text
-- [ ] 5.2 Implement the four badge variants reading colors from tokens;
+- [x] 5.2 Implement the four badge variants reading colors from tokens;
       `.badge-packed` uses `--servus-primary`; `.badge-delivered` uses a
       forest-green token added to both themes; `.badge-pending` uses
       `--servus-spark`
-- [ ] 5.3 Add a failing E2E test that loads a delivered box detail page under
+- [x] 5.3 Add a failing E2E test that loads a delivered box detail page under
       both themes and confirms the badge background colour matches the active
       theme's delivered token
 
 ## 6. Top and bottom navigation
 
-- [ ] 6.1 Add a failing unit test that asserts the `<nav class="top-nav">` and
+- [x] 6.1 Add a failing unit test that asserts the `<nav class="top-nav">` and
       `<nav class="bottom-nav">` containers exist with the correct links and
       visibility breakpoints (≥/< 768 px)
-- [ ] 6.2 Refactor `components/Nav.tsx` (or equivalent) to read all colors from
+- [x] 6.2 Refactor `components/Nav.tsx` (or equivalent) to read all colors from
       tokens; remove any inline styles or `html.dark` references
-- [ ] 6.3 Add a failing E2E test that verifies the top nav is visible on desktop
+- [x] 6.3 Add a failing E2E test that verifies the top nav is visible on desktop
       and the bottom nav is visible on mobile, with both nav links working under
       both themes
 
 ## 7. Active navigation indicator
 
-- [ ] 7.1 Add a failing unit test that asserts a Raute-active nav link renders a
+- [x] 7.1 Add a failing unit test that asserts a Raute-active nav link renders a
       filled gold lozenge background (uses a known CSS class or SVG ref) and a
       Sternenhimmel-active nav link renders a 2 px gold bottom border
-- [ ] 7.2 Implement the active indicator in `components/Nav.tsx` using a single
+- [x] 7.2 Implement the active indicator in `components/Nav.tsx` using a single
       `.nav-active` class; the lozenge-vs-underline split is expressed via
       tokens and a CSS background-image that is empty under Sternenhimmel
-- [ ] 7.3 Add a failing E2E test that navigates to `/items` and asserts the
+- [x] 7.3 Add a failing E2E test that navigates to `/items` and asserts the
       "Items" link has the active treatment in both top and bottom nav, under
       both themes
 
 ## 8. Quick-add visual distinction
 
-- [ ] 8.1 Add a failing unit test asserting `.nav-quick-add` renders as a raised
+- [x] 8.1 Add a failing unit test asserting `.nav-quick-add` renders as a raised
       circular button with a non-empty `box-shadow` and a background that
       resolves to `--servus-primary`
-- [ ] 8.2 Implement the `.nav-quick-add` treatment with theme-adaptive
+- [x] 8.2 Implement the `.nav-quick-add` treatment with theme-adaptive
       `box-shadow` (Sternenhimmel adds a soft gold glow via a token-driven
       shadow color)
-- [ ] 8.3 Add a failing E2E test asserting `.nav-quick-add` is visibly larger
+- [x] 8.3 Add a failing E2E test asserting `.nav-quick-add` is visibly larger
       than other bottom-nav items at the 375 px viewport
 
 ## 9. Raute lozenge motif
