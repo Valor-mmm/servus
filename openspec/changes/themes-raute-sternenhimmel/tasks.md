@@ -161,19 +161,19 @@
 
 ## 12. Define previously-broken CSS classes
 
-- [ ] 12.1 Add a failing unit test that asserts each of the following classes
+- [x] 12.1 Add a failing unit test that asserts each of the following classes
       resolves to a non-empty computed style block when rendered: `.auth-page`,
       `.photo-gallery`, `.photo-gallery-img`, `.qty-controls`, `.qty-label`,
       `.badge-pending`, `.photo-capture`, `.photo-capture--multi`,
       `.capture-btn`, `.capture-error`
-- [ ] 12.2 Define `.auth-page` as a centered card layout (used by
+- [x] 12.2 Define `.auth-page` as a centered card layout (used by
       `routes/login.tsx`) under both themes
-- [ ] 12.3 Define `.photo-gallery` and `.photo-gallery-img` for the item detail
+- [x] 12.3 Define `.photo-gallery` and `.photo-gallery-img` for the item detail
       page photo grid; sizes constrained on mobile
-- [ ] 12.4 Define `.qty-controls` and `.qty-label` for the quantity island with
+- [x] 12.4 Define `.qty-controls` and `.qty-label` for the quantity island with
       the `min-height: 44px` mobile touch target
-- [ ] 12.5 Define `.badge-pending` (covered alongside Task 5 if practical)
-- [ ] 12.6 Define `.photo-capture`, `.photo-capture--multi`, `.capture-btn`, and
+- [x] 12.5 Define `.badge-pending` (covered alongside Task 5 if practical)
+- [x] 12.6 Define `.photo-capture`, `.photo-capture--multi`, `.capture-btn`, and
       `.capture-error` for the photo capture island
 
 ## 13. Item rows, box plaque, and remaining page chrome
@@ -192,11 +192,11 @@
 
 ## 14. PWA theme-color and manifest sanity
 
-- [ ] 14.1 Add a failing E2E test asserting that toggling theme updates
+- [x] 14.1 Add a failing E2E test asserting that toggling theme updates
       `<meta name="theme-color">` `content` attribute within the same animation
       frame
-- [ ] 14.2 Implement the meta-color update inside the ThemeToggle island
-- [ ] 14.3 Verify `static/manifest.json` `theme_color` is `#0E4FA0` (Raute
+- [x] 14.2 Implement the meta-color update inside the ThemeToggle island
+- [x] 14.3 Verify `static/manifest.json` `theme_color` is `#0E4FA0` (Raute
       primary); update if required and adjust the manifest unit test
 
 ## 15. Per-route smoke pass
@@ -210,11 +210,11 @@
 
 ## 16. Update affected specs and validate
 
-- [ ] 16.1 Run `openspec validate themes-raute-sternenhimmel --strict` and fix
+- [x] 16.1 Run `openspec validate themes-raute-sternenhimmel --strict` and fix
       any reported issues
-- [ ] 16.2 Run `deno task fmt`, `deno task lint`, `deno check **/*.ts` and fix
+- [x] 16.2 Run `deno task fmt`, `deno task lint`, `deno check **/*.ts` and fix
       any issues
-- [ ] 16.3 Run `deno task test` (unit + integration) and confirm all green
+- [x] 16.3 Run `deno task test` (unit + integration) and confirm all green
 
 ## 17. Playwright E2E for the theme switcher
 
