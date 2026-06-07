@@ -76,6 +76,18 @@ html.theme-raute {
   --servus-active-border: 0 solid transparent;
   --servus-active-text: #ffffff;
 
+  /* Section-break motif — Raute paints a gold lozenge band. */
+  --servus-motif-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 16'><path d='M20 2 L34 8 L20 14 L6 8 Z' fill='%23E5A82E' opacity='0.85'/></svg>");
+  --servus-motif-bg-size: 40px 16px;
+  --servus-motif-bg-repeat: repeat-x;
+
+  /* Page-body background pattern. Raute leaves the body empty; the
+     Sternenhimmel block below overrides this with the star scatter. */
+  --servus-body-bg-image: none;
+  --servus-body-bg-size: auto;
+  --servus-body-bg-position: 0 0;
+  --servus-body-bg-blend: normal;
+
   /* Feedback (error/success/banner) — token-driven so themes adapt. */
   --servus-error-bg: #fde8e8;
   --servus-error-text: #b4332d;
@@ -132,6 +144,22 @@ html.theme-sternenhimmel {
   --servus-active-border: 2px solid var(--servus-nav-active);
   --servus-active-text: #f0d87a;
 
+  /* Section-break motif — Sternenhimmel paints a peak-silhouette horizon. */
+  --servus-motif-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 18' preserveAspectRatio='none'><path d='M0 18 L20 10 L40 14 L60 6 L85 13 L110 4 L130 12 L155 8 L180 14 L200 10 L200 18 Z' fill='%231A2942'/></svg>");
+  --servus-motif-bg-size: 200px 18px;
+  --servus-motif-bg-repeat: repeat-x;
+
+  /* Night-sky body — faint gold and silver-blue star pinpoints. */
+  --servus-body-bg-image:
+    radial-gradient(circle, #f0d87a 0.6px, transparent 1px), radial-gradient(
+    circle,
+    #c5cfdc 0.4px,
+    transparent 0.8px
+  );
+  --servus-body-bg-size: 180px 180px, 240px 240px;
+  --servus-body-bg-position: 30px 50px, 110px 90px;
+  --servus-body-bg-blend: lighten;
+
   --servus-error-bg: rgba(184, 80, 80, 0.18);
   --servus-error-text: #f5a8a8;
   --servus-error-border: rgba(184, 80, 80, 0.40);
@@ -167,9 +195,7 @@ img, video {
 html {
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--servus-type-body-family);
   font-size: 16px;
   color: var(--servus-text);
   background: var(--servus-bg);
@@ -177,6 +203,13 @@ html {
 
 body {
   min-height: 100dvh;
+  /* Theme-driven body background. Raute resolves to `none`; Sternenhimmel
+     paints a faint gold/silver star scatter, fixed behind the page. */
+  background-image: var(--servus-body-bg-image);
+  background-size: var(--servus-body-bg-size);
+  background-position: var(--servus-body-bg-position);
+  background-attachment: fixed;
+  background-blend-mode: var(--servus-body-bg-blend);
 }
 
 code, pre {
@@ -203,13 +236,16 @@ code, pre {
 
 /* ── Typography ────────────────────────────────────────────────────────────── */
 h1 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.25;
   margin-bottom: 1rem;
   color: var(--servus-text);
+  letter-spacing: -0.01em;
 }
 h2 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.3;
@@ -218,10 +254,48 @@ h2 {
   color: var(--servus-text);
 }
 h3 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.1rem;
   font-weight: 600;
   line-height: 1.4;
   color: var(--servus-text);
+}
+
+/* ── Heraldic / horizon motifs ─────────────────────────────────────────────── */
+/* A reusable section break. Under Raute it paints a gold lozenge band;
+   under Sternenhimmel it paints a peak silhouette. Pure token-driven swap. */
+.section-break {
+  height: 16px;
+  margin: var(--servus-space-5) 0;
+  background-image: var(--servus-motif-bg);
+  background-size: var(--servus-motif-bg-size);
+  background-repeat: var(--servus-motif-bg-repeat);
+  background-position: center;
+}
+
+/* Peak-silhouette horizon strip — used at the bottom of hero surfaces and
+   the login splash on Sternenhimmel. Token-coloured so adding a third theme
+   doesn't need component changes. */
+.peak-silhouette {
+  display: block;
+  height: 14px;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M0 14 L20 8 L40 12 L60 4 L85 11 L110 2 L130 10 L155 6 L180 12 L200 8 L200 14 Z' fill='currentColor'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 200px 14px;
+  color: var(--servus-horizon-fill);
+}
+
+/* A single warm-orange spark — the "Fensterlicht" lit-window detail.
+   Under Sternenhimmel it sits near a peak; under Raute it inherits the
+   accent and reads as a small gold mark. */
+.horizon-spark {
+  display: inline-block;
+  width: 4px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--servus-spark);
+  box-shadow: 0 0 8px var(--servus-spark);
 }
 
 p {

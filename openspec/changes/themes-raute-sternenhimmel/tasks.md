@@ -119,43 +119,43 @@
 
 ## 9. Raute lozenge motif
 
-- [ ] 9.1 Add a failing unit test asserting that the lozenge SVG component
+- [x] 9.1 Add a failing unit test asserting that the lozenge SVG component
       (`components/Lozenge.tsx` or `static/lozenge.svg`) renders with a
       `currentColor` fill and a `--servus-motif-stroke` stroke
-- [ ] 9.2 Implement the reusable lozenge SVG/CSS pattern
-- [ ] 9.3 Add a failing E2E test that asserts the `/login` page under
+- [x] 9.2 Implement the reusable lozenge SVG/CSS pattern
+- [x] 9.3 Add a failing E2E test that asserts the `/login` page under
       `theme-raute` renders the diagonal lozenge pattern in the splash panel
       (assertion: pattern background-image is non-empty)
-- [ ] 9.4 Wire the lozenge motif into the login splash and into a
+- [x] 9.4 Wire the lozenge motif into the login splash and into a
       `.section-break` component used by the items list and box detail
 
 ## 10. Sternenhimmel night-sky motif
 
-- [ ] 10.1 Add a failing unit test asserting that under `theme-sternenhimmel`
+- [x] 10.1 Add a failing unit test asserting that under `theme-sternenhimmel`
       the `<body>` has a `background-image` that contains a `radial-gradient`
       pattern (the star scatter), and that under `theme-raute` the same
       `background-image` is `none`
-- [ ] 10.2 Implement the star scatter as a `body` background pattern scoped
+- [x] 10.2 Implement the star scatter as a `body` background pattern scoped
       under `html.theme-sternenhimmel`
-- [ ] 10.3 Add a failing unit test asserting that the peak silhouette component
+- [x] 10.3 Add a failing unit test asserting that the peak silhouette component
       renders an SVG with `fill: var(--servus-horizon-fill)`
-- [ ] 10.4 Implement the peak silhouette component and wire it into the login
+- [x] 10.4 Implement the peak silhouette component and wire it into the login
       splash, the items page header, and the `.section-break`
-- [ ] 10.5 Add a failing E2E test asserting exactly one `--servus-spark`-colored
+- [x] 10.5 Add a failing E2E test asserting exactly one `--servus-spark`-colored
       element is visible near the peak silhouette on `/login` under
       Sternenhimmel
-- [ ] 10.6 Implement the single Fensterlicht spark placement
+- [x] 10.6 Implement the single Fensterlicht spark placement
 
 ## 11. Display typography per theme
 
-- [ ] 11.1 Add a failing unit test asserting that
+- [x] 11.1 Add a failing unit test asserting that
       `getComputedStyle(headingEl).fontFamily` under Raute starts with
       `DIN Alternate` and under Sternenhimmel starts with `Roboto Condensed`
-- [ ] 11.2 Set `--servus-type-display-family` in each theme block with the
+- [x] 11.2 Set `--servus-type-display-family` in each theme block with the
       correct stack; remove any hard-coded `font-family` in headings
-- [ ] 11.3 Add a failing network-assertion E2E test that under `theme-raute` no
+- [x] 11.3 Add a failing network-assertion E2E test that under `theme-raute` no
       request to `fonts.googleapis.com/css*?family=Roboto+Condensed` is made
-- [ ] 11.4 Implement the conditional Roboto Condensed load inside the pre-paint
+- [x] 11.4 Implement the conditional Roboto Condensed load inside the pre-paint
       script and ThemeToggle island, both using a shared helper from
       `lib/styles/theme.ts`
 
