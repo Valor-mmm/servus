@@ -20,6 +20,11 @@ export default define.page(function App({ Component, state, url }) {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{t("app.name")}</title>
+        {
+          /* theme-color must be in the DOM before theme-init.js runs so the
+            pre-paint script can update its `content` attribute. */
+        }
+        <meta name="theme-color" content={THEME_COLOR[initialTheme]} />
         {/* Anti-flash: apply html.theme-* before the stylesheet loads. */}
         <script src="/theme-init.js" />
         {state.csrfToken && (
@@ -27,7 +32,6 @@ export default define.page(function App({ Component, state, url }) {
         )}
         <link rel="stylesheet" href="/styles.css" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content={THEME_COLOR[initialTheme]} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"

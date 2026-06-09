@@ -161,7 +161,10 @@ export function applySecurityHeaders(
     [
       "default-src 'self'",
       `img-src 'self' data: blob:${r2Src ? ` ${r2Src}` : ""}`,
-      "style-src 'self' 'unsafe-inline'",
+      // Roboto Condensed is loaded conditionally from Google Fonts when
+      // the Sternenhimmel theme is active.
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
       scriptSrc,
       "object-src 'none'",
       "base-uri 'self'",

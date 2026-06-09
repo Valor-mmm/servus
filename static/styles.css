@@ -691,7 +691,8 @@ button:focus-visible,
 .item-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   background: var(--servus-surface);
   border: 1px solid var(--servus-border);
   border-radius: var(--servus-radius);
@@ -924,8 +925,18 @@ button:focus-visible,
   color: var(--servus-text-muted);
   font-size: 0.85rem;
   margin-left: auto;
+  /* On wide rows .meta sits to the right of the link, nowrap. On narrow
+     viewports the row wraps; meta drops below and is allowed to wrap. */
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .meta {
+    white-space: normal;
+    margin-left: 0;
+  }
 }
 
 /* ── Empty state ───────────────────────────────────────────────────────────── */

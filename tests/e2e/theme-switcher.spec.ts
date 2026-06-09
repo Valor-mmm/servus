@@ -10,9 +10,10 @@ import { expect, test } from "@playwright/test";
 //     parses, so a stored-dark user never sees a flash of Raute light
 
 test.describe("theme switcher (Raute ↔ Sternenhimmel)", () => {
-  test.beforeEach(async ({ page, context }) => {
-    await context.clearCookies();
-    // Re-auth via stored session is handled by the chromium project.
+  test.beforeEach(async ({ page }) => {
+    // The chromium project authenticates via storageState. Don't clear
+    // cookies — we need the auth, just reset the theme localStorage so
+    // each test starts from a known state.
     await page.goto("/items");
     await page.evaluate(() => localStorage.removeItem("servus-theme"));
   });
@@ -82,11 +83,13 @@ test.describe("theme switcher (Raute ↔ Sternenhimmel)", () => {
 
     await expect(page.locator("html")).toHaveClass(/theme-sternenhimmel/);
 
-    const bodyBg = await page.evaluate(() => {
-      return getComputedStyle(document.body).backgroundColor;
+    // Body has no background-color of its own — html carries it via the
+    // --servus-bg token. Read from documentElement.
+    const htmlBg = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement).backgroundColor;
     });
     // #0E1830 in rgb() form
-    expect(bodyBg.replace(/\s+/g, "")).toBe("rgb(14,24,48)");
+    expect(htmlBg.replace(/\s+/g, "")).toBe("rgb(14,24,48)");
 
     // <meta name="theme-color"> tracks the active theme.
     const themeColor = await page.locator('meta[name="theme-color"]')
@@ -103,10 +106,10 @@ test.describe("theme switcher (Raute ↔ Sternenhimmel)", () => {
     await page.goto("/items", { waitUntil: "domcontentloaded" });
 
     await expect(page.locator("html")).toHaveClass(/theme-raute/);
-    const bodyBg = await page.evaluate(() => {
-      return getComputedStyle(document.body).backgroundColor;
+    const htmlBg = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement).backgroundColor;
     });
     // #F4ECDA in rgb() form
-    expect(bodyBg.replace(/\s+/g, "")).toBe("rgb(244,236,218)");
+    expect(htmlBg.replace(/\s+/g, "")).toBe("rgb(244,236,218)");
   });
 });
