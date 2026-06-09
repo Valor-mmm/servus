@@ -178,16 +178,16 @@
 
 ## 13. Item rows, box plaque, and remaining page chrome
 
-- [ ] 13.1 Add a failing E2E test that screenshots `/items` and `/boxes/:id`
+- [x] 13.1 Add a failing E2E test that screenshots `/items` and `/boxes/:id`
       under both themes at 375 px and 1280 px viewports and asserts no
       horizontal overflow occurs
-- [ ] 13.2 Update item-row component CSS to match the mocks: 64 px category
+- [x] 13.2 Update item-row component CSS to match the mocks: 64 px category
       plate / brass tag on the left, name + meta column, status badge, quantity
       control
-- [ ] 13.3 Update box-detail hero composition to match the mocks: 132 px plaque
+- [x] 13.3 Update box-detail hero composition to match the mocks: 132 px plaque
       on the left containing the box code, hero title + meta grid, large status
       badge
-- [ ] 13.4 Update page header, filter row, search field, and the `.load-all`
+- [x] 13.4 Update page header, filter row, search field, and the `.load-all`
       link styling to the new tokens
 
 ## 14. PWA theme-color and manifest sanity
