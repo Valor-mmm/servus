@@ -10,22 +10,22 @@ interface PageProps {
 
 function DeleteConfirmPage({ count, csrfToken }: PageProps) {
   return (
-    <main class="page page-danger">
+    <main class="page">
       <h1>{t("admin.delete_confirm.title")}</h1>
 
-      <div class="danger-banner" role="alert">
-        <p>{t("admin.delete_confirm.warning")}</p>
-        <p>
-          <strong>
-            {t("admin.delete_confirm.count", { count: String(count) })}
-          </strong>
-        </p>
-      </div>
+      <p class="error" role="alert">
+        {t("admin.delete_confirm.warning")}
+      </p>
+      <p>
+        <strong>
+          {t("admin.delete_confirm.count", { count: String(count) })}
+        </strong>
+      </p>
 
-      <div class="danger-actions">
+      <div class="actions">
         <form method="post" action="/admin/delete">
           <input type="hidden" name="csrf_token" value={csrfToken} />
-          <button type="submit" class="btn-danger btn-danger-lg">
+          <button type="submit" class="btn-danger">
             {t("admin.delete_confirm.button")}
           </button>
         </form>

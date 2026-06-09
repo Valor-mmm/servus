@@ -17,22 +17,22 @@ function AdminPage(
       <h1>{t("admin.title")}</h1>
 
       {imported !== null && (
-        <div class="banner banner-success" role="status">
+        <p class="success" role="status">
           {t("admin.import.success", {
             imported: String(imported),
             skipped: String(skipped ?? 0),
           })}
-        </div>
+        </p>
       )}
       {deleted !== null && (
-        <div class="banner banner-success" role="status">
+        <p class="success" role="status">
           {t("admin.delete.success", { deleted: String(deleted) })}
-        </div>
+        </p>
       )}
       {error && (
-        <div class="banner banner-error" role="alert">
+        <p class="error" role="alert">
           {t("admin.import.error", { message: error })}
-        </div>
+        </p>
       )}
 
       <section class="admin-section">
