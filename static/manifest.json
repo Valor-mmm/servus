@@ -9,9 +9,16 @@
   "background_color": "#F4ECDA",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/lion.svg",
+      "type": "image/svg+xml",
       "sizes": "any",
-      "type": "image/x-icon"
+      "purpose": "any"
+    },
+    {
+      "src": "/lion-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
     }
   ]
 }

@@ -261,12 +261,22 @@ The app MUST apply the following animations; all MUST respect
 
 ### Requirement: PWA installability
 
-The app MUST be installable as a Progressive Web App on iOS and Android. The
-HTML document MUST include a `<link rel="manifest">` pointing to
-`/manifest.json`. The manifest MUST specify `display: "standalone"`, a short
-name, a theme color matching the Bavarian blue token, and at least one icon.
-Apple-specific `<meta>` tags for `apple-mobile-web-app-capable` and
-`apple-mobile-web-app-status-bar-style` MUST be present in `<head>`.
+The app MUST be installable as a Progressive Web App on Android (Chrome and
+Firefox). iOS support is deferred. The HTML document MUST include a
+`<link rel="manifest">` pointing to `/manifest.json`. The manifest MUST specify
+`display: "standalone"`, a short name, a theme color matching the Bavarian blue
+token (`#0E4FA0`), and an `icons` array with at least two entries: one with
+`"purpose": "any"` and one with `"purpose": "maskable"`. Both MUST use
+`"type": "image/svg+xml"`. A registered service worker is required by Chrome and
+Firefox for the install prompt to appear; the app MUST register one.
+
+The service worker MUST pre-cache the app shell (stylesheet, scripts, SVG icons,
+and the offline page) on install. For navigation requests, it MUST use a
+network-first strategy and fall back to the cached offline page when the network
+is unreachable. It MUST NOT cache API responses or user data.
+
+The offline page MUST display the servus lion, a short Bavarian message, and a
+reload button that retries the original URL via `window.location.reload()`.
 
 #### Scenario: Manifest link present in HTML
 
@@ -274,17 +284,26 @@ Apple-specific `<meta>` tags for `apple-mobile-web-app-capable` and
 - **THEN** the HTML `<head>` contains
   `<link rel="manifest" href="/manifest.json">`
 
-#### Scenario: Manifest is valid JSON
+#### Scenario: Manifest has correct icon entries
 
 - **WHEN** a browser requests `/manifest.json`
 - **THEN** the response is valid JSON with `name`, `short_name`, `display`,
-  `theme_color`, and `icons` fields
+  `theme_color`, and `icons` fields; the `icons` array contains one entry with
+  `"purpose": "any"` and one with `"purpose": "maskable"`, both using
+  `"type": "image/svg+xml"`
 
-#### Scenario: App installable on mobile
+#### Scenario: App installable on Android
 
-- **WHEN** an authenticated user visits the app on a mobile browser that
-  supports PWA installation
+- **WHEN** an authenticated user visits the app on Chrome or Firefox for Android
 - **THEN** the browser presents an "Add to Home Screen" prompt or install option
+
+#### Scenario: Offline navigation shows offline page
+
+- **GIVEN** the service worker has been installed and the app shell is cached
+- **WHEN** the user navigates to any page while the device has no network
+  connection
+- **THEN** the browser displays the cached offline page with the servus lion and
+  the Bavarian message instead of a browser error
 
 ---
 
