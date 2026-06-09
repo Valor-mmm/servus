@@ -201,12 +201,12 @@
 
 ## 15. Per-route smoke pass
 
-- [ ] 15.1 Add a Playwright "smoke" spec that loops every authenticated route
+- [x] 15.1 Add a Playwright "smoke" spec that loops every authenticated route
       (`/`, `/items`, `/items/quick-add`, `/items/:id`, `/items/:id/edit`,
       `/boxes`, `/boxes/:id`, `/categories`, `/rooms`, `/invites`) plus
       `/login`, navigates under both themes, asserts each renders without
       console errors and without layout overflow at 375 px and 1280 px
-- [ ] 15.2 Fix any regressions surfaced by the smoke pass
+- [x] 15.2 Fix any regressions surfaced by the smoke pass
 
 ## 16. Update affected specs and validate
 
