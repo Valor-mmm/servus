@@ -1,53 +1,77 @@
 import { expect, test } from "@playwright/test";
 
-// ── Dark mode toggle ──────────────────────────────────────────────────────────
+// ── Theme switcher (Raute light ↔ Sternenhimmel dark) ─────────────────────────
 
-test("dark mode toggle on desktop applies html.dark and persists on reload", async ({ page }) => {
+test("desktop toggle swaps theme-raute ↔ theme-sternenhimmel and persists", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/items");
 
-  // Ensure we start in light mode
+  // Start clean, force light theme.
   await page.evaluate(() => {
-    localStorage.removeItem("servus-theme");
-    document.documentElement.classList.remove("dark");
+    localStorage.setItem("servus-theme", "raute");
   });
   await page.reload();
 
   const html = page.locator("html");
   const toggleBtn = page.locator("nav.top-nav [data-theme-toggle]");
 
-  await expect(html).not.toHaveClass(/dark/);
+  await expect(html).toHaveClass(/theme-raute/);
+  await expect(html).not.toHaveClass(/theme-sternenhimmel/);
 
   await toggleBtn.click();
-  await expect(html).toHaveClass(/dark/);
+  await expect(html).toHaveClass(/theme-sternenhimmel/);
+  await expect(html).not.toHaveClass(/theme-raute/);
 
   const stored = await page.evaluate(() =>
     localStorage.getItem("servus-theme")
   );
-  expect(stored).toBe("dark");
+  expect(stored).toBe("sternenhimmel");
 
-  // Persists after reload
+  // Persists after reload (no flash should be visible).
   await page.reload();
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveClass(/theme-sternenhimmel/);
 
-  // Restore light mode for other tests
+  // <meta name="theme-color"> tracks the active theme.
+  const color = await page.locator('meta[name="theme-color"]').getAttribute(
+    "content",
+  );
+  expect(color).toBe("#0E1830");
+
   await page.evaluate(() => localStorage.removeItem("servus-theme"));
 });
 
-test("dark mode FAB on mobile applies html.dark", async ({ page }) => {
+test("mobile FAB swaps theme-raute → theme-sternenhimmel", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/items");
 
   await page.evaluate(() => {
-    localStorage.removeItem("servus-theme");
-    document.documentElement.classList.remove("dark");
+    localStorage.setItem("servus-theme", "raute");
   });
   await page.reload();
 
   const fab = page.locator("button.theme-toggle-fab");
   await expect(fab).toBeVisible();
   await fab.click();
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveClass(/theme-sternenhimmel/);
+
+  await page.evaluate(() => localStorage.removeItem("servus-theme"));
+});
+
+test("invalid stored theme value falls through to default", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/items");
+
+  // Legacy values from before the rename must not break anything.
+  await page.evaluate(() => {
+    localStorage.setItem("servus-theme", "dark");
+  });
+  await page.reload();
+
+  // The pre-paint script falls back to system preference; in headless
+  // Chrome that resolves to Raute (light).
+  const html = page.locator("html");
+  await expect(html).toHaveClass(/theme-(raute|sternenhimmel)/);
+  await expect(html).not.toHaveClass(/^dark$/);
 
   await page.evaluate(() => localStorage.removeItem("servus-theme"));
 });

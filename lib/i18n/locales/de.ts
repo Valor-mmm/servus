@@ -129,6 +129,8 @@ const de = {
   "items.loadAll": "Alle Gegenstände laden",
   "nav.quickAdd": "Schnellerfassung",
   "nav.toggleTheme": "Design umschalten",
+  "nav.themeRaute": "Hell",
+  "nav.themeSternenhimmel": "Dunkel",
 
   // ── Invites ───────────────────────────────────────────────────────────────
   "invites.title": "Einladungen",

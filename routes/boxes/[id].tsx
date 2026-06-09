@@ -52,9 +52,11 @@ function BoxDetailPage(
       {showConfetti && <script src="/confetti.js" />}
       <main class="page">
         <h1>
-          {t("boxes.detail_title")}: <strong>{box.code}</strong>
+          {t("boxes.detail_title")}: <span class="code-chip">{box.code}</span>
           {box.label ? ` – ${box.label}` : ""}
         </h1>
+
+        <div class="section-break" aria-hidden="true"></div>
 
         <dl class="detail-list">
           <dt>{t("boxes.destination_room_label")}</dt>

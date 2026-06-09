@@ -1,72 +1,190 @@
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
+/* Structural / theme-agnostic tokens. Two themes (Raute light, Sternenhimmel
+   dark) override the palette tokens below in their html.theme-* blocks.
+   Adding a third theme later means a new html.theme-* block — components
+   never reference theme names. */
 :root {
-  /* Colors — Bavarian palette */
-  --servus-bg: #fdf8f0;
-  --servus-surface: #ffffff;
-  --servus-surface-raised: #fef9f2;
-  --servus-text: #1c1612;
-  --servus-text-muted: #6b5e4e;
-  --servus-primary: #1a5fa8;
-  --servus-primary-hover: #154d8a;
-  --servus-primary-text: #ffffff;
-  --servus-accent: #c5900a;
-  --servus-accent-hover: #a37508;
-  --servus-danger: #c0392b;
-  --servus-danger-hover: #a93226;
-  --servus-success: #2e7d32;
-  --servus-border: #d9cfc2;
-  --servus-border-focus: #1a5fa8;
-  --servus-shadow: 0 1px 3px rgba(28, 22, 18, 0.10);
-  --servus-shadow-raised: 0 4px 12px rgba(28, 22, 18, 0.12);
+  /* Spacing scale */
+  --servus-space-1: 0.25rem;
+  --servus-space-2: 0.5rem;
+  --servus-space-3: 0.75rem;
+  --servus-space-4: 1rem;
+  --servus-space-5: 1.25rem;
+  --servus-space-6: 1.5rem;
+  --servus-space-7: 2rem;
+  --servus-space-8: 3rem;
+
+  /* Radii */
   --servus-radius: 0.5rem;
   --servus-radius-sm: 0.25rem;
   --servus-radius-pill: 999px;
 
-  /* Badge colors */
-  --servus-badge-empty-bg: #e8e0d8;
-  --servus-badge-empty-text: #5a4f45;
-  --servus-badge-packed-bg: #1a5fa8;
-  --servus-badge-packed-text: #ffffff;
-  --servus-badge-delivered-bg: #2e7d32;
-  --servus-badge-delivered-text: #ffffff;
+  /* Type families. Display family default is the Raute (DIN) stack; the
+     Sternenhimmel block below overrides it to Roboto Condensed. */
+  --servus-type-body-family:
+    "Inter",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  --servus-type-display-family:
+    "DIN Alternate",
+    "DIN Pro",
+    "Roboto Condensed",
+    system-ui;
 
-  /* Nav */
-  --servus-nav-bg: #1a5fa8;
-  --servus-nav-text: #ffffff;
-  --servus-nav-active: #c5900a;
+  /* Layout */
   --servus-bottom-nav-height: 4rem;
 }
 
-/* ── Dark mode — Bavarian warm tones ───────────────────────────────────────── */
-html.dark {
-  --servus-bg: #1a1410;
-  --servus-surface: #251e18;
-  --servus-surface-raised: #2e2419;
-  --servus-text: #f0e6d4;
-  --servus-text-muted: #9d8873;
-  --servus-primary: #4a8fd4;
-  --servus-primary-hover: #3a7dc4;
+/* ── Theme: Raute (light, heraldic Bavarian flag) ──────────────────────────── */
+html.theme-raute {
+  --servus-bg: #f4ecda;
+  --servus-surface: #ffffff;
+  --servus-surface-raised: #faf5e8;
+  --servus-text: #0a1a2e;
+  --servus-text-muted: #7b8b9e;
+  --servus-primary: #0e4fa0;
+  --servus-primary-hover: #093c7c;
   --servus-primary-text: #ffffff;
-  --servus-accent: #e0a820;
-  --servus-accent-hover: #c8941a;
-  --servus-danger: #e05252;
-  --servus-danger-hover: #cc3d3d;
-  --servus-success: #52c87a;
-  --servus-border: #3d2f24;
-  --servus-border-focus: #4a8fd4;
+  --servus-accent: #e5a82e;
+  --servus-accent-hover: #c9931f;
+  --servus-danger: #b4332d;
+  --servus-danger-hover: #962416;
+  --servus-success: #2e7d32;
+  --servus-border: #d5c9a8;
+  --servus-border-focus: #0e4fa0;
+  --servus-shadow: 0 1px 3px rgba(10, 26, 46, 0.10);
+  --servus-shadow-raised: 0 4px 12px rgba(10, 26, 46, 0.12);
+
+  --servus-badge-empty-bg: #e8e0d8;
+  --servus-badge-empty-text: #5a4f45;
+  --servus-badge-packed-bg: #0e4fa0;
+  --servus-badge-packed-text: #ffffff;
+  --servus-badge-delivered-bg: #2e7d32;
+  --servus-badge-delivered-text: #ffffff;
+  --servus-badge-pending-bg: #fef3c7;
+  --servus-badge-pending-text: #92400e;
+  --servus-badge-pending-border: rgba(229, 168, 46, 0.50);
+
+  --servus-nav-bg: #0e4fa0;
+  --servus-nav-text: #ffffff;
+  --servus-nav-active: #e5a82e;
+
+  /* Heraldic-motif tokens (used by section breaks, login splash, lozenge). */
+  --servus-motif-stroke: #ffffff;
+  --servus-horizon-fill: #ffffff;
+  --servus-spark: #e5a82e;
+
+  /* Active-nav appearance — Raute paints a gold lozenge behind the label.
+     Sternenhimmel uses a flat gold underline; both themes share one rule. */
+  --servus-active-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 32' preserveAspectRatio='none'><path d='M30 2 L58 16 L30 30 L2 16 Z' fill='%23E5A82E' opacity='0.88'/></svg>");
+  --servus-active-border: 0 solid transparent;
+  --servus-active-text: #ffffff;
+
+  /* Section-break motif — Raute paints a gold lozenge band. */
+  --servus-motif-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 16'><path d='M20 2 L34 8 L20 14 L6 8 Z' fill='%23E5A82E' opacity='0.85'/></svg>");
+  --servus-motif-bg-size: 40px 16px;
+  --servus-motif-bg-repeat: repeat-x;
+
+  /* Page-body background pattern. Raute leaves the body empty; the
+     Sternenhimmel block below overrides this with the star scatter. */
+  --servus-body-bg-image: none;
+  --servus-body-bg-size: auto;
+  --servus-body-bg-position: 0 0;
+  --servus-body-bg-blend: normal;
+
+  /* Feedback (error/success/banner) — token-driven so themes adapt. */
+  --servus-error-bg: #fde8e8;
+  --servus-error-text: #b4332d;
+  --servus-error-border: #f5b8b8;
+  --servus-success-bg: #e8f5e9;
+  --servus-success-text: #2e7d32;
+  --servus-success-border: #a5d6a7;
+  --servus-warn-bg: #fef3c7;
+  --servus-warn-border: #f59e0b;
+  --servus-warn-text: #78350f;
+}
+
+/* ── Theme: Sternenhimmel (dark, alpine starry night — sibling of Raute) ───── */
+html.theme-sternenhimmel {
+  --servus-bg: #0e1830;
+  --servus-surface: #161a23;
+  --servus-surface-raised: #1c2230;
+  --servus-text: #c5cfdc;
+  --servus-text-muted: #8c97a9;
+  --servus-primary: #f0d87a;
+  --servus-primary-hover: #c9b452;
+  --servus-primary-text: #0e1830;
+  --servus-accent: #f0d87a;
+  --servus-accent-hover: #c9b452;
+  --servus-danger: #b85050;
+  --servus-danger-hover: #963535;
+  --servus-success: #5a7848;
+  --servus-border: #1a2942;
+  --servus-border-focus: #f0d87a;
   --servus-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   --servus-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.6);
 
-  --servus-badge-empty-bg: #3d2f24;
-  --servus-badge-empty-text: #c9bfb3;
-  --servus-badge-packed-bg: #1f4daa;
-  --servus-badge-packed-text: #ffffff;
-  --servus-badge-delivered-bg: #1a5a34;
-  --servus-badge-delivered-text: #a5f3c0;
+  --servus-badge-empty-bg: #1a2942;
+  --servus-badge-empty-text: #8c97a9;
+  --servus-badge-packed-bg: #f0d87a;
+  --servus-badge-packed-text: #0e1830;
+  --servus-badge-delivered-bg: rgba(90, 120, 72, 0.22);
+  --servus-badge-delivered-text: #9db779;
+  --servus-badge-pending-bg: rgba(217, 119, 43, 0.18);
+  --servus-badge-pending-text: #f0b98a;
+  --servus-badge-pending-border: rgba(217, 119, 43, 0.45);
 
-  --servus-nav-bg: #0f0c09;
-  --servus-nav-text: #f0e6d4;
-  --servus-nav-active: #e0a820;
+  --servus-nav-bg: #060c1a;
+  --servus-nav-text: #c5cfdc;
+  --servus-nav-active: #f0d87a;
+
+  /* Heraldic motif at night: lozenge stroke goes muted-flag-blue. */
+  --servus-motif-stroke: #2d5f8c;
+  --servus-horizon-fill: #1a2942;
+  --servus-spark: #d9772b;
+
+  /* At night the active state is a flat gold underline, not a lozenge. */
+  --servus-active-bg: none;
+  --servus-active-border: 2px solid var(--servus-nav-active);
+  --servus-active-text: #f0d87a;
+
+  /* Section-break motif — Sternenhimmel paints a peak-silhouette horizon. */
+  --servus-motif-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 18' preserveAspectRatio='none'><path d='M0 18 L20 10 L40 14 L60 6 L85 13 L110 4 L130 12 L155 8 L180 14 L200 10 L200 18 Z' fill='%231A2942'/></svg>");
+  --servus-motif-bg-size: 200px 18px;
+  --servus-motif-bg-repeat: repeat-x;
+
+  /* Night-sky body — faint gold and silver-blue star pinpoints. */
+  --servus-body-bg-image:
+    radial-gradient(circle, #f0d87a 0.6px, transparent 1px),
+    radial-gradient(circle, #c5cfdc 0.4px, transparent 0.8px);
+  --servus-body-bg-size: 180px 180px, 240px 240px;
+  --servus-body-bg-position: 30px 50px, 110px 90px;
+  --servus-body-bg-blend: lighten;
+
+  --servus-error-bg: rgba(184, 80, 80, 0.18);
+  --servus-error-text: #f5a8a8;
+  --servus-error-border: rgba(184, 80, 80, 0.40);
+  --servus-success-bg: rgba(90, 120, 72, 0.18);
+  --servus-success-text: #a8c593;
+  --servus-success-border: rgba(90, 120, 72, 0.40);
+  --servus-warn-bg: rgba(217, 119, 43, 0.18);
+  --servus-warn-border: rgba(217, 119, 43, 0.45);
+  --servus-warn-text: #f0b98a;
+
+  /* Display type switches to Roboto Condensed at night (loaded conditionally
+     by the pre-paint script and the toggle handler). */
+  --servus-type-display-family:
+    "Roboto Condensed",
+    "DIN Alternate",
+    "DIN Pro",
+    system-ui;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────────────────── */
@@ -88,9 +206,7 @@ img, video {
 html {
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--servus-type-body-family);
   font-size: 16px;
   color: var(--servus-text);
   background: var(--servus-bg);
@@ -98,6 +214,13 @@ html {
 
 body {
   min-height: 100dvh;
+  /* Theme-driven body background. Raute resolves to `none`; Sternenhimmel
+     paints a faint gold/silver star scatter, fixed behind the page. */
+  background-image: var(--servus-body-bg-image);
+  background-size: var(--servus-body-bg-size);
+  background-position: var(--servus-body-bg-position);
+  background-attachment: fixed;
+  background-blend-mode: var(--servus-body-bg-blend);
 }
 
 code, pre {
@@ -124,13 +247,16 @@ code, pre {
 
 /* ── Typography ────────────────────────────────────────────────────────────── */
 h1 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.25;
   margin-bottom: 1rem;
   color: var(--servus-text);
+  letter-spacing: -0.01em;
 }
 h2 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.3;
@@ -139,10 +265,48 @@ h2 {
   color: var(--servus-text);
 }
 h3 {
+  font-family: var(--servus-type-display-family);
   font-size: 1.1rem;
   font-weight: 600;
   line-height: 1.4;
   color: var(--servus-text);
+}
+
+/* ── Heraldic / horizon motifs ─────────────────────────────────────────────── */
+/* A reusable section break. Under Raute it paints a gold lozenge band;
+   under Sternenhimmel it paints a peak silhouette. Pure token-driven swap. */
+.section-break {
+  height: 16px;
+  margin: var(--servus-space-5) 0;
+  background-image: var(--servus-motif-bg);
+  background-size: var(--servus-motif-bg-size);
+  background-repeat: var(--servus-motif-bg-repeat);
+  background-position: center;
+}
+
+/* Peak-silhouette horizon strip — used at the bottom of hero surfaces and
+   the login splash on Sternenhimmel. Token-coloured so adding a third theme
+   doesn't need component changes. */
+.peak-silhouette {
+  display: block;
+  height: 14px;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M0 14 L20 8 L40 12 L60 4 L85 11 L110 2 L130 10 L155 6 L180 12 L200 8 L200 14 Z' fill='currentColor'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 200px 14px;
+  color: var(--servus-horizon-fill);
+}
+
+/* A single warm-orange spark — the "Fensterlicht" lit-window detail.
+   Under Sternenhimmel it sits near a peak; under Raute it inherits the
+   accent and reads as a small gold mark. */
+.horizon-spark {
+  display: inline-block;
+  width: 4px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--servus-spark);
+  box-shadow: 0 0 8px var(--servus-spark);
 }
 
 p {
@@ -210,10 +374,16 @@ p {
   display: contents;
 }
 
-/* Active nav link — gold underline */
+/* Active nav link — Raute paints a gold lozenge behind the label,
+   Sternenhimmel paints a gold underline. Tokens drive the swap. */
 .top-nav a.nav-active {
   opacity: 1;
-  box-shadow: inset 0 -2px 0 var(--servus-nav-active);
+  color: var(--servus-active-text);
+  background-image: var(--servus-active-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 80%;
+  border-bottom: var(--servus-active-border);
 }
 
 /* Theme toggle button in top nav */
@@ -293,21 +463,29 @@ p {
   border-top: 2px solid var(--servus-nav-active);
 }
 
-/* Quick-add primary action — gold pill around icon */
+/* Quick-add primary action — raised circular button above the nav baseline.
+   Background and glow come from theme tokens; both themes share one rule. */
 .bottom-nav .nav-quick-add {
-  opacity: 0.9;
+  opacity: 1;
+  justify-content: flex-end;
+  padding-bottom: 0.25rem;
 }
 
 .bottom-nav .nav-quick-add .nav-icon {
-  font-size: 1.4rem;
-  background: var(--servus-nav-active);
-  border-radius: var(--servus-radius-pill);
-  width: 2rem;
-  height: 2rem;
+  font-size: 1.5rem;
+  background: var(--servus-primary);
+  color: var(--servus-primary-text);
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  margin-top: -1.25rem;
+  box-shadow:
+    var(--servus-shadow-raised),
+    0 0 0 3px var(--servus-nav-bg);
 }
 
 /* ── Theme toggle FAB (mobile only) ────────────────────────────────────────── */
@@ -443,15 +621,40 @@ button.danger:hover, .btn-danger:hover {
   }
 }
 
+/* Keyboard focus ring — readable on both themes via the accent token. */
+button:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-danger:focus-visible,
+.btn-small:focus-visible {
+  outline: 2px solid var(--servus-accent);
+  outline-offset: 3px;
+}
+
 /* ── Status badges ─────────────────────────────────────────────────────────── */
+/* A leading shape indicator (`::before`) is mandatory so status is legible
+   without colour — accessibility win for colour-blind users. */
 .badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2rem 0.65rem 0.2rem 0.55rem;
   border-radius: var(--servus-radius-pill);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.badge::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
 .badge-empty {
@@ -470,13 +673,9 @@ button.danger:hover, .btn-danger:hover {
 }
 
 .badge-pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-html.dark .badge-pending {
-  background: #3d2a0a;
-  color: #fcd34d;
+  background: var(--servus-badge-pending-bg);
+  color: var(--servus-badge-pending-text);
+  border: 1px solid var(--servus-badge-pending-border);
 }
 
 /* ── Lists ─────────────────────────────────────────────────────────────────── */
@@ -492,7 +691,8 @@ html.dark .badge-pending {
 .item-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   background: var(--servus-surface);
   border: 1px solid var(--servus-border);
   border-radius: var(--servus-radius);
@@ -573,26 +773,45 @@ html.dark .badge-pending {
   background: var(--servus-surface);
   border: 1px solid var(--servus-border);
   border-radius: var(--servus-radius);
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.4rem 1rem;
+  gap: 0.55rem 1.25rem;
   margin-bottom: 1.25rem;
   box-shadow: var(--servus-shadow);
 }
 
 .detail-list dt {
-  font-weight: 600;
+  font-family: var(--servus-type-display-family);
+  font-weight: 700;
   color: var(--servus-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.18em;
   white-space: nowrap;
-  padding-top: 0.1rem;
+  padding-top: 0.15rem;
 }
 
 .detail-list dd {
   color: var(--servus-text);
+  font-weight: 500;
+}
+
+/* Box-code chip — used inside the box-detail h1 to make the box code read
+   as a plaque sitting next to the title. Tokenised so themes adapt. */
+.code-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--servus-type-display-family);
+  font-weight: 700;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  padding: 0.15em 0.55em;
+  background: var(--servus-primary);
+  color: var(--servus-primary-text);
+  border-radius: var(--servus-radius-sm);
+  box-shadow: 0 0 0 2px var(--servus-surface), 0 0 0 3px var(--servus-accent);
+  margin-right: 0.25em;
 }
 
 /* ── Inline forms ──────────────────────────────────────────────────────────── */
@@ -682,9 +901,9 @@ html.dark .badge-pending {
 
 /* ── Feedback messages ─────────────────────────────────────────────────────── */
 .error {
-  background: #fde8e8;
-  color: var(--servus-danger);
-  border: 1px solid #f5b8b8;
+  background: var(--servus-error-bg);
+  color: var(--servus-error-text);
+  border: 1px solid var(--servus-error-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
@@ -692,25 +911,13 @@ html.dark .badge-pending {
 }
 
 .success {
-  background: #e8f5e9;
-  color: var(--servus-success);
-  border: 1px solid #a5d6a7;
+  background: var(--servus-success-bg);
+  color: var(--servus-success-text);
+  border: 1px solid var(--servus-success-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
   font-weight: 500;
-}
-
-html.dark .error {
-  background: rgba(224, 82, 82, 0.15);
-  border-color: rgba(224, 82, 82, 0.4);
-  color: #ff9999;
-}
-
-html.dark .success {
-  background: rgba(82, 200, 122, 0.15);
-  border-color: rgba(82, 200, 122, 0.4);
-  color: #a5f3c0;
 }
 
 /* ── Meta / secondary text ─────────────────────────────────────────────────── */
@@ -718,8 +925,18 @@ html.dark .success {
   color: var(--servus-text-muted);
   font-size: 0.85rem;
   margin-left: auto;
+  /* On wide rows .meta sits to the right of the link, nowrap. On narrow
+     viewports the row wraps; meta drops below and is allowed to wrap. */
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .meta {
+    white-space: normal;
+    margin-left: 0;
+  }
 }
 
 /* ── Empty state ───────────────────────────────────────────────────────────── */
@@ -868,20 +1085,14 @@ html.dark .success {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
+  background: var(--servus-warn-bg);
+  border: 1px solid var(--servus-warn-border);
   border-radius: var(--servus-radius);
   padding: 0.65rem 0.9rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #78350f;
-}
-
-html.dark .photo-error-banner {
-  background: rgba(224, 168, 32, 0.15);
-  border-color: rgba(224, 168, 32, 0.4);
-  color: #fcd34d;
+  color: var(--servus-warn-text);
 }
 
 .photo-error-banner a {
