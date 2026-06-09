@@ -982,6 +982,23 @@ button:focus-visible,
   margin-bottom: 1.25rem;
 }
 
+/* ── Admin sections ────────────────────────────────────────────────────────── */
+.admin-section {
+  background: var(--servus-surface-raised);
+  border: 1.5px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-section h2 {
+  margin-top: 0;
+}
+
+.admin-section-danger {
+  border-color: var(--servus-danger);
+}
+
 /* ── Auth page ─────────────────────────────────────────────────────────────── */
 .auth-page {
   min-height: 100dvh;

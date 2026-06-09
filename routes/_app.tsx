@@ -82,11 +82,11 @@ export default define.page(function App({ Component, state, url }) {
                 {t("nav.rooms")}
               </a>
               <a
-                href="/admin/invites"
-                class={navActive(path, "/admin/invites").trim() || undefined}
-                title={t("invites.nav")}
+                href="/admin"
+                class={navActive(path, "/admin").trim() || undefined}
+                title={t("admin.nav")}
               >
-                {t("invites.nav")}
+                {t("admin.nav")}
               </a>
               <button
                 type="button"

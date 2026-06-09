@@ -7,7 +7,7 @@ export const handler = define.handlers({
     await revokeInvite(id);
     return new Response(null, {
       status: 302,
-      headers: { Location: "/admin/invites" },
+      headers: { Location: "/admin" },
     });
   },
 });
