@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Anmelden — Direction A: Raute</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --blau: #0E4FA0;
+    --blau-tief: #093C7C;
+    --weiss: #FFFFFF;
+    --tinte: #0A1A2E;
+    --pergament: #F4ECDA;
+    --gold: #E5A82E;
+    --mortel: #7B8B9E;
+    --rot: #B4332D;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background: var(--pergament);
+    color: var(--tinte);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 768px) {
+    body { grid-template-columns: 1fr; grid-template-rows: 220px 1fr; }
+  }
+
+  /* ───── Flag panel (left half) ───── */
+  .flag {
+    position: relative;
+    overflow: hidden;
+    background: var(--blau);
+    color: var(--weiss);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px;
+  }
+  .flag-lozenges {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 120px 120px,
+      linear-gradient(45deg,  transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 120px 120px;
+    opacity: 0.10;
+  }
+  .flag-mark { position: relative; z-index: 1; display: flex; align-items: center; gap: 16px; }
+  .flag-mark svg { width: 56px; height: 56px; }
+  .flag-mark .wordmark {
+    font-family: "DIN Alternate", "DIN Pro", "Roboto Condensed", system-ui;
+    font-weight: 900;
+    font-size: 40px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .flag-mark .tagline {
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-top: 6px;
+  }
+  .flag-headline {
+    position: relative; z-index: 1;
+    font-family: "DIN Alternate", "DIN Pro", "Roboto Condensed", system-ui;
+    font-weight: 700;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 12ch;
+  }
+  .flag-headline em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .flag-meta {
+    position: relative; z-index: 1;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    border-top: 1px solid rgba(255,255,255,0.25);
+    padding-top: 18px;
+  }
+
+  /* ───── Form panel (right half) ───── */
+  .form-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64px;
+    max-width: 520px;
+  }
+  @media (max-width: 768px) { .form-panel { padding: 32px 24px; max-width: none; } }
+
+  h1 {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 36px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mortel);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  p.lead {
+    margin: 0 0 36px;
+    color: var(--mortel);
+    font-size: 15px;
+    max-width: 36ch;
+    line-height: 1.5;
+  }
+  form { display: grid; gap: 18px; }
+  label { display: grid; gap: 6px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: var(--tinte); }
+  input[type="text"], input[type="password"] {
+    font: inherit;
+    font-size: 16px;
+    padding: 14px 14px;
+    border: 1.5px solid var(--tinte);
+    background: var(--weiss);
+    border-radius: 0;
+    color: var(--tinte);
+    outline: none;
+    transition: border-color .15s;
+  }
+  input:focus { border-color: var(--blau); box-shadow: 0 0 0 2px var(--gold) inset; }
+  button.primary {
+    margin-top: 8px;
+    font: inherit;
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    border: none;
+    background: var(--blau);
+    color: var(--weiss);
+    cursor: pointer;
+    position: relative;
+    transition: background .15s;
+  }
+  button.primary:hover { background: var(--blau-tief); }
+  button.primary::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 -6px 0;
+    background: var(--gold);
+    z-index: -1;
+  }
+  button.primary { isolation: isolate; }
+
+  .legal {
+    margin-top: 48px;
+    font-size: 12px;
+    color: var(--mortel);
+    border-top: 1px solid #E2D9C0;
+    padding-top: 16px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+  <aside class="flag">
+    <div class="flag-lozenges"></div>
+    <div class="flag-mark">
+      <!-- Lion as heraldic monogram -->
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="60" height="60" stroke="#E5A82E" stroke-width="2"/>
+        <path d="M16 44 L24 22 L32 38 L40 22 L48 44 L42 44 L38 36 L32 46 L26 36 L22 44 Z" fill="#E5A82E"/>
+        <circle cx="32" cy="14" r="2.4" fill="#E5A82E"/>
+      </svg>
+      <div>
+        <div class="wordmark">servus</div>
+        <span class="tagline">Haushalt &amp; Umzug</span>
+      </div>
+    </div>
+
+    <div class="flag-headline">Grüß di.<br><em>Pack ma's.</em></div>
+
+    <div class="flag-meta">Privat · Zwei Bewohner · Eine Bude</div>
+  </aside>
+
+  <main class="form-panel">
+    <p class="eyebrow">Anmelden</p>
+    <h1>Willkommen daheim.</h1>
+    <p class="lead">Dein privates Haushaltssystem. Melde dich an, um Gegenstände und Umzugskartons zu verwalten.</p>
+
+    <form onsubmit="event.preventDefault()">
+      <label>
+        Benutzername
+        <input type="text" name="username" autocomplete="username" value="monster">
+      </label>
+      <label>
+        Passwort
+        <input type="password" name="password" autocomplete="current-password" value="••••••••">
+      </label>
+      <button type="submit" class="primary">Anmelden →</button>
+    </form>
+
+    <div class="legal">Servus ist ein privates System. Zugang nur mit Einladung.</div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Gegenstände — Direction C: Bergsteiger</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --schiefer: #1F2A35;
+    --schiefer-tief: #0E1620;
+    --gletscher: #3FA1B8;
+    --gletscher-hell: #5DC4DA;
+    --himmel: #DCE9F0;
+    --himmel-tief: #C4D6E1;
+    --firn: #F7FAFC;
+    --granit: #4A5567;
+    --granit-hell: #A4B0C0;
+    --fohn: #E8A540;
+    --enzian: #1F4E8C;
+    --almrot: #A04545;
+    --packed: var(--gletscher);
+    --delivered: #3D8B5C;
+    --empty: var(--granit-hell);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter Tight", system-ui, sans-serif;
+    background: var(--himmel);
+    color: var(--schiefer);
+  }
+
+  /* ── Top strip ── */
+  header.top {
+    background: var(--schiefer);
+    color: var(--firn);
+    border-bottom: 2px solid var(--gletscher);
+  }
+  .top-inner {
+    max-width: 1180px; margin: 0 auto;
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+  .brand svg { width: 28px; height: 28px; }
+  nav.primary { display: flex; gap: 0; flex: 1; }
+  nav.primary a {
+    color: var(--firn);
+    text-decoration: none;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    opacity: 0.55;
+  }
+  nav.primary a:first-child { border-left: 1px solid rgba(255,255,255,0.08); }
+  nav.primary a.active {
+    opacity: 1;
+    color: var(--gletscher-hell);
+    background: var(--schiefer-tief);
+    border-top: 2px solid var(--gletscher);
+    margin-top: -2px;
+  }
+  nav.primary a:hover:not(.active) { opacity: 0.85; }
+  .top-right { display: flex; gap: 8px; align-items: center; }
+  .coords {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--granit-hell);
+    letter-spacing: 0.08em;
+  }
+  .coords .blip { display: inline-block; width: 6px; height: 6px; background: var(--fohn); border-radius: 50%; margin-right: 6px; }
+  .icon-btn {
+    background: transparent;
+    color: var(--firn);
+    border: 1px solid rgba(255,255,255,0.18);
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  @media (max-width: 768px) { nav.primary { display: none; } .top-inner { padding: 12px 16px; gap: 12px; } }
+
+  .page { max-width: 1180px; margin: 0 auto; padding: 24px 32px 110px; }
+  @media (max-width: 768px) { .page { padding: 16px 16px 110px; } }
+
+  /* ── Stat strip / packing progress ── */
+  .progress-strip {
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .progress-strip .label-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+    margin-bottom: 8px;
+  }
+  .progress-strip .label-row strong { color: var(--schiefer); font-weight: 700; }
+  .bar {
+    height: 12px;
+    background: var(--himmel-tief);
+    border: 1px solid var(--schiefer);
+    display: flex;
+    overflow: hidden;
+  }
+  .bar .seg { height: 100%; }
+  .bar .seg.delivered { background: var(--delivered); width: 24%; }
+  .bar .seg.packed    { background: var(--gletscher); width: 38%; }
+  .bar .seg.pending   { background: var(--fohn); width: 10%; }
+
+  .progress-strip .counters {
+    display: flex; gap: 18px; padding-left: 24px; border-left: 1px solid var(--himmel-tief);
+  }
+  .progress-strip .counters .stat {
+    text-align: right;
+  }
+  .progress-strip .counters .stat .num {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--schiefer);
+    line-height: 1;
+  }
+  .progress-strip .counters .stat .lab {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+    display: block;
+    margin-top: 4px;
+  }
+  @media (max-width: 640px) {
+    .progress-strip { grid-template-columns: 1fr; }
+    .progress-strip .counters { padding-left: 0; border-left: none; border-top: 1px solid var(--himmel-tief); padding-top: 14px; justify-content: space-between; }
+    .progress-strip .counters .stat { text-align: left; }
+  }
+
+  /* ── Page head ── */
+  .page-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--granit);
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+  h1 {
+    font-family: "Inter Tight", sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    margin: 0;
+    letter-spacing: -0.02em;
+    color: var(--schiefer);
+  }
+  h1 .count {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    color: var(--gletscher);
+    margin-left: 8px;
+    font-size: 26px;
+    vertical-align: 2px;
+  }
+  .cta-primary {
+    background: var(--schiefer);
+    color: var(--firn);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 18px;
+    border: 1.5px solid var(--schiefer);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .cta-primary:hover { background: var(--gletscher); border-color: var(--gletscher); }
+  .cta-primary .arrow { font-family: "JetBrains Mono", monospace; color: var(--gletscher-hell); }
+  .cta-primary:hover .arrow { color: var(--schiefer-tief); }
+
+  /* ── Filter row ── */
+  .filters {
+    display: flex; gap: 8px; align-items: stretch;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--himmel-tief);
+    border-bottom: 1px solid var(--himmel-tief);
+    padding: 14px 0;
+  }
+  .search {
+    flex: 1; min-width: 220px;
+    display: flex; align-items: stretch;
+    border: 1.5px solid var(--schiefer);
+    background: var(--firn);
+  }
+  .search input {
+    flex: 1; font: inherit; font-family: "Inter Tight", sans-serif; font-size: 14px;
+    border: none; outline: none; background: transparent; padding: 8px 12px;
+  }
+  .search button {
+    background: var(--schiefer); color: var(--firn);
+    border: none; padding: 0 16px; cursor: pointer;
+    font-family: "JetBrains Mono", monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .chip-select {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: var(--firn);
+    border: 1.5px solid var(--schiefer);
+    padding: 8px 12px;
+    color: var(--schiefer);
+  }
+
+  /* ── Item table ── */
+  table.items {
+    width: 100%; border-collapse: collapse;
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+  }
+  table.items thead th {
+    text-align: left;
+    background: var(--schiefer);
+    color: var(--gletscher-hell);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--schiefer);
+  }
+  table.items tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--himmel-tief);
+    vertical-align: middle;
+  }
+  table.items tbody tr:hover { background: rgba(63,161,184,0.06); cursor: pointer; }
+  table.items tbody tr:last-child td { border-bottom: none; }
+
+  td.code { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--granit); }
+  td.name { font-weight: 600; font-size: 15px; color: var(--schiefer); }
+  td.name .sub { display: block; font-weight: 400; font-size: 12px; color: var(--granit); margin-top: 2px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.04em; }
+
+  /* Status as a geometric shape — color reinforces but doesn't replace */
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--schiefer);
+    font-weight: 500;
+  }
+  .shape { width: 14px; height: 14px; flex-shrink: 0; }
+  .shape.packed    { background: var(--packed); clip-path: polygon(50% 0, 100% 100%, 0 100%); } /* triangle */
+  .shape.delivered { background: var(--delivered); border-radius: 50%; } /* circle */
+  .shape.pending   { background: transparent; border: 2px solid var(--fohn); } /* square */
+
+  td.qty {
+    text-align: right;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--schiefer);
+  }
+  td.qty .controls {
+    display: inline-flex; align-items: center; gap: 0;
+    border: 1.5px solid var(--schiefer);
+    background: var(--firn);
+    margin-left: 8px;
+  }
+  td.qty .controls button {
+    background: transparent; border: none;
+    font: inherit; font-weight: 600; font-size: 14px;
+    padding: 4px 10px;
+    color: var(--schiefer);
+    cursor: pointer;
+    min-width: 28px;
+  }
+  td.qty .controls .n {
+    padding: 4px 8px;
+    background: var(--himmel);
+    border-left: 1px solid var(--schiefer);
+    border-right: 1px solid var(--schiefer);
+    min-width: 32px;
+    text-align: center;
+  }
+
+  /* Load all */
+  .load-all {
+    margin-top: 18px;
+    text-align: center;
+  }
+  .load-all a {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--enzian);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--enzian);
+    display: inline-block;
+  }
+  .load-all a:hover { background: var(--enzian); color: var(--firn); }
+
+  /* Mobile bottom nav */
+  nav.bottom { display: none; }
+  @media (max-width: 768px) {
+    nav.bottom {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--schiefer);
+      border-top: 2px solid var(--gletscher);
+      padding: 6px 0 14px;
+      justify-content: space-around;
+      z-index: 10;
+    }
+    nav.bottom a {
+      color: var(--firn);
+      text-decoration: none;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      flex: 1; text-align: center;
+      display: grid; gap: 4px; justify-items: center;
+      opacity: 0.55;
+      padding: 6px 0;
+    }
+    nav.bottom a.active { opacity: 1; color: var(--gletscher-hell); }
+    nav.bottom a .glyph { font-size: 14px; line-height: 1; }
+    nav.bottom a.quick-add {
+      opacity: 1;
+      background: var(--gletscher);
+      color: var(--schiefer);
+    }
+    h1 { font-size: 26px; }
+    table.items thead { display: none; }
+    table.items tbody tr { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; padding: 12px 14px; align-items: center; }
+    table.items tbody td { border-bottom: none; padding: 0; }
+    table.items tbody td.code { grid-row: 1; }
+    table.items tbody td.name { grid-row: 1; grid-column: 2; }
+    table.items tbody td.status-cell { grid-column: 1 / -1; }
+    table.items tbody td.qty { grid-column: 1 / -1; text-align: left; }
+    table.items tbody tr { border-bottom: 1px solid var(--himmel-tief); }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="24,6 42,40 6,40" fill="none" stroke="#5DC4DA" stroke-width="2"/>
+          <polygon points="24,16 36,40 12,40" fill="#3FA1B8"/>
+          <circle cx="24" cy="32" r="3" fill="#E8A540"/>
+        </svg>
+        servus
+      </div>
+      <nav class="primary">
+        <a href="#" class="active">Gegenstände</a>
+        <a href="#">Kartons</a>
+        <a href="#">Kategorien</a>
+        <a href="#">Räume</a>
+        <a href="#">Einladungen</a>
+      </nav>
+      <div class="coords"><span class="blip"></span>monster@daheim</div>
+      <div class="top-right">
+        <button class="icon-btn">☾</button>
+        <button class="icon-btn">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <!-- Progress strip: this would be the actual KPI dashboard -->
+    <div class="progress-strip">
+      <div>
+        <div class="label-row">
+          <span>Umzug · Route 2026</span>
+          <span><strong>72 %</strong> verpackt &middot; 24 % geliefert</span>
+        </div>
+        <div class="bar">
+          <div class="seg delivered" title="geliefert"></div>
+          <div class="seg packed" title="gepackt"></div>
+          <div class="seg pending" title="ausstehend"></div>
+        </div>
+      </div>
+      <div class="counters">
+        <div class="stat"><span class="num">12</span><span class="lab">Kartons gepackt</span></div>
+        <div class="stat"><span class="num">4</span><span class="lab">geliefert</span></div>
+        <div class="stat"><span class="num">7</span><span class="lab">ohne Raum</span></div>
+      </div>
+    </div>
+
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">Index · Inventar · Stand 04.06.2026 22:48</p>
+        <h1>Gegenstände <span class="count">[21]</span></h1>
+      </div>
+      <a href="#" class="cta-primary">Gegenstand hinzufügen <span class="arrow">→</span></a>
+    </div>
+
+    <div class="filters">
+      <div class="search">
+        <input placeholder="grep …">
+        <button>Suchen</button>
+      </div>
+      <select class="chip-select">
+        <option>Alle Kategorien</option><option>Bücher</option><option>Hosen</option><option>Werkzeug</option>
+      </select>
+      <select class="chip-select">
+        <option>Alle Räume</option><option>Küche</option>
+      </select>
+      <select class="chip-select">
+        <option>Alle Status</option><option>Gepackt</option><option>Geliefert</option><option>Ausstehend</option>
+      </select>
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name &amp; Pfad</th>
+          <th>Status</th>
+          <th style="text-align:right">Anzahl</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="code">I-0042</td>
+          <td class="name">Bücher: Goethe-Werkausgabe<span class="sub">Bücher / Wohnzimmer / B-006</span></td>
+          <td class="status-cell"><span class="status"><span class="shape packed"></span>Gepackt</span></td>
+          <td class="qty">×4 <span class="controls"><button>−</button><span class="n">4</span><button>+</button></span></td>
+        </tr>
+        <tr>
+          <td class="code">I-0041</td>
+          <td class="name">Lederhose, kurz<span class="sub">Hosen / Schlafzimmer / B-009</span></td>
+          <td class="status-cell"><span class="status"><span class="shape packed"></span>Gepackt</span></td>
+          <td class="qty">×1 <span class="controls"><button>−</button><span class="n">1</span><button>+</button></span></td>
+        </tr>
+        <tr>
+          <td class="code">I-0040</td>
+          <td class="name">Hammer, mittelgroß<span class="sub">Werkzeug / Keller</span></td>
+          <td class="status-cell"><span class="status"><span class="shape delivered"></span>Geliefert</span></td>
+          <td class="qty">×2 <span class="controls"><button>−</button><span class="n">2</span><button>+</button></span></td>
+        </tr>
+        <tr>
+          <td class="code">I-0039</td>
+          <td class="name">Kupferpfanne<span class="sub">Küche / – / nicht zugeordnet</span></td>
+          <td class="status-cell"><span class="status"><span class="shape pending"></span>Ausstehend</span></td>
+          <td class="qty">×1 <span class="controls"><button>−</button><span class="n">1</span><button>+</button></span></td>
+        </tr>
+        <tr>
+          <td class="code">I-0038</td>
+          <td class="name">Daunendecke<span class="sub">Schlafzimmer / B-007</span></td>
+          <td class="status-cell"><span class="status"><span class="shape packed"></span>Gepackt</span></td>
+          <td class="qty">×1 <span class="controls"><button>−</button><span class="n">1</span><button>+</button></span></td>
+        </tr>
+        <tr>
+          <td class="code">I-0037</td>
+          <td class="name">Messerblock<span class="sub">Küche / B-006</span></td>
+          <td class="status-cell"><span class="status"><span class="shape packed"></span>Gepackt</span></td>
+          <td class="qty">×1 <span class="controls"><button>−</button><span class="n">1</span><button>+</button></span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="load-all"><a href="#">Alle 21 laden →</a></div>
+
+  </div>
+
+  <nav class="bottom">
+    <a href="#" class="active"><span class="glyph">▦</span>Items</a>
+    <a href="#"><span class="glyph">◫</span>Kartons</a>
+    <a href="#" class="quick-add"><span class="glyph">+</span>Schnell</a>
+    <a href="#"><span class="glyph">∷</span>Kat.</a>
+    <a href="#"><span class="glyph">⌂</span>Räume</a>
+  </nav>
+
+</body>
+</html>
