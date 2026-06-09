@@ -3,6 +3,10 @@ import { exportKv } from "@/lib/kv/export.ts";
 import { importKv } from "@/lib/kv/import.ts";
 import { deleteAllKv } from "@/lib/kv/deleteAll.ts";
 
+async function* linesAsGenerator(lines: string[]): AsyncGenerator<string> {
+  for (const l of lines) yield l;
+}
+
 // ── 6.1: Round-trip: export → import, prefix exclusion ───────────────────────
 
 Deno.test("export→import round-trip preserves all in-scope entries", async () => {
@@ -39,10 +43,7 @@ Deno.test("export→import round-trip preserves all in-scope entries", async () 
     }
 
     // Import into fresh KV
-    async function* asGenerator(): AsyncGenerator<string> {
-      for (const l of lines) yield l;
-    }
-    const { imported, skipped } = await importKv(dest, asGenerator());
+    const { imported, skipped } = await importKv(dest, linesAsGenerator(lines));
     assertEquals(imported, 8); // 7 list entries + box-code-counter
     assertEquals(skipped, 0);
 
@@ -74,12 +75,8 @@ Deno.test("importKv twice with same lines is idempotent", async () => {
       lines.push(line);
     }
 
-    async function* asGenerator(): AsyncGenerator<string> {
-      for (const l of lines) yield l;
-    }
-
-    const first = await importKv(kv, asGenerator());
-    const second = await importKv(kv, asGenerator());
+    const first = await importKv(kv, linesAsGenerator(lines));
+    const second = await importKv(kv, linesAsGenerator(lines));
 
     assertEquals(first.imported, second.imported);
     assertEquals(first.skipped, second.skipped);

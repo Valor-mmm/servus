@@ -14,7 +14,10 @@ async function createCategory(
   await expect(page.locator(`text=${name}`)).toBeVisible();
 }
 
-async function createRoom(page: import("@playwright/test").Page, name: string) {
+async function _createRoom(
+  page: import("@playwright/test").Page,
+  name: string,
+) {
   await page.goto("/rooms");
   await page.fill('main [name="name"]', name);
   await page.click('main [type="submit"]');

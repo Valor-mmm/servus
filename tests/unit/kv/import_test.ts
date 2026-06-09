@@ -1,6 +1,16 @@
 import { assertEquals } from "@std/assert";
 import { importKv } from "@/lib/kv/import.ts";
 
+async function* withBlanks(): AsyncGenerator<string> {
+  yield "";
+  yield JSON.stringify({
+    key: ["item", "i1"],
+    value: { name: "Sofa" },
+    versionstamp: "0",
+  });
+  yield "   ";
+}
+
 async function* linesOf(
   entries: Array<{ key: Deno.KvKey; value: unknown }>,
 ): AsyncGenerator<string> {
@@ -94,15 +104,6 @@ Deno.test("importKv: batches >50 entries without error", async () => {
 Deno.test("importKv: skips blank lines without error", async () => {
   const kv = await Deno.openKv(":memory:");
   try {
-    async function* withBlanks(): AsyncGenerator<string> {
-      yield "";
-      yield JSON.stringify({
-        key: ["item", "i1"],
-        value: { name: "Sofa" },
-        versionstamp: "0",
-      });
-      yield "   ";
-    }
     const result = await importKv(kv, withBlanks());
     assertEquals(result.imported, 1);
   } finally {
