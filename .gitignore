@@ -20,3 +20,6 @@ tests/e2e/.auth/
 
 # Playwright MCP scratch (screenshots, console logs, page snapshots)
 .playwright-mcp/
+
+# Personal Claude Code overrides
+.claude/settings.local.json

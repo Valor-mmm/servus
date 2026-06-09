@@ -30,10 +30,7 @@ test("manifest.json contains both SVG icon entries", async ({ page }) => {
   expect(maskableIcon.type).toBe("image/svg+xml");
 });
 
-test("offline page is served when navigation fails with no network", async ({
-  page,
-  context,
-}) => {
+test("offline page is served when navigation fails with no network", async ({ page, context }) => {
   // Load the page first so the service worker can install and cache the shell.
   await page.goto("/items");
 
