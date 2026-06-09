@@ -1,5 +1,8 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { listOutstandingInvites, mintInvite } from "@/lib/invites/index.ts";
+import { generateQrSvg } from "@/lib/invites/qr.ts";
+import type { Invite } from "@/lib/invites/types.ts";
 
 interface PageProps {
   imported: number | null;
@@ -7,10 +10,30 @@ interface PageProps {
   deleted: number | null;
   error: string | null;
   csrfToken: string;
+  invites: Invite[];
+  newInviteUrl: string | null;
+  qrSvg: string | null;
+}
+
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 function AdminPage(
-  { imported, skipped, deleted, error, csrfToken }: PageProps,
+  {
+    imported,
+    skipped,
+    deleted,
+    error,
+    csrfToken,
+    invites,
+    newInviteUrl,
+    qrSvg,
+  }: PageProps,
 ) {
   return (
     <main class="page">
@@ -74,17 +97,85 @@ function AdminPage(
           {t("admin.delete.button")}
         </a>
       </section>
+
+      <section class="admin-section">
+        <h2>{t("invites.title")}</h2>
+
+        {newInviteUrl && (
+          <div class="invite-code-banner">
+            <p class="invite-warning">{t("invites.code_warning")}</p>
+            <p>
+              <strong>{t("invites.code_label")}:</strong>
+            </p>
+            <code class="invite-url">{newInviteUrl}</code>
+            {qrSvg && (
+              <img
+                class="invite-qr"
+                src={`data:image/svg+xml;charset=utf-8,${
+                  encodeURIComponent(qrSvg)
+                }`}
+                alt={t("invites.qr_label")}
+                width="200"
+                height="200"
+              />
+            )}
+          </div>
+        )}
+
+        <form method="post" action="/admin">
+          <input type="hidden" name="csrf_token" value={csrfToken} />
+          <input type="hidden" name="_action" value="create_invite" />
+          <label>
+            {t("invites.expiry_label")}
+            <input
+              type="number"
+              name="expiry_days"
+              min="1"
+              max="30"
+              value={t("invites.expiry_default")}
+              required
+            />
+          </label>
+          <button type="submit">{t("invites.create")}</button>
+        </form>
+
+        {invites.length === 0
+          ? <p class="empty">{t("invites.empty")}</p>
+          : (
+            <ul class="item-list">
+              {invites.map((inv) => (
+                <li key={inv.id} class="item-row">
+                  <span>
+                    {t("invites.created_at_label")}: {formatDate(inv.createdAt)}
+                    {" — "}
+                    {t("invites.expiry_date_label")}: {formatDate(inv.expiry)}
+                  </span>
+                  <form
+                    method="post"
+                    action={`/admin/invites/${inv.id}/revoke`}
+                  >
+                    <input type="hidden" name="csrf_token" value={csrfToken} />
+                    <button type="submit" class="btn-danger btn-small">
+                      {t("invites.revoke")}
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+      </section>
     </main>
   );
 }
 
 export const handler = define.handlers({
-  GET(ctx) {
+  async GET(ctx) {
     const url = new URL(ctx.req.url);
     const imported = url.searchParams.get("imported");
     const skipped = url.searchParams.get("skipped");
     const deleted = url.searchParams.get("deleted");
     const error = url.searchParams.get("error");
+    const invites = await listOutstandingInvites();
 
     return ctx.render(
       <AdminPage
@@ -93,7 +184,44 @@ export const handler = define.handlers({
         deleted={deleted !== null ? Number(deleted) : null}
         error={error}
         csrfToken={ctx.state.csrfToken ?? ""}
+        invites={invites}
+        newInviteUrl={null}
+        qrSvg={null}
       />,
     );
+  },
+
+  async POST(ctx) {
+    const form = await ctx.req.formData();
+    const action = form.get("_action") as string;
+
+    if (action === "create_invite") {
+      const expiryDaysRaw = (form.get("expiry_days") as string | null) ?? "7";
+      const expiryDays = Math.max(
+        1,
+        Math.min(30, parseInt(expiryDaysRaw, 10) || 7),
+      );
+
+      const { rawCode } = await mintInvite(expiryDays);
+      const origin = new URL(ctx.req.url).origin;
+      const newInviteUrl = `${origin}/invite/${rawCode}`;
+      const qrSvg = await generateQrSvg(newInviteUrl);
+      const invites = await listOutstandingInvites();
+
+      return ctx.render(
+        <AdminPage
+          imported={null}
+          skipped={null}
+          deleted={null}
+          error={null}
+          csrfToken={ctx.state.csrfToken ?? ""}
+          invites={invites}
+          newInviteUrl={newInviteUrl}
+          qrSvg={qrSvg}
+        />,
+      );
+    }
+
+    return new Response(null, { status: 302, headers: { Location: "/admin" } });
   },
 });

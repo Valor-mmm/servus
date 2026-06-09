@@ -9,6 +9,12 @@ account. No credentials are chosen or remembered.
 
 ## Requirements
 
+### Requirement: Invite management location
+
+The invite management UI (create, list, revoke) MUST be accessible at `/admin`
+as a section of the admin hub. Requests to `/admin/invites` MUST redirect to
+`/admin`.
+
 ### Requirement: Invite code generation
 
 The system SHALL allow an authenticated admin to generate a single-use invite
