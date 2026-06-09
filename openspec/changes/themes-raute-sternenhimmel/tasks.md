@@ -218,11 +218,11 @@
 
 ## 17. Playwright E2E for the theme switcher
 
-- [ ] 17.1 Write `tests/e2e/theme-switcher.spec.ts` covering: (a) first visit
+- [x] 17.1 Write `tests/e2e/theme-switcher.spec.ts` covering: (a) first visit
       with no stored preference and OS dark → app loads under Sternenhimmel; (b)
       user toggles to Raute → reload preserves Raute; (c) user with stored
       Sternenhimmel loads any page → no flash of Raute observed in the first 100
       ms (screenshot dominant-color assertion); (d) toggle updates
       `<meta name="theme-color">`
-- [ ] 17.2 Run `deno task e2e` and confirm the new spec + the full E2E suite
+- [x] 17.2 Run `deno task e2e` and confirm the new spec + the full E2E suite
       pass green
