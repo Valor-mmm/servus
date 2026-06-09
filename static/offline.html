@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de" class="theme-raute">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servus – Kein Netz</title>
+    <script src="/theme-init.js"></script>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .offline-page {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      .offline-page img {
+        width: 120px;
+        height: 120px;
+      }
+      .offline-page h1 {
+        font-size: 1.5rem;
+        margin: 0;
+      }
+      .offline-page p {
+        margin: 0;
+        color: var(--servus-text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="offline-page">
+      <img src="/lion.svg" width="120" height="120" alt="" />
+      <h1>Koa Netz: Nix los in da Hos™</h1>
+      <p>Wart a Moment und probiars no amoi.</p>
+      <button class="btn-primary" onclick="window.location.reload()">
+        Nochmal
+      </button>
+    </div>
+  </body>
+</html>
