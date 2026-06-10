@@ -375,3 +375,31 @@ iOS Human Interface Guidelines.
   than 768 px
 - **THEN** the quantity increment and decrement buttons each have a rendered
   height of at least 44 px
+
+---
+
+### Requirement: Mobile item card layout
+
+Each item in the item list MUST use a three-zone layout:
+`[thumbnail?] | [body] | [quantity controls]`. The three zones MUST NOT wrap
+(`flex-wrap: nowrap`). The body zone MUST display the item name (with
+`text-overflow: ellipsis` truncation) and optional status badge on a first line
+(`.item-row-top`), and the category · room meta text on a second line below it.
+On viewports ≥ 768 px the body zone MUST switch to `flex-direction: row` so that
+name, badge, and meta are displayed on a single horizontal line, preserving the
+desktop density of the current layout.
+
+#### Scenario: Item row does not overflow on a narrow viewport
+
+- **GIVEN** the items list contains at least one item with a long name and one
+  item in pending status
+- **WHEN** an authenticated user views `/items` on a 375 px wide viewport
+- **THEN** each `.item-row` is rendered in at most two visible lines (name line
+  and meta line); no content overlaps or is clipped by the viewport edge
+- **AND** the quantity controls are right-aligned and vertically centred
+
+#### Scenario: Desktop row remains single-line
+
+- **WHEN** an authenticated user views `/items` on a viewport ≥ 768 px
+- **THEN** each item row displays name, badge (if applicable), and meta text on
+  a single horizontal line alongside the quantity controls
