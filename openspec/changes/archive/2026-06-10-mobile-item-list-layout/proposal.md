@@ -24,9 +24,9 @@ The item list row is restructured into a proper two-zone card:
 
 On desktop (≥ 768 px) a `@media` override flips `item-row-body` back to
 `flex-direction: row`, so name, badge, and meta sit on a single horizontal line
-exactly as they do today — no density regression on wide screens.
-No new route, no new island, no JS changes — this is a CSS restructure plus a
-small JSX change in `routes/items/index.tsx`.
+exactly as they do today — no density regression on wide screens. No new route,
+no new island, no JS changes — this is a CSS restructure plus a small JSX change
+in `routes/items/index.tsx`.
 
 ## Capabilities
 
@@ -45,8 +45,8 @@ _(none)_
   `static/styles.css` (new `.item-row-body`, `.item-row-top` rules; update
   `.item-row`, `.item-row a`, `.meta` rules)
 - **No new dependencies**
-- **No spec-breaking changes** — all existing design-system requirements
-  (touch targets ≥ 44 px, mobile bottom nav, etc.) are preserved or improved
+- **No spec-breaking changes** — all existing design-system requirements (touch
+  targets ≥ 44 px, mobile bottom nav, etc.) are preserved or improved
 
 ## Non-goals
 

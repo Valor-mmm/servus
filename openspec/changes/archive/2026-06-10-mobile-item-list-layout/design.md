@@ -1,23 +1,26 @@
 ## Context
 
 `routes/items/index.tsx` renders each item as a `<li class="item-row">` with
-five direct children: `<img>` (optional), `<a>`, `<span class="badge">` (optional),
-`<span class="meta">`, and `<QuantityControl>`. The CSS for `.item-row` is a
-single `display: flex; flex-wrap: wrap` block, which means all five children
-share one wrap context. On a 375 px screen the `<a>` shrinks, the badge and meta
-fall to a second line unstructured, and quantity controls get pushed to a third
-partial line. There is no visual hierarchy.
+five direct children: `<img>` (optional), `<a>`, `<span class="badge">`
+(optional), `<span class="meta">`, and `<QuantityControl>`. The CSS for
+`.item-row` is a single `display: flex; flex-wrap: wrap` block, which means all
+five children share one wrap context. On a 375 px screen the `<a>` shrinks, the
+badge and meta fall to a second line unstructured, and quantity controls get
+pushed to a third partial line. There is no visual hierarchy.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
 - Name is always fully readable (or truncates cleanly with `…`)
-- On mobile (< 768 px): badge and meta text appear below the name, never beside quantity controls
-- On desktop (≥ 768 px): name, badge, and meta remain on a single horizontal line — no change to desktop density
+- On mobile (< 768 px): badge and meta text appear below the name, never beside
+  quantity controls
+- On desktop (≥ 768 px): name, badge, and meta remain on a single horizontal
+  line — no change to desktop density
 - Quantity controls are always right-aligned and vertically centred
 - Thumbnail remains left-aligned, vertically centred
-- Touch targets for quantity controls remain ≥ 44 px (existing design-system requirement)
+- Touch targets for quantity controls remain ≥ 44 px (existing design-system
+  requirement)
 - Layout works in both light and dark themes without additional changes
 
 **Non-Goals:**
@@ -31,6 +34,7 @@ partial line. There is no visual hierarchy.
 ### 1. New HTML structure inside `<li class="item-row">`
 
 Current (flat):
+
 ```
 <li class="item-row">
   <img ...>          ← optional thumbnail
@@ -42,6 +46,7 @@ Current (flat):
 ```
 
 New (zoned):
+
 ```
 <li class="item-row">
   <img ...>                          ← optional thumbnail, left zone
@@ -65,7 +70,7 @@ MUST NOT wrap:
 .item-row {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap;   /* was: wrap */
+  flex-wrap: nowrap; /* was: wrap */
   gap: 0.75rem;
 }
 ```
@@ -75,7 +80,7 @@ New `.item-row-body`:
 ```css
 .item-row-body {
   flex: 1;
-  min-width: 0;          /* allows the flex child to shrink below content size */
+  min-width: 0; /* allows the flex child to shrink below content size */
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -143,10 +148,11 @@ with name, badge, and meta side by side:
 }
 ```
 
-On desktop `.item-row-top` still holds the name + badge; the `<span class="meta">`
-becomes a sibling of `.item-row-top` inside the now-horizontal body. The visual
-result is: `[thumbnail]  Name  ● Badge  category · room  [– ×3 +]` — unchanged
-from today's desktop layout.
+On desktop `.item-row-top` still holds the name + badge; the
+`<span class="meta">` becomes a sibling of `.item-row-top` inside the
+now-horizontal body. The visual result is:
+`[thumbnail]  Name  ● Badge  category · room  [– ×3 +]` — unchanged from today's
+desktop layout.
 
 ### 4. Existing `.item-row a` rule scope
 
@@ -156,11 +162,11 @@ top line, not to any other anchor that might appear in the row.
 
 ## Affected Files
 
-| File | Change |
-|---|---|
-| `routes/items/index.tsx` | Wrap link + badge in `<div class="item-row-top">`, wrap body in `<div class="item-row-body">` |
-| `static/styles.css` | Add `.item-row-body`, `.item-row-top`, `.item-row-top a`; update `.item-row` (remove `flex-wrap: wrap`); tighten `.item-row a` selector scope; add `@media (min-width: 768px)` override to restore row direction on desktop |
-| `openspec/specs/design-system/spec.md` | Add requirement: Mobile item card layout |
+| File                                   | Change                                                                                                                                                                                                                      |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routes/items/index.tsx`               | Wrap link + badge in `<div class="item-row-top">`, wrap body in `<div class="item-row-body">`                                                                                                                               |
+| `static/styles.css`                    | Add `.item-row-body`, `.item-row-top`, `.item-row-top a`; update `.item-row` (remove `flex-wrap: wrap`); tighten `.item-row a` selector scope; add `@media (min-width: 768px)` override to restore row direction on desktop |
+| `openspec/specs/design-system/spec.md` | Add requirement: Mobile item card layout                                                                                                                                                                                    |
 
 ## Wireframes
 
