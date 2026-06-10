@@ -8,26 +8,38 @@ test("manifest link is present in HTML head", async ({ page }) => {
   await expect(manifest).toHaveAttribute("href", "/manifest.json");
 });
 
-test("manifest.json contains both SVG icon entries", async ({ page }) => {
+test("manifest.json contains PNG and SVG icon entries", async ({ page }) => {
   const response = await page.request.get("/manifest.json");
   expect(response.ok()).toBe(true);
 
   const json = await response.json();
-  expect(json.icons).toHaveLength(2);
+  expect(json.icons).toHaveLength(4);
 
-  const anyIcon = json.icons.find(
-    (i: { purpose: string }) => i.purpose === "any",
+  const png192 = json.icons.find(
+    (i: { type: string; sizes: string }) =>
+      i.type === "image/png" && i.sizes === "192x192",
   );
-  expect(anyIcon).toBeDefined();
-  expect(anyIcon.src).toBe("/lion.svg");
-  expect(anyIcon.type).toBe("image/svg+xml");
+  expect(png192).toBeDefined();
+  expect(png192.src).toBe("/icon-192.png");
+  expect(png192.purpose).toBe("any");
 
-  const maskableIcon = json.icons.find(
-    (i: { purpose: string }) => i.purpose === "maskable",
+  const png512 = json.icons.find(
+    (i: { type: string; sizes: string }) =>
+      i.type === "image/png" && i.sizes === "512x512",
   );
-  expect(maskableIcon).toBeDefined();
-  expect(maskableIcon.src).toBe("/lion-maskable.svg");
-  expect(maskableIcon.type).toBe("image/svg+xml");
+  expect(png512).toBeDefined();
+  expect(png512.src).toBe("/icon-512.png");
+  expect(png512.purpose).toContain("maskable");
+
+  const svgAny = json.icons.find(
+    (i: { src: string }) => i.src === "/lion.svg",
+  );
+  expect(svgAny).toBeDefined();
+
+  const svgMaskable = json.icons.find(
+    (i: { src: string }) => i.src === "/lion-maskable.svg",
+  );
+  expect(svgMaskable).toBeDefined();
 });
 
 test("offline page is served when navigation fails with no network", async ({ page, context }) => {
