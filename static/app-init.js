@@ -112,7 +112,7 @@
 })();
 
 if ("serviceWorker" in navigator) {
-  self.addEventListener("load", function () {
+  window.addEventListener("load", function () {
     navigator.serviceWorker.register("/sw.js");
   });
 }

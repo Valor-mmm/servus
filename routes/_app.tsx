@@ -38,7 +38,7 @@ export default define.page(function App({ Component, state, url }) {
           content="black-translucent"
         />
         <meta name="apple-mobile-web-app-title" content={t("app.name")} />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
         {state.user && (
