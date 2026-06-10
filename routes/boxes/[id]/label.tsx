@@ -95,9 +95,32 @@ const STYLES = `
   }
   .qr-code { margin-top: 0.5rem; }
   .qr-code svg { width: 180px; height: 180px; }
+  @media screen {
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .toolbar-btn {
+      padding: 0.5rem 1.25rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 2px solid #111;
+      background: #111;
+      color: #fff;
+      border-radius: 4px;
+    }
+    .toolbar-link {
+      font-size: 1rem;
+      color: #333;
+      text-decoration: underline;
+    }
+  }
   @media print {
     body { min-height: auto; padding: 0; }
     .label-card { border: 1px solid #000; }
+    .toolbar { display: none; }
   }
 `;
 
@@ -132,6 +155,14 @@ export const handler = define.handlers({
   <style>${STYLES}</style>
 </head>
 <body>
+  <div class="toolbar">
+    <button id="print-btn" class="toolbar-btn">${
+      esc(t("boxes.action.print"))
+    }</button>
+    <a class="toolbar-link" href="/boxes/${esc(box.id)}">${
+      esc(t("action.back"))
+    }</a>
+  </div>
   <div class="label-card">
     ${destinationRoom ? `<div class="room-icon">${roomIcon}</div>` : ""}
     ${
@@ -144,6 +175,11 @@ export const handler = define.handlers({
     <div><span class="item-count">${esc(itemCountStr)}</span></div>
     <div class="qr-code">${qrSvg}</div>
   </div>
+  <script>
+    document.getElementById('print-btn').addEventListener('click', function() {
+      window.print();
+    });
+  </script>
 </body>
 </html>`;
 

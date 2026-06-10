@@ -234,6 +234,7 @@ const de = {
   "boxes.action.place_item": "Einlagern",
   "boxes.action.assign_room": "Zielraum festlegen",
   "boxes.action.unpack_all": "Alle entpacken nach {room}",
+  "boxes.action.print": "Drucken",
 
   // Box delivered-state UI copy
   "boxes.place_item_label": "In Raum einlagern",

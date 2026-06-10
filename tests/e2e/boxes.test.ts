@@ -378,6 +378,37 @@ test("delivered box without room: assign-room shown; after assign, unpack-all ap
 
 // ── 8.6: Label page shows room icon, room name, and item count badge ───────────
 
+// ── Print toolbar ─────────────────────────────────────────────────────────────
+
+test("label page shows Drucken button and Zurück link above label card", async ({ page }) => {
+  const roomName = `Wohnzimmer-toolbar-${RUN}`;
+  const boxLabel = `Toolbar-${RUN}`;
+
+  await createRoom(page, roomName);
+  await createBox(page, boxLabel, roomName);
+  const boxUrl = page.url();
+  const boxId = new URL(boxUrl).pathname.split("/").pop()!;
+
+  await page.goto(`${boxUrl}/label`);
+
+  // Toolbar is visible
+  await expect(page.locator(".toolbar")).toBeVisible();
+
+  // Print button is present
+  const printBtn = page.getByRole("button", { name: "Drucken" });
+  await expect(printBtn).toBeVisible();
+
+  // Zurück link points back to the box detail page
+  const backLink = page.getByRole("link", { name: "Zurück" });
+  await expect(backLink).toBeVisible();
+  const href = await backLink.getAttribute("href");
+  expect(href).toBe(`/boxes/${boxId}`);
+
+  // Clicking Zurück navigates back to the box detail page
+  await backLink.click();
+  await expect(page).toHaveURL(`/boxes/${boxId}`);
+});
+
 test("label page shows room icon, large room name, and item count badge", async ({ page }) => {
   const catName = `Kat-8-6-${RUN}`;
   const roomName = `Küche-label-${RUN}`;

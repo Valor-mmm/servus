@@ -333,7 +333,9 @@ The system MUST provide a printable label page for each box. The page MUST
 contain: the destination room name as the largest element (with a Unicode room
 icon derived from the room name), the short code, the optional label text, an
 item count badge, and an SVG QR code linking to the box detail URL. The page
-MUST render without navigation chrome and MUST apply print-optimised CSS.
+MUST render without navigation chrome and MUST apply print-optimised CSS. The
+label page MUST also render a screen-only toolbar (hidden in `@media print`)
+containing a print trigger and a back link to the box detail page.
 
 #### Scenario: Label page renders dominant room name with icon
 
@@ -364,3 +366,10 @@ MUST render without navigation chrome and MUST apply print-optimised CSS.
 
 - **WHEN** a user scans the QR code printed from the label page
 - **THEN** the device browser navigates to the box detail page (login required)
+
+#### Scenario: Toolbar is visible on screen but absent when printing
+
+- **WHEN** an authenticated user opens the label page in a browser
+- **THEN** a "Drucken" button and a "Zurück" link are visible above the label
+  card
+- **AND** the toolbar is absent from the printed output
