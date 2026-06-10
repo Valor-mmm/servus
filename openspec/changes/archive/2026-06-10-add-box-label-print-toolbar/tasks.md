@@ -57,4 +57,6 @@
 ## 6. Wrap-up
 
 - [x] 6.1 Run `deno task check` and `deno task test` — all green.
-- [x] 6.2 Run the full E2E suite (`deno task e2e`) — auth setup failure is pre-existing (confirmed against baseline); no regressions introduced by this change.
+- [x] 6.2 Run the full E2E suite (`deno task e2e`) — auth setup failure is
+      pre-existing (confirmed against baseline); no regressions introduced by
+      this change.
