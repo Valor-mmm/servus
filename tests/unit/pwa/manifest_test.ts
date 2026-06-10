@@ -6,32 +6,49 @@ const manifest = JSON.parse(
   ),
 );
 
-Deno.test("manifest icons has exactly two entries", () => {
-  assertEquals(manifest.icons.length, 2);
+Deno.test("manifest icons has exactly four entries", () => {
+  assertEquals(manifest.icons.length, 4);
 });
 
-Deno.test("manifest icons all use image/svg+xml type", () => {
-  for (const icon of manifest.icons) {
-    assertEquals(icon.type, "image/svg+xml");
-  }
-});
-
-Deno.test("manifest has an icon with purpose 'any' pointing to /lion.svg", () => {
-  const icon = manifest.icons.find((i: { purpose: string }) =>
-    i.purpose === "any"
+Deno.test("manifest has a 192x192 PNG icon with purpose 'any'", () => {
+  const icon = manifest.icons.find(
+    (i: { src: string; type: string; sizes: string }) =>
+      i.type === "image/png" && i.sizes === "192x192",
   );
   assertExists(icon);
-  assertEquals(icon.src, "/lion.svg");
+  assertEquals(icon.src, "/icon-192.png");
+  assertEquals(icon.purpose, "any");
+});
+
+Deno.test("manifest has a 512x512 PNG icon covering maskable purpose", () => {
+  const icon = manifest.icons.find(
+    (i: { src: string; type: string; sizes: string }) =>
+      i.type === "image/png" && i.sizes === "512x512",
+  );
+  assertExists(icon);
+  assertEquals(icon.src, "/icon-512.png");
+  assertEquals(icon.purpose.includes("maskable"), true);
 });
 
 Deno.test(
-  "manifest has an icon with purpose 'maskable' pointing to /lion-maskable.svg",
+  "manifest has an SVG icon with purpose 'any' pointing to /lion.svg",
   () => {
-    const icon = manifest.icons.find((i: { purpose: string }) =>
-      i.purpose === "maskable"
+    const icon = manifest.icons.find(
+      (i: { src: string; type: string }) =>
+        i.type === "image/svg+xml" && i.src === "/lion.svg",
     );
     assertExists(icon);
-    assertEquals(icon.src, "/lion-maskable.svg");
+  },
+);
+
+Deno.test(
+  "manifest has an SVG icon with purpose 'maskable' pointing to /lion-maskable.svg",
+  () => {
+    const icon = manifest.icons.find((i: { src: string }) =>
+      i.src === "/lion-maskable.svg"
+    );
+    assertExists(icon);
+    assertEquals(icon.purpose, "maskable");
   },
 );
 
