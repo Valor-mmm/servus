@@ -265,10 +265,13 @@ The app MUST be installable as a Progressive Web App on Android (Chrome and
 Firefox). iOS support is deferred. The HTML document MUST include a
 `<link rel="manifest">` pointing to `/manifest.json`. The manifest MUST specify
 `display: "standalone"`, a short name, a theme color matching the Bavarian blue
-token (`#0E4FA0`), and an `icons` array with at least two entries: one with
-`"purpose": "any"` and one with `"purpose": "maskable"`. Both MUST use
-`"type": "image/svg+xml"`. A registered service worker is required by Chrome and
-Firefox for the install prompt to appear; the app MUST register one.
+token (`#0E4FA0`), and an `icons` array containing at minimum a 192×192 PNG
+(`"purpose": "any"`) and a 512×512 PNG (`"purpose": "any maskable"`). Chrome
+requires bitmap icons at these sizes to surface the install prompt; SVG-only
+manifests do not satisfy Chrome's installability check. SVG entries MAY be
+included as additional entries for browsers that prefer them. A registered
+service worker is required by Chrome and Firefox for the install prompt to
+appear; the app MUST register one.
 
 The service worker MUST pre-cache the app shell (stylesheet, scripts, SVG icons,
 and the offline page) on install. For navigation requests, it MUST use a
@@ -288,9 +291,9 @@ reload button that retries the original URL via `window.location.reload()`.
 
 - **WHEN** a browser requests `/manifest.json`
 - **THEN** the response is valid JSON with `name`, `short_name`, `display`,
-  `theme_color`, and `icons` fields; the `icons` array contains one entry with
-  `"purpose": "any"` and one with `"purpose": "maskable"`, both using
-  `"type": "image/svg+xml"`
+  `theme_color`, and `icons` fields; the `icons` array contains a 192×192 PNG
+  entry with `"purpose": "any"` and a 512×512 PNG entry with
+  `"purpose": "any maskable"`
 
 #### Scenario: App installable on Android
 

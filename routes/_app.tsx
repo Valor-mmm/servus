@@ -30,6 +30,13 @@ export default define.page(function App({ Component, state, url }) {
         {state.csrfToken && (
           <meta name="csrf-token" content={state.csrfToken} />
         )}
+        <link rel="icon" type="image/svg+xml" href="/lion.svg" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icon-192.png"
+        />
         <link rel="stylesheet" href="/styles.css" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -38,7 +45,7 @@ export default define.page(function App({ Component, state, url }) {
           content="black-translucent"
         />
         <meta name="apple-mobile-web-app-title" content={t("app.name")} />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
         {state.user && (
