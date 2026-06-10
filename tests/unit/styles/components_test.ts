@@ -179,3 +179,80 @@ Deno.test(".nav-quick-add is a raised primary action", () => {
     ".nav-quick-add must source emphasis from a theme token (primary or nav-active)",
   );
 });
+
+// ── Group 9: Mobile item card layout ──────────────────────────────────────────
+
+Deno.test(".item-row uses nowrap three-zone layout", () => {
+  const block = extractBlock(CSS, ".item-row");
+  assert(block.length > 0, ".item-row rule must exist");
+  assert(
+    block.includes("nowrap"),
+    ".item-row must use flex-wrap: nowrap so zones never collapse",
+  );
+});
+
+Deno.test(".item-row-body is a flex-column centre zone", () => {
+  const block = extractBlock(CSS, ".item-row-body");
+  assert(block.length > 0, ".item-row-body rule must exist");
+  assert(
+    block.includes("flex-direction") && block.includes("column"),
+    ".item-row-body must set flex-direction: column",
+  );
+  assert(
+    block.includes("flex: 1") || block.includes("flex:1"),
+    ".item-row-body must set flex: 1 to fill available space",
+  );
+  assert(
+    block.includes("min-width: 0") || block.includes("min-width:0"),
+    ".item-row-body must set min-width: 0 to allow shrinking",
+  );
+});
+
+Deno.test(".item-row-top is an inline name+badge zone", () => {
+  const block = extractBlock(CSS, ".item-row-top");
+  assert(block.length > 0, ".item-row-top rule must exist");
+  assert(
+    block.includes("display") && block.includes("flex"),
+    ".item-row-top must be a flex container",
+  );
+  assert(
+    block.includes("min-width: 0") || block.includes("min-width:0"),
+    ".item-row-top must set min-width: 0",
+  );
+});
+
+Deno.test(".item-row-top a truncates long names", () => {
+  const blocks = extractAllMatchingBlocks(CSS, ".item-row-top a");
+  assert(blocks.length > 0, ".item-row-top a rule must exist");
+  const combined = blocks.join(" ");
+  assert(
+    combined.includes("text-overflow") && combined.includes("ellipsis"),
+    ".item-row-top a must truncate with text-overflow: ellipsis",
+  );
+  assert(
+    combined.includes("white-space") && combined.includes("nowrap"),
+    ".item-row-top a must prevent wrapping with white-space: nowrap",
+  );
+});
+
+Deno.test(".item-row-body .meta has truncation styles", () => {
+  const blocks = extractAllMatchingBlocks(CSS, ".item-row-body .meta");
+  assert(blocks.length > 0, ".item-row-body .meta rule must exist");
+  const combined = blocks.join(" ");
+  assert(
+    combined.includes("text-overflow") && combined.includes("ellipsis"),
+    ".item-row-body .meta must truncate with text-overflow: ellipsis",
+  );
+});
+
+Deno.test("desktop override restores row direction for .item-row-body", () => {
+  const mediaIdx = CSS.indexOf("min-width: 768px");
+  assert(mediaIdx !== -1, "@media (min-width: 768px) block must exist");
+  const afterMedia = CSS.slice(mediaIdx);
+  assert(
+    afterMedia.includes(".item-row-body") &&
+      afterMedia.includes("flex-direction") &&
+      afterMedia.includes("row"),
+    "@media (min-width: 768px) must override .item-row-body to flex-direction: row",
+  );
+});

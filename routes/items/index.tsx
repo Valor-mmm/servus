@@ -126,14 +126,20 @@ function ItemsPage(
                     height="40"
                   />
                 )}
-                <a href={`/items/${item.id}`}>{displayName(item)}</a>
-                {item.status === "pending" && (
-                  <span class="badge badge-pending">{t("items.pending")}</span>
-                )}
-                <span class="meta">
-                  {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
-                  {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
-                </span>
+                <div class="item-row-body">
+                  <div class="item-row-top">
+                    <a href={`/items/${item.id}`}>{displayName(item)}</a>
+                    {item.status === "pending" && (
+                      <span class="badge badge-pending">
+                        {t("items.pending")}
+                      </span>
+                    )}
+                  </div>
+                  <span class="meta">
+                    {item.categoryId ? (catMap[item.categoryId] ?? "–") : "–"}
+                    {item.roomId ? ` · ${roomMap[item.roomId] ?? "–"}` : ""}
+                  </span>
+                </div>
                 <QuantityControl
                   itemId={item.id}
                   initialQuantity={item.quantity}
