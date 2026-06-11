@@ -144,7 +144,7 @@ test("item creation works end-to-end when a category exists", async ({
   const marker = `prod-test-${Date.now()}`;
   await page.fill('[name="name"]', marker);
 
-  await page.click('button[type="submit"]');
+  await page.locator("main").locator('button[type="submit"]').click();
   await expect(page).toHaveURL("/items", { timeout: 10_000 });
   await expect(page.locator(`text=${marker}`)).toBeVisible({ timeout: 5_000 });
 

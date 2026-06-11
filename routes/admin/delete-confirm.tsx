@@ -2,6 +2,7 @@ import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { getKv } from "@/lib/kv/client.ts";
 import { exportKv } from "@/lib/kv/export.ts";
+import { isAdminUser } from "@/lib/auth/adminGuard.ts";
 
 interface PageProps {
   count: number;
@@ -39,6 +40,9 @@ function DeleteConfirmPage({ count, csrfToken }: PageProps) {
 
 export const handler = define.handlers({
   async GET(ctx) {
+    if (!isAdminUser(ctx.state.user?.username ?? "")) {
+      return new Response(null, { status: 403 });
+    }
     const kv = await getKv();
     let count = 0;
     for await (const _line of exportKv(kv)) {
