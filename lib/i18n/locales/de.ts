@@ -168,6 +168,8 @@ const de = {
     "Keine Kamera gefunden. Bitte verwende die Dateiauswahl.",
   "capture.unsupportedHint":
     "Dein Browser unterstützt keinen direkten Kamerazugriff. Bitte verwende die Dateiauswahl.",
+  "capture.zoomSliderLabel": "Zoom",
+  "capture.focusRingLabel": "Fokuspunkt",
 
   // ── Admin ─────────────────────────────────────────────────────────────────
   "admin.title": "Verwaltung",

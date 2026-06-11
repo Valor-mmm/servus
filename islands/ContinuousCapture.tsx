@@ -7,6 +7,14 @@ import { captureAndUpload } from "@/lib/capture/shutterLogic.ts";
 import { createCleanup } from "@/lib/capture/lifecycleLogic.ts";
 import { classifyGetUserMediaError } from "@/lib/capture/fallbackLogic.ts";
 import { isContinuousCaptureSupported } from "@/lib/camera/support.ts";
+import {
+  applyZoom,
+  createPinchHandler,
+  type FocusMode,
+  handleTapToFocus,
+  initCameraControls,
+  type ZoomCapability,
+} from "@/lib/camera/controls.ts";
 import PhotoCapture from "@/islands/PhotoCapture.tsx";
 
 interface Props {
@@ -26,29 +34,68 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
   const thumbnails = useSignal<string[]>([]);
   const busy = useSignal(false);
   const error = useSignal<string | null>(null);
-  // Set to true immediately if getUserMedia is not available in this browser.
   const fallback = useSignal(!isContinuousCaptureSupported());
   const fallbackHint = useSignal<string | null>(
     !isContinuousCaptureSupported() ? t("capture.unsupportedHint") : null,
   );
 
-  // True once at least one item has been created in this session.
-  // Used to decide whether handleClose() should reload to reveal new items.
   const hadCaptures = useSignal(false);
+
+  // ── Zoom + focus signals ───────────────────────────────────────────────
+  const zoomCap = useSignal<ZoomCapability | null>(null);
+  const zoomLevel = useSignal(1);
+  const focusSupported = useSignal(false);
+  const focusMode = useSignal<FocusMode>("continuous");
+  const focusRing = useSignal<{ x: number; y: number } | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const focusRingTimerRef = useRef<number | null>(null);
+
+  // ── Pinch handler (recreated when zoom cap changes) ────────────────────
+  const pinchRef = useRef(
+    createPinchHandler({
+      onZoom: async (zoom) => {
+        zoomLevel.value = zoom;
+        const track = streamRef.current?.getVideoTracks()[0];
+        if (track) await applyZoom(track, zoom);
+      },
+      zoomCap: { min: 1, max: 1, step: 0.1 },
+      getCurrentZoom: () => zoomLevel.value,
+    }),
+  );
 
   // ── Exit-path cleanup ─────────────────────────────────────────────────
 
   const cleanup = createCleanup(streamRef, videoRef);
 
+  function resetControlSignals() {
+    zoomCap.value = null;
+    zoomLevel.value = 1;
+    focusSupported.value = false;
+    focusMode.value = "continuous";
+    focusRing.value = null;
+    if (focusRingTimerRef.current !== null) {
+      clearTimeout(focusRingTimerRef.current);
+      focusRingTimerRef.current = null;
+    }
+  }
+
   useEffect(() => {
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") cleanup();
+      if (document.visibilityState === "hidden") {
+        cleanup();
+        resetControlSignals();
+      }
     };
-    const onPageHide = () => cleanup();
-    const onBeforeUnload = () => cleanup();
+    const onPageHide = () => {
+      cleanup();
+      resetControlSignals();
+    };
+    const onBeforeUnload = () => {
+      cleanup();
+      resetControlSignals();
+    };
 
     document.addEventListener("visibilitychange", onVisibility);
     globalThis.addEventListener("pagehide", onPageHide);
@@ -56,6 +103,7 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
 
     return () => {
       cleanup();
+      resetControlSignals();
       document.removeEventListener("visibilitychange", onVisibility);
       globalThis.removeEventListener("pagehide", onPageHide);
       globalThis.removeEventListener("beforeunload", onBeforeUnload);
@@ -66,8 +114,9 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
 
   async function handleShutter() {
     if (busy.value) return;
+    // Bail if a pinch is still active — don't fire shutter mid-gesture
+    if (pinchRef.current.isPinching()) return;
 
-    // Phase: idle → request camera permission and start stream
     if (phase.value === "idle") {
       busy.value = true;
       error.value = null;
@@ -77,6 +126,26 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
           videoRef.current ?? { srcObject: null },
         );
         streamRef.current = stream;
+
+        // Initialise zoom + focus controls
+        const controls = await initCameraControls(stream);
+        zoomCap.value = controls.zoomCap;
+        focusSupported.value = controls.focusSupported;
+        zoomLevel.value = 1;
+
+        // Rebuild pinch handler with real capability range
+        if (controls.zoomCap) {
+          pinchRef.current = createPinchHandler({
+            onZoom: async (zoom) => {
+              zoomLevel.value = zoom;
+              const track = stream.getVideoTracks()[0];
+              if (track) await applyZoom(track, zoom);
+            },
+            zoomCap: controls.zoomCap,
+            getCurrentZoom: () => zoomLevel.value,
+          });
+        }
+
         phase.value = "starting";
       } catch (err) {
         const kind = classifyGetUserMediaError(err);
@@ -95,7 +164,6 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
       return;
     }
 
-    // Phase: starting or in-progress → capture frame and upload
     if (phase.value === "starting" || phase.value === "in-progress") {
       if (!videoRef.current) return;
       busy.value = true;
@@ -109,7 +177,6 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
         const thumbUrl = URL.createObjectURL(blob);
 
         if (phase.value === "starting") {
-          // Create new item from first photo
           const resp = await fetch("/api/items/create-from-photo", {
             method: "POST",
             headers: {
@@ -125,7 +192,6 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
           hadCaptures.value = true;
           phase.value = "in-progress";
         } else {
-          // Append photo to existing item
           const resp = await fetch("/api/items/append-photo", {
             method: "POST",
             headers: {
@@ -173,10 +239,52 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
 
   function handleClose() {
     cleanup();
+    resetControlSignals();
     phase.value = "closed";
     if (hadCaptures.value) {
       globalThis.location?.reload();
     }
+  }
+
+  // ── Zoom slider handler ────────────────────────────────────────────────
+
+  async function handleZoomSlider(e: Event) {
+    const value = parseFloat((e.target as HTMLInputElement).value);
+    zoomLevel.value = value;
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (track) await applyZoom(track, value);
+  }
+
+  // ── Tap-to-focus handler ───────────────────────────────────────────────
+
+  async function handleVideoPointerDown(e: PointerEvent) {
+    // Delegate to pinch handler first
+    pinchRef.current.onPointerDown(e);
+
+    // Only handle tap-to-focus when focus is supported and not a pinch gesture
+    if (!focusSupported.value) return;
+    if (pinchRef.current.isPinching()) return;
+
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+
+    const rect = videoEl.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+
+    // Show focus ring
+    focusRing.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    if (focusRingTimerRef.current !== null) {
+      clearTimeout(focusRingTimerRef.current);
+    }
+    focusRingTimerRef.current = setTimeout(() => {
+      focusRing.value = null;
+      focusRingTimerRef.current = null;
+    }, 1500) as unknown as number;
+
+    focusMode.value = await handleTapToFocus(track, focusMode.value, x, y);
   }
 
   // ── Render ────────────────────────────────────────────────────────────
@@ -200,13 +308,44 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
 
   return (
     <div class="continuous-capture">
-      <video
-        ref={videoRef}
-        playsinline
-        muted
-        autoplay
-        class="capture-viewfinder"
-      />
+      <div class="capture-viewfinder-wrap">
+        <video
+          ref={videoRef}
+          playsinline
+          muted
+          autoplay
+          class="capture-viewfinder"
+          onPointerDown={handleVideoPointerDown}
+          onPointerMove={(e) => pinchRef.current.onPointerMove(e)}
+          onPointerUp={(e) => pinchRef.current.onPointerUp(e)}
+          onPointerCancel={(e) => pinchRef.current.onPointerUp(e)}
+        />
+
+        {zoomCap.value !== null && (
+          <input
+            type="range"
+            class="capture-zoom-slider"
+            min={zoomCap.value.min}
+            max={zoomCap.value.max}
+            step={zoomCap.value.step}
+            value={zoomLevel.value}
+            aria-label={t("capture.zoomSliderLabel")}
+            onInput={handleZoomSlider}
+          />
+        )}
+
+        {focusRing.value !== null && (
+          <div
+            class="capture-focus-ring"
+            aria-hidden="true"
+            style={{
+              left: `${focusRing.value.x}px`,
+              top: `${focusRing.value.y}px`,
+            }}
+            aria-label={t("capture.focusRingLabel")}
+          />
+        )}
+      </div>
 
       {thumbnails.value.length > 0 && (
         <div class="capture-preview-strip">

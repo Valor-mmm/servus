@@ -58,6 +58,17 @@ export default defineConfig({
       dependencies: ["setup"],
       testMatch: /continuous-capture\.spec\.ts/,
     },
+    // Chromium project for camera zoom + focus controls spec.
+    {
+      name: "chromium-camera-controls",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "tests/e2e/.auth/user.json",
+        permissions: ["camera"],
+      },
+      dependencies: ["setup"],
+      testMatch: /camera-controls\.spec\.ts/,
+    },
   ],
 
   webServer: {

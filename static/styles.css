@@ -740,6 +740,77 @@ button:focus-visible,
   }
 }
 
+/* ── Continuous capture viewfinder wrapper (relative container for overlays) ── */
+.capture-viewfinder-wrap {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.capture-viewfinder {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ── Zoom slider overlay ─────────────────────────────────────────────────── */
+.capture-zoom-slider {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 5%;
+  width: 90%;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  outline: none;
+  cursor: pointer;
+}
+
+.capture-zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.capture-zoom-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  border: none;
+}
+
+/* ── Focus ring overlay ──────────────────────────────────────────────────── */
+@keyframes focus-ring-fade {
+  0% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+.capture-focus-ring {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: focus-ring-fade 1.5s ease-out forwards;
+  transform-origin: center;
+}
+
 /* ── Capture preview strip (in-session thumbnails during multi-photo capture) ── */
 .capture-preview-strip {
   display: flex;
