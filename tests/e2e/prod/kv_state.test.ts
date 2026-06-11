@@ -14,7 +14,6 @@ async function login(page: Page): Promise<void> {
   await page.goto("/login");
   await page.fill('[name="username"]', USERNAME);
   await page.fill('[name="password"]', PASSWORD);
-  // Login form has only one submit — click within main to avoid nav logout button
   await page.locator("main").locator('[type="submit"]').click();
   await expect(page).not.toHaveURL(/\/login/, { timeout: 15_000 });
 }
@@ -41,11 +40,9 @@ test("kv: write a category and verify it persists", async ({ page }) => {
 
   const name = `diag-cat-${Date.now()}`;
   await page.fill('[name="name"]', name);
-  // Click the submit inside the CREATE form (first form in main), not the nav logout
   await page.locator('main form:has([name="_action"][value="create"]) [type="submit"]').click();
   await expect(page).toHaveURL("/categories", { timeout: 10_000 });
 
-  // Should be in the list now
   await expect(page.locator(`text=${name}`)).toBeVisible({ timeout: 5_000 });
   console.log(`\nCategory "${name}" created and visible.`);
 
@@ -89,4 +86,23 @@ test("kv: write a room and verify it persists", async ({ page }) => {
     await page.waitForURL("/rooms", { timeout: 5_000 });
     console.log(`Room "${name}" deleted.`);
   }
+});
+
+// Creates a persistent sentinel entry we can check later to confirm KV durability.
+// Run this, note the name in the output, and check /categories after some time.
+test("kv: create a PERSISTENT sentinel category (do not delete)", async ({
+  page,
+}) => {
+  await login(page);
+
+  const sentinel = `sentinel-${new Date().toISOString().slice(0, 16).replace("T", "-")}`;
+  console.log(`\nCreating sentinel: "${sentinel}"`);
+
+  await page.goto("/categories");
+  await expect(page).toHaveURL("/categories", { timeout: 10_000 });
+  await page.fill('[name="name"]', sentinel);
+  await page.locator('main form:has([name="_action"][value="create"]) [type="submit"]').click();
+  await expect(page).toHaveURL("/categories", { timeout: 10_000 });
+  await expect(page.locator(`text=${sentinel}`)).toBeVisible({ timeout: 5_000 });
+  console.log(`Sentinel "${sentinel}" created. Navigate to /categories later and verify it is still there.`);
 });
