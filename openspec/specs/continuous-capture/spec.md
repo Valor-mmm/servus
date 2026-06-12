@@ -261,6 +261,13 @@ gesture on the viewfinder MUST produce the same effect as the slider.
 This requirement covers hardware (optical) zoom only. CSS-scale digital zoom is
 explicitly out of scope.
 
+> **Browser compatibility note:** `zoom` is a Chrome/Android extension to the
+> W3C Media Capture spec. Firefox does not expose a `zoom` capability from
+> `getCapabilities()` and does not implement the `zoom` constraint in
+> `applyConstraints()`. As a result, the zoom slider and pinch-to-zoom gesture
+> are unavailable in Firefox. This is the correct graceful degradation; no
+> workaround is planned.
+
 #### Scenario: Zoom slider appears when zoom capability is available
 
 - **WHEN** the user activates the camera on a device whose video track reports a
@@ -303,6 +310,13 @@ with normalised coordinates. A brief animated ring indicator MUST appear at the
 tap position and fade within 1.5 seconds. A second tap MUST reset focus to
 `"continuous"` mode. When `"manual"` is not listed as a supported focus mode,
 tapping the viewfinder has no effect.
+
+> **Browser compatibility note:** `focusMode` and `pointOfInterest` are
+> Chrome/Android extensions to the W3C Media Capture spec. Firefox does not
+> include `focusMode` in `getCapabilities()` and does not implement the
+> `focusMode`/`pointOfInterest` constraints. As a result, tap-to-focus is
+> unavailable in Firefox. This is the correct graceful degradation; no
+> workaround is planned.
 
 #### Scenario: Tap places manual focus at the tapped position
 
