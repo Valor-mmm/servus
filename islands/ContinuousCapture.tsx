@@ -258,6 +258,9 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
   // ── Tap-to-focus handler ───────────────────────────────────────────────
 
   async function handleVideoPointerDown(e: PointerEvent) {
+    // Capture pointer so pointerup always fires on this element, even when
+    // fingers lift outside the video — prevents stale entries in the pinch map.
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     // Delegate to pinch handler first
     pinchRef.current.onPointerDown(e);
 

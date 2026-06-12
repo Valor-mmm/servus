@@ -751,6 +751,7 @@ button:focus-visible,
   width: 100%;
   border-radius: 8px;
   display: block;
+  touch-action: none; /* Prevent browser pinch-zoom on the viewfinder */
 }
 
 /* ── Zoom slider overlay ─────────────────────────────────────────────────── */
