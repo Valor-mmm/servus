@@ -245,3 +245,119 @@ and every error message.
   surface
 - **THEN** all of those strings are added as new keys to
   `lib/i18n/locales/de.ts` and referenced from the island via `t(key)`
+
+---
+
+### Requirement: Optical zoom via hardware constraint
+
+When the active video track reports a `zoom` capability via
+`track.getCapabilities()`, the system MUST expose a range control overlaid on
+the viewfinder allowing the user to adjust zoom within the hardware-reported
+`[min, max]` range. The zoom level MUST be applied via
+`track.applyConstraints({ advanced: [{ zoom }] })`. The control MUST NOT be
+rendered when the track does not report a `zoom` capability. A pinch-to-zoom
+gesture on the viewfinder MUST produce the same effect as the slider.
+
+This requirement covers hardware (optical) zoom only. CSS-scale digital zoom is
+explicitly out of scope.
+
+> **Browser compatibility note:** `zoom` is a Chrome/Android extension to the
+> W3C Media Capture spec. Firefox does not expose a `zoom` capability from
+> `getCapabilities()` and does not implement the `zoom` constraint in
+> `applyConstraints()`. As a result, the zoom slider and pinch-to-zoom gesture
+> are unavailable in Firefox. This is the correct graceful degradation; no
+> workaround is planned.
+
+#### Scenario: Zoom slider appears when zoom capability is available
+
+- **WHEN** the user activates the camera on a device whose video track reports a
+  `zoom` capability
+- **THEN** a zoom slider control is visible overlaid on the viewfinder
+
+#### Scenario: Zoom slider is absent when zoom is unsupported
+
+- **WHEN** the user activates the camera on a device whose video track does not
+  report a `zoom` capability
+- **THEN** no zoom slider is rendered
+
+#### Scenario: Zoom slider updates the track constraint
+
+- **WHEN** the user moves the zoom slider to a value within the reported range
+- **THEN** `track.applyConstraints({ advanced: [{ zoom: <value> }] })` is called
+  with the new value
+
+#### Scenario: Pinch-out zooms in
+
+- **WHEN** the user performs a pinch-out gesture on the viewfinder with zoom
+  capability available
+- **THEN** the zoom level increases and the same constraint is applied to the
+  track
+
+#### Scenario: Zoom is clamped to capability range
+
+- **WHEN** the pinch or slider would produce a zoom value outside `[min, max]`
+- **THEN** the applied value is clamped to the reported range
+
+---
+
+### Requirement: Tap-to-focus with visual ring indicator
+
+When the active video track reports `"manual"` in its `focusMode` capability,
+the system MUST allow the user to tap the viewfinder to set a manual focus point
+at the tapped position. The system MUST issue
+`track.applyConstraints({ advanced: [{ focusMode: "manual", pointOfInterest: { x, y } }] })`
+with normalised coordinates. A brief animated ring indicator MUST appear at the
+tap position and fade within 1.5 seconds. A second tap MUST reset focus to
+`"continuous"` mode. When `"manual"` is not listed as a supported focus mode,
+tapping the viewfinder has no effect.
+
+> **Browser compatibility note:** `focusMode` and `pointOfInterest` are
+> Chrome/Android extensions to the W3C Media Capture spec. Firefox does not
+> include `focusMode` in `getCapabilities()` and does not implement the
+> `focusMode`/`pointOfInterest` constraints. As a result, tap-to-focus is
+> unavailable in Firefox. This is the correct graceful degradation; no
+> workaround is planned.
+
+#### Scenario: Tap places manual focus at the tapped position
+
+- **WHEN** the user taps the viewfinder with focus control supported and current
+  focus mode is `"continuous"`
+- **THEN** `applyConstraints` is called with `focusMode: "manual"` and
+  `pointOfInterest` set to the normalised tap coordinates
+
+#### Scenario: Second tap resets to continuous focus
+
+- **WHEN** the user taps the viewfinder a second time while `focusMode` is
+  `"manual"`
+- **THEN** `applyConstraints` is called with `focusMode: "continuous"` and focus
+  mode returns to `"continuous"`
+
+#### Scenario: Focus ring appears and fades
+
+- **WHEN** the user taps the viewfinder
+- **THEN** an animated ring element appears at the tap position and disappears
+  within 1.5 seconds
+
+#### Scenario: Tap has no effect when focus control is unsupported
+
+- **WHEN** the user taps the viewfinder on a device whose track does not report
+  `"manual"` in its `focusMode` capability
+- **THEN** no `applyConstraints` call is made and no focus ring is shown
+
+---
+
+### Requirement: Camera controls are reset on stream stop
+
+When the camera stream is stopped via any exit path (close button, tab hidden,
+unmount, page hide, beforeunload), all zoom and focus overlay state MUST be
+reset to initial values (`zoomCap: null`, `zoomLevel: 1`,
+`focusSupported: false`, `focusMode: "continuous"`, `focusRing: null`). This
+ensures that if the surface re-activates, it begins from a clean state without
+stale capability data.
+
+#### Scenario: Zoom and focus signals cleared on stream stop
+
+- **WHEN** the user closes the continuous capture surface or the page becomes
+  hidden with the stream active
+- **THEN** `zoomCap` is null, `focusSupported` is false, and any visible focus
+  ring is removed

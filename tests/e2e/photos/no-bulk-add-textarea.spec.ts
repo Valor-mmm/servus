@@ -15,6 +15,10 @@ test("box detail page has no bulk-add textarea", async ({ page }) => {
 
   // Textarea with name="names" must not exist
   await expect(page.locator('textarea[name="names"]')).toHaveCount(0);
-  // The PhotoCapture island IS present (camera button)
-  await expect(page.locator(".photo-capture")).toBeVisible();
+  // A capture UI is present — either PhotoCapture fallback (.photo-capture) or
+  // ContinuousCapture activation button (.capture-shutter), depending on
+  // whether getUserMedia is available in the test environment.
+  await expect(
+    page.locator(".photo-capture, .capture-shutter"),
+  ).toBeVisible();
 });
