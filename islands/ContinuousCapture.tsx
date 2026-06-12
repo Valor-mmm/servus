@@ -58,7 +58,13 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
       onZoom: async (zoom) => {
         zoomLevel.value = zoom;
         const track = streamRef.current?.getVideoTracks()[0];
-        if (track) await applyZoom(track, zoom);
+        if (track) {
+          try {
+            await applyZoom(track, zoom);
+          } catch {
+            // zoom constraint not supported on this device
+          }
+        }
       },
       zoomCap: { min: 1, max: 1, step: 0.1 },
       getCurrentZoom: () => zoomLevel.value,
@@ -139,7 +145,13 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
             onZoom: async (zoom) => {
               zoomLevel.value = zoom;
               const track = stream.getVideoTracks()[0];
-              if (track) await applyZoom(track, zoom);
+              if (track) {
+                try {
+                  await applyZoom(track, zoom);
+                } catch {
+                  // zoom constraint not supported on this device
+                }
+              }
             },
             zoomCap: controls.zoomCap,
             getCurrentZoom: () => zoomLevel.value,
@@ -252,16 +264,27 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
     const value = parseFloat((e.target as HTMLInputElement).value);
     zoomLevel.value = value;
     const track = streamRef.current?.getVideoTracks()[0];
-    if (track) await applyZoom(track, value);
+    if (track) {
+      try {
+        await applyZoom(track, value);
+      } catch {
+        // zoom constraint not supported on this device
+      }
+    }
   }
 
   // ── Tap-to-focus handler ───────────────────────────────────────────────
 
   async function handleVideoPointerDown(e: PointerEvent) {
-    // Capture pointer so pointerup always fires on this element, even when
-    // fingers lift outside the video — prevents stale entries in the pinch map.
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    // Delegate to pinch handler first
+    // Best-effort pointer capture: ensures pointerup fires on this element even
+    // when a finger lifts outside the video, preventing stale pinch map entries.
+    // Some browsers (older iOS Safari) throw on video elements — swallow that.
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      // not supported on this browser/element; stale-pointer cleanup may miss
+    }
+    // Delegate to pinch handler first — must run even if capture failed
     pinchRef.current.onPointerDown(e);
 
     // Only handle tap-to-focus when focus is supported and not a pinch gesture
@@ -287,7 +310,11 @@ export default function ContinuousCapture({ boxId, csrfToken }: Props) {
       focusRingTimerRef.current = null;
     }, 1500) as unknown as number;
 
-    focusMode.value = await handleTapToFocus(track, focusMode.value, x, y);
+    try {
+      focusMode.value = await handleTapToFocus(track, focusMode.value, x, y);
+    } catch {
+      // focus constraint not supported on this device; ring still shows
+    }
   }
 
   // ── Render ────────────────────────────────────────────────────────────
