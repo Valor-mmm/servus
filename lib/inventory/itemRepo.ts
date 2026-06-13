@@ -2,7 +2,7 @@ import { getKv } from "@/lib/kv/client.ts";
 import type { Item } from "@/lib/inventory/types.ts";
 import { updateBoxStatus } from "@/lib/inventory/boxRepo.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
-import { getSchema } from "@/lib/inventory/schemas.ts";
+import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
 import {
   validateMetadata,
   validateWarrantyDate,
@@ -70,7 +70,7 @@ async function metadataForCategory(
   raw: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const category = categoryId ? await findCategory(categoryId) : null;
-  const schema = getSchema(category?.schemaType ?? "generic");
+  const schema = await resolveSchema(category?.schemaType ?? "generic");
   return validateMetadata(schema, raw);
 }
 

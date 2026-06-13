@@ -214,17 +214,34 @@ const SCHEMAS: CategorySchema[] = [
 
 const BY_TYPE = new Map(SCHEMAS.map((s) => [s.schemaType, s]));
 
-/** Returns the schema for a type, falling back to generic for unknown types. */
+export const GENERIC_TYPE = GENERIC;
+
+/**
+ * Returns the seeded built-in schema for a type, falling back to generic for
+ * unknown types. This is the seed layer; the KV overlay (schemaRepo) is checked
+ * ahead of this by `resolveSchema`.
+ */
 export function getSchema(schemaType: string): CategorySchema {
   return BY_TYPE.get(schemaType) ?? BY_TYPE.get(GENERIC)!;
 }
 
-/** True if the schemaType exists in the catalogue (generic included). */
-export function isKnownSchemaType(schemaType: string): boolean {
+/** The seeded built-in schema for a type, or undefined if not a built-in. */
+export function getSeedSchema(schemaType: string): CategorySchema | undefined {
+  return BY_TYPE.get(schemaType);
+}
+
+/** True if the schemaType is a seeded built-in (generic included). */
+export function isBuiltinSchemaType(schemaType: string): boolean {
   return BY_TYPE.has(schemaType);
 }
 
-/** All schema types with their display-label i18n keys, in catalogue order. */
-export function listSchemaTypes(): { schemaType: string; label: string }[] {
+/** Back-compat alias: a known built-in schemaType. */
+export const isKnownSchemaType = isBuiltinSchemaType;
+
+/** All seeded built-in schema types with their label i18n keys, in order. */
+export function listSeedSchemaTypes(): { schemaType: string; label: string }[] {
   return SCHEMAS.map((s) => ({ schemaType: s.schemaType, label: s.label }));
 }
+
+/** Back-compat alias used by callers that only need the built-in list. */
+export const listSchemaTypes = listSeedSchemaTypes;

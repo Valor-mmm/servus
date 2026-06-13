@@ -1,6 +1,6 @@
 import { getKv } from "@/lib/kv/client.ts";
 import type { Category } from "@/lib/inventory/types.ts";
-import { isKnownSchemaType } from "@/lib/inventory/schemas.ts";
+import { schemaTypeExists } from "@/lib/inventory/schemaRepo.ts";
 
 const CAT_KEY = (id: string): Deno.KvKey => ["category", id];
 const CAT_BY_NAME_KEY = (name: string): Deno.KvKey => [
@@ -23,7 +23,7 @@ export async function createCategory(
   name: string,
   schemaType: string = "generic",
 ): Promise<Category> {
-  if (!isKnownSchemaType(schemaType)) {
+  if (!(await schemaTypeExists(schemaType))) {
     throw new Error(`Unknown schemaType '${schemaType}'`);
   }
   const kv = await getKv();
@@ -79,7 +79,10 @@ export async function updateCategory(
   const existing = await findCategory(id);
   if (!existing) throw new Error(`Category '${id}' not found`);
 
-  if (input.schemaType !== undefined && !isKnownSchemaType(input.schemaType)) {
+  if (
+    input.schemaType !== undefined &&
+    !(await schemaTypeExists(input.schemaType))
+  ) {
     throw new Error(`Unknown schemaType '${input.schemaType}'`);
   }
 

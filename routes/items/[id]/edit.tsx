@@ -2,7 +2,7 @@ import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { findItem, updateItem } from "@/lib/inventory/itemRepo.ts";
 import { findCategory, listCategories } from "@/lib/inventory/categoryRepo.ts";
-import { getSchema } from "@/lib/inventory/schemas.ts";
+import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
 import { MetadataValidationError } from "@/lib/inventory/validateMetadata.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import { listBoxes } from "@/lib/inventory/boxRepo.ts";
@@ -34,7 +34,7 @@ interface PageProps {
 
 async function schemaForItem(item: Item): Promise<CategorySchema> {
   const category = item.categoryId ? await findCategory(item.categoryId) : null;
-  return getSchema(category?.schemaType ?? "generic");
+  return resolveSchema(category?.schemaType ?? "generic");
 }
 
 function EditItemPage(

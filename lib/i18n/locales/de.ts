@@ -59,6 +59,37 @@ const de = {
   "categories.edit": "Bearbeiten",
   "categories.save": "Speichern",
   "categories.error.invalid_schema": "Unbekannter Kategorietyp.",
+  "categories.manage_schemas": "Typen verwalten",
+
+  // ── Schema editor ─────────────────────────────────────────────────────────
+  "schemas.title": "Kategorietypen",
+  "schemas.new": "Neuen Typ erstellen",
+  "schemas.edit_title": "Typ bearbeiten",
+  "schemas.new_title": "Neuer Typ",
+  "schemas.name_label": "Name des Typs",
+  "schemas.name_placeholder": "z. B. Pflanze",
+  "schemas.builtin_badge": "Eingebaut",
+  "schemas.builtin_note":
+    "Eingebaute Typen können erweitert, aber nicht gelöscht werden.",
+  "schemas.empty": "Noch keine eigenen Typen.",
+  "schemas.fields_heading": "Felder",
+  "schemas.field_label": "Bezeichnung",
+  "schemas.field_label_placeholder": "z. B. Farbe",
+  "schemas.field_type": "Feldtyp",
+  "schemas.field_options": "Auswahlmöglichkeiten (eine pro Zeile)",
+  "schemas.add_field": "Feld hinzufügen",
+  "schemas.remove_field": "Entfernen",
+  "schemas.save": "Speichern",
+  "schemas.delete": "Typ löschen",
+  "schemas.delete_confirm": 'Typ "{name}" wirklich löschen?',
+  "schemas.fieldtype.text": "Text",
+  "schemas.fieldtype.number": "Zahl",
+  "schemas.fieldtype.enum": "Auswahl",
+  "schemas.fieldtype.date": "Datum",
+  "schemas.fieldtype.boolean": "Ja/Nein",
+  "schemas.error.invalid": "Der Typ ist ungültig. Bitte Eingaben prüfen.",
+  "schemas.error.in_use":
+    "Typ wird noch von einer Kategorie verwendet und kann nicht gelöscht werden.",
 
   // ── Category schema type names ────────────────────────────────────────────
   "schema.generic": "Allgemein",

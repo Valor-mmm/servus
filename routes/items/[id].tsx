@@ -4,15 +4,22 @@ import { deleteItem, findItem } from "@/lib/inventory/itemRepo.ts";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
-import { getSchema } from "@/lib/inventory/schemas.ts";
+import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
 import { SchemaFieldsDisplay } from "@/components/SchemaFields.tsx";
 import { findRoom } from "@/lib/inventory/roomRepo.ts";
 import { findBox } from "@/lib/inventory/boxRepo.ts";
-import type { Box, Category, Item, Room } from "@/lib/inventory/types.ts";
+import type {
+  Box,
+  Category,
+  CategorySchema,
+  Item,
+  Room,
+} from "@/lib/inventory/types.ts";
 
 interface PageProps {
   item: Item;
   category: Category | null;
+  schema: CategorySchema;
   room: Room | null;
   box: Box | null;
   csrfToken: string;
@@ -20,9 +27,8 @@ interface PageProps {
 }
 
 function ItemDetailPage(
-  { item, category, room, box, csrfToken, photoUrls }: PageProps,
+  { item, category, schema, room, box, csrfToken, photoUrls }: PageProps,
 ) {
-  const schema = getSchema(category?.schemaType ?? "generic");
   const displayName = item.name ||
     (item.status === "pending" ? t("items.placeholderName") : "–");
   return (
@@ -125,6 +131,7 @@ export const handler = define.handlers({
       item.roomId ? findRoom(item.roomId) : Promise.resolve(null),
       item.boxId ? findBox(item.boxId) : Promise.resolve(null),
     ]);
+    const schema = await resolveSchema(category?.schemaType ?? "generic");
     let photoUrls: string[] = [];
     try {
       const r2cfg = getR2Config();
@@ -136,6 +143,7 @@ export const handler = define.handlers({
       <ItemDetailPage
         item={item}
         category={category}
+        schema={schema}
         room={room}
         box={box}
         csrfToken={ctx.state.csrfToken ?? ""}

@@ -6,20 +6,28 @@ import {
   listCategories,
   updateCategory,
 } from "@/lib/inventory/categoryRepo.ts";
-import { listSchemaTypes } from "@/lib/inventory/schemas.ts";
+import {
+  listSchemaTypes,
+  type SchemaTypeListing,
+} from "@/lib/inventory/schemaRepo.ts";
 import type { Category } from "@/lib/inventory/types.ts";
 
 interface PageProps {
   categories: Category[];
+  schemaTypes: SchemaTypeListing[];
   error: string | null;
 }
 
 function SchemaSelect(
-  { name, selected }: { name: string; selected: string },
+  { name, selected, types }: {
+    name: string;
+    selected: string;
+    types: SchemaTypeListing[];
+  },
 ) {
   return (
     <select name={name}>
-      {listSchemaTypes().map((s) => (
+      {types.map((s) => (
         <option
           key={s.schemaType}
           value={s.schemaType}
@@ -33,11 +41,18 @@ function SchemaSelect(
 }
 
 function CategoriesPage(
-  { categories, error, csrfToken }: PageProps & { csrfToken: string },
+  { categories, schemaTypes, error, csrfToken }:
+    & PageProps
+    & { csrfToken: string },
 ) {
   return (
     <main class="page">
-      <h1>{t("categories.title")}</h1>
+      <div class="page-header">
+        <h1>{t("categories.title")}</h1>
+        <a href="/categories/schemas" class="btn-secondary">
+          {t("categories.manage_schemas")}
+        </a>
+      </div>
       {error && <p class="error">{error}</p>}
 
       <form method="post" action="/categories">
@@ -54,7 +69,11 @@ function CategoriesPage(
         </label>
         <label>
           {t("categories.schema_label")}
-          <SchemaSelect name="schemaType" selected="generic" />
+          <SchemaSelect
+            name="schemaType"
+            selected="generic"
+            types={schemaTypes}
+          />
         </label>
         <button type="submit">{t("categories.add")}</button>
       </form>
@@ -72,7 +91,11 @@ function CategoriesPage(
                   <input type="hidden" name="id" value={cat.id} />
                   <label>
                     {t("categories.schema_label")}
-                    <SchemaSelect name="schemaType" selected={cat.schemaType} />
+                    <SchemaSelect
+                      name="schemaType"
+                      selected={cat.schemaType}
+                      types={schemaTypes}
+                    />
                   </label>
                   <button type="submit" class="btn-small">
                     {t("categories.save")}
@@ -96,10 +119,14 @@ function CategoriesPage(
 
 export const handler = define.handlers({
   async GET(ctx) {
-    const categories = await listCategories();
+    const [categories, schemaTypes] = await Promise.all([
+      listCategories(),
+      listSchemaTypes(),
+    ]);
     return ctx.render(
       <CategoriesPage
         categories={categories}
+        schemaTypes={schemaTypes}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
@@ -152,10 +179,14 @@ export const handler = define.handlers({
       }
     }
 
-    const categories = await listCategories();
+    const [categories, schemaTypes] = await Promise.all([
+      listCategories(),
+      listSchemaTypes(),
+    ]);
     return ctx.render(
       <CategoriesPage
         categories={categories}
+        schemaTypes={schemaTypes}
         error={error}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
