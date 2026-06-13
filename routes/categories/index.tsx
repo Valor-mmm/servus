@@ -1,15 +1,35 @@
 import { define } from "@/utils.ts";
-import { t } from "@/lib/i18n/t.ts";
+import { t, td } from "@/lib/i18n/t.ts";
 import {
   createCategory,
   deleteCategory,
   listCategories,
+  updateCategory,
 } from "@/lib/inventory/categoryRepo.ts";
+import { listSchemaTypes } from "@/lib/inventory/schemas.ts";
 import type { Category } from "@/lib/inventory/types.ts";
 
 interface PageProps {
   categories: Category[];
   error: string | null;
+}
+
+function SchemaSelect(
+  { name, selected }: { name: string; selected: string },
+) {
+  return (
+    <select name={name}>
+      {listSchemaTypes().map((s) => (
+        <option
+          key={s.schemaType}
+          value={s.schemaType}
+          selected={s.schemaType === selected}
+        >
+          {td(s.label)}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 function CategoriesPage(
@@ -32,6 +52,10 @@ function CategoriesPage(
             required
           />
         </label>
+        <label>
+          {t("categories.schema_label")}
+          <SchemaSelect name="schemaType" selected="generic" />
+        </label>
         <button type="submit">{t("categories.add")}</button>
       </form>
 
@@ -42,6 +66,18 @@ function CategoriesPage(
             {categories.map((cat) => (
               <li key={cat.id} class="item-row">
                 <span>{cat.name}</span>
+                <form method="post" action="/categories">
+                  <input type="hidden" name="csrf_token" value={csrfToken} />
+                  <input type="hidden" name="_action" value="update" />
+                  <input type="hidden" name="id" value={cat.id} />
+                  <label>
+                    {t("categories.schema_label")}
+                    <SchemaSelect name="schemaType" selected={cat.schemaType} />
+                  </label>
+                  <button type="submit" class="btn-small">
+                    {t("categories.save")}
+                  </button>
+                </form>
                 <form method="post" action="/categories">
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
@@ -77,14 +113,31 @@ export const handler = define.handlers({
 
     if (action === "create") {
       const name = ((form.get("name") as string | null) ?? "").trim();
+      const schemaType = (form.get("schemaType") as string | null) ?? "generic";
       try {
-        await createCategory(name);
+        await createCategory(name, schemaType);
         return new Response(null, {
           status: 302,
           headers: { Location: "/categories" },
         });
-      } catch {
-        error = t("categories.error.duplicate");
+      } catch (e) {
+        error = (e instanceof Error && e.message.includes("schemaType"))
+          ? t("categories.error.invalid_schema")
+          : t("categories.error.duplicate");
+      }
+    } else if (action === "update") {
+      const id = (form.get("id") as string | null) ?? "";
+      const schemaType = (form.get("schemaType") as string | null) ?? "generic";
+      try {
+        await updateCategory(id, { schemaType });
+        return new Response(null, {
+          status: 302,
+          headers: { Location: "/categories" },
+        });
+      } catch (e) {
+        error = (e instanceof Error && e.message.includes("schemaType"))
+          ? t("categories.error.invalid_schema")
+          : t("categories.error.duplicate");
       }
     } else if (action === "delete") {
       const id = (form.get("id") as string | null) ?? "";

@@ -1,6 +1,12 @@
 import { getKv } from "@/lib/kv/client.ts";
 import type { Item } from "@/lib/inventory/types.ts";
 import { updateBoxStatus } from "@/lib/inventory/boxRepo.ts";
+import { findCategory } from "@/lib/inventory/categoryRepo.ts";
+import { getSchema } from "@/lib/inventory/schemas.ts";
+import {
+  validateMetadata,
+  validateWarrantyDate,
+} from "@/lib/inventory/validateMetadata.ts";
 import { deleteObject } from "@/lib/photos/r2.ts";
 import type { R2Config } from "@/lib/photos/config.ts";
 
@@ -35,6 +41,8 @@ export interface CreateItemInput {
   boxId?: string | null;
   quantity?: number;
   estimatedValue: number | null;
+  warrantyUntil?: string | null;
+  metadata?: Record<string, unknown>;
   photos?: string[];
   status?: "pending" | "confirmed";
 }
@@ -46,12 +54,24 @@ export interface UpdateItemInput {
   boxId?: string | null;
   quantity?: number;
   estimatedValue?: number | null;
+  warrantyUntil?: string | null;
+  metadata?: Record<string, unknown>;
   photos?: string[];
 }
 
 function coerceQuantity(raw: unknown): number {
   const n = typeof raw === "number" ? raw : undefined;
   return n !== undefined && n >= 1 ? n : 1;
+}
+
+// Validate metadata against the schema of the given category (generic for none).
+async function metadataForCategory(
+  categoryId: string | null,
+  raw: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const category = categoryId ? await findCategory(categoryId) : null;
+  const schema = getSchema(category?.schemaType ?? "generic");
+  return validateMetadata(schema, raw);
 }
 
 export async function createItem(input: CreateItemInput): Promise<Item> {
@@ -63,6 +83,12 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
   const boxId = input.boxId ?? null;
   const roomId = boxId ? null : (input.roomId ?? null);
 
+  const warrantyUntil = validateWarrantyDate(input.warrantyUntil);
+  const metadata = await metadataForCategory(
+    input.categoryId,
+    input.metadata ?? {},
+  );
+
   const item: Item = {
     id,
     name: input.name,
@@ -71,6 +97,8 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     boxId,
     quantity: coerceQuantity(input.quantity),
     estimatedValue: input.estimatedValue,
+    warrantyUntil,
+    metadata,
     photos: input.photos ?? [],
     status: input.status ?? "confirmed",
     createdAt: now,
@@ -103,6 +131,13 @@ function normalizeItem(raw: any): Item {
     // Legacy records missing `photos` or carrying the old `photoKey` field
     // are coerced to an empty array at read time. No write-side migration needed.
     photos: Array.isArray(raw.photos) ? raw.photos : [],
+    // Legacy records predate typed fields; default them on read.
+    warrantyUntil: typeof raw.warrantyUntil === "string"
+      ? raw.warrantyUntil
+      : null,
+    metadata: raw.metadata && typeof raw.metadata === "object"
+      ? raw.metadata
+      : {},
   };
 }
 
@@ -178,12 +213,25 @@ export async function updateItem(
     resolvedBoxId = null;
   }
 
+  const resolvedCategoryId = input.categoryId !== undefined
+    ? input.categoryId
+    : existing.categoryId;
+
+  // Re-validate metadata against the effective category's schema. Changing the
+  // category re-filters existing metadata to the new schema (orphan keys drop).
+  const rawMetadata = input.metadata !== undefined
+    ? input.metadata
+    : existing.metadata;
+  const metadata = await metadataForCategory(resolvedCategoryId, rawMetadata);
+
+  const warrantyUntil = input.warrantyUntil !== undefined
+    ? validateWarrantyDate(input.warrantyUntil)
+    : existing.warrantyUntil;
+
   const updated: Item = {
     ...existing,
     name: input.name ?? existing.name,
-    categoryId: input.categoryId !== undefined
-      ? input.categoryId
-      : existing.categoryId,
+    categoryId: resolvedCategoryId,
     roomId: resolvedRoomId,
     boxId: resolvedBoxId,
     quantity: input.quantity !== undefined
@@ -192,6 +240,8 @@ export async function updateItem(
     estimatedValue: input.estimatedValue !== undefined
       ? input.estimatedValue
       : existing.estimatedValue,
+    warrantyUntil,
+    metadata,
     photos: input.photos !== undefined ? input.photos : existing.photos,
     updatedAt: Date.now(),
   };

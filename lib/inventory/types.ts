@@ -1,7 +1,28 @@
 export interface Category {
   id: string;
   name: string;
+  schemaType: string;
   createdAt: number;
+}
+
+export type FieldType = "text" | "number" | "enum" | "date" | "boolean";
+
+export interface FieldDef {
+  /** Stable machine key, used as a key in Item.metadata. */
+  key: string;
+  /** i18n key for the field's display label — never literal copy. */
+  label: string;
+  type: FieldType;
+  /** i18n keys for allowed values; present iff type === "enum". */
+  options?: string[];
+}
+
+export interface CategorySchema {
+  schemaType: string;
+  /** i18n key for the schema's display name. */
+  label: string;
+  /** Empty for the generic schema. */
+  fields: FieldDef[];
 }
 
 export interface Room {
@@ -42,6 +63,10 @@ export interface Item {
   boxId: string | null;
   quantity: number;
   estimatedValue: number | null;
+  /** Optional core field (ISO date), independent of any category schema. */
+  warrantyUntil: string | null;
+  /** Schema-specific values, keyed by the category schema's field keys. */
+  metadata: Record<string, unknown>;
   photos: string[];
   status: ItemStatus;
   createdAt: number;

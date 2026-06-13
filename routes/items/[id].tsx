@@ -4,6 +4,8 @@ import { deleteItem, findItem } from "@/lib/inventory/itemRepo.ts";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
+import { getSchema } from "@/lib/inventory/schemas.ts";
+import { SchemaFieldsDisplay } from "@/components/SchemaFields.tsx";
 import { findRoom } from "@/lib/inventory/roomRepo.ts";
 import { findBox } from "@/lib/inventory/boxRepo.ts";
 import type { Box, Category, Item, Room } from "@/lib/inventory/types.ts";
@@ -20,6 +22,7 @@ interface PageProps {
 function ItemDetailPage(
   { item, category, room, box, csrfToken, photoUrls }: PageProps,
 ) {
+  const schema = getSchema(category?.schemaType ?? "generic");
   const displayName = item.name ||
     (item.status === "pending" ? t("items.placeholderName") : "–");
   return (
@@ -73,6 +76,17 @@ function ItemDetailPage(
             <dd>{item.estimatedValue} €</dd>
           </>
         )}
+
+        {item.warrantyUntil && (
+          <>
+            <dt>{t("items.warranty_display")}</dt>
+            <dd>
+              {new Date(item.warrantyUntil).toLocaleDateString("de-DE")}
+            </dd>
+          </>
+        )}
+
+        <SchemaFieldsDisplay schema={schema} metadata={item.metadata} />
 
         <dt>{t("items.created_at")}</dt>
         <dd>{new Date(item.createdAt).toLocaleDateString("de-DE")}</dd>
