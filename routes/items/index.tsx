@@ -35,7 +35,7 @@ function displayName(item: Item): string {
   return "–";
 }
 
-function ItemsPage(
+export function ItemsPage(
   {
     items,
     categories,

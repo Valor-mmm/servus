@@ -1,11 +1,22 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { findItem, updateItem } from "@/lib/inventory/itemRepo.ts";
-import { listCategories } from "@/lib/inventory/categoryRepo.ts";
+import { findCategory, listCategories } from "@/lib/inventory/categoryRepo.ts";
+import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
+import { MetadataValidationError } from "@/lib/inventory/validateMetadata.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import { listBoxes } from "@/lib/inventory/boxRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
-import type { Category, Item, Room } from "@/lib/inventory/types.ts";
+import type {
+  Category,
+  CategorySchema,
+  Item,
+  Room,
+} from "@/lib/inventory/types.ts";
+import {
+  readMetadataFromForm,
+  SchemaFields,
+} from "@/components/SchemaFields.tsx";
 import PhotoCapture from "@/islands/PhotoCapture.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
@@ -13,6 +24,7 @@ import { presignGet } from "@/lib/photos/signing.ts";
 interface PageProps {
   item: Item;
   categories: Category[];
+  schema: CategorySchema;
   rooms: Room[];
   boxes: BoxWithItemCount[];
   error: string | null;
@@ -20,8 +32,14 @@ interface PageProps {
   photoUrls: string[]; // presigned URLs for each photo in order
 }
 
+async function schemaForItem(item: Item): Promise<CategorySchema> {
+  const category = item.categoryId ? await findCategory(item.categoryId) : null;
+  return resolveSchema(category?.schemaType ?? "generic");
+}
+
 function EditItemPage(
-  { item, categories, rooms, boxes, error, csrfToken, photoUrls }: PageProps,
+  { item, categories, schema, rooms, boxes, error, csrfToken, photoUrls }:
+    PageProps,
 ) {
   return (
     <main class="page">
@@ -137,6 +155,17 @@ function EditItemPage(
           />
         </label>
 
+        <label>
+          {t("items.warranty_label")}
+          <input
+            type="date"
+            name="warrantyUntil"
+            value={item.warrantyUntil ?? ""}
+          />
+        </label>
+
+        <SchemaFields schema={schema} metadata={item.metadata} />
+
         <button type="submit">{t("action.save")}</button>
         <a href={`/items/${item.id}`}>{t("action.cancel")}</a>
       </form>
@@ -159,16 +188,18 @@ export const handler = define.handlers({
     const item = await findItem(ctx.params.id);
     if (!item) return new Response(t("error.not_found"), { status: 404 });
 
-    const [categories, rooms, boxes] = await Promise.all([
+    const [categories, rooms, boxes, schema] = await Promise.all([
       listCategories(),
       listRooms(),
       listBoxes(),
+      schemaForItem(item),
     ]);
     const photoUrls = buildPhotoUrls(item.photos);
     return ctx.render(
       <EditItemPage
         item={item}
         categories={categories}
+        schema={schema}
         rooms={rooms}
         boxes={boxes}
         error={null}
@@ -211,16 +242,21 @@ export const handler = define.handlers({
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
 
+    const warrantyRaw = (form.get("warrantyUntil") as string | null) ?? "";
+    const metadata = readMetadataFromForm(form);
+
     const renderError = async (error: string) => {
-      const [categories, rooms, boxes] = await Promise.all([
+      const [categories, rooms, boxes, schema] = await Promise.all([
         listCategories(),
         listRooms(),
         listBoxes(),
+        schemaForItem(item),
       ]);
       return ctx.render(
         <EditItemPage
           item={item}
           categories={categories}
+          schema={schema}
           rooms={rooms}
           boxes={boxes}
           error={error}
@@ -238,16 +274,29 @@ export const handler = define.handlers({
     }
 
     const estimatedValue = valueRaw ? parseFloat(valueRaw) : null;
-    await updateItem(item.id, {
-      name,
-      categoryId,
-      roomId: roomId || null,
-      boxId: boxId || null,
-      quantity,
-      estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
-        ? null
-        : estimatedValue,
-    });
+    try {
+      await updateItem(item.id, {
+        name,
+        categoryId,
+        roomId: roomId || null,
+        boxId: boxId || null,
+        quantity,
+        estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
+          ? null
+          : estimatedValue,
+        warrantyUntil: warrantyRaw || null,
+        metadata,
+      });
+    } catch (e) {
+      if (e instanceof MetadataValidationError) {
+        return renderError(
+          e.message.includes("warrantyUntil")
+            ? t("items.error.warranty_invalid")
+            : t("items.error.metadata_invalid"),
+        );
+      }
+      throw e;
+    }
 
     return new Response(null, {
       status: 302,

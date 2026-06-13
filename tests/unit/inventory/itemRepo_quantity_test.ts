@@ -42,8 +42,9 @@ Deno.test("createItem with quantity: 6 stores quantity: 6", async () => {
 
 Deno.test("legacy record without quantity field reads back as quantity: 1", async () => {
   await withKv(async () => {
-    // Simulate a legacy record stored without quantity
-    const legacyItem: Omit<Item, "quantity"> = {
+    // Simulate a legacy record stored without quantity (also predates
+    // metadata / warrantyUntil — the normalizer defaults all three on read).
+    const legacyItem: Omit<Item, "quantity" | "metadata" | "warrantyUntil"> = {
       id: "legacy-id",
       name: "Altes Ding",
       categoryId: CAT,

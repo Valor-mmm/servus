@@ -1,18 +1,41 @@
 # Inventory Specification
 
+## Purpose
+
+Defines how the household inventory is modelled and managed: categories (with
+optional typed schemas), rooms, boxes, and the items that live in them. Covers
+item creation (including photo-first capture), editing, deletion, quantity,
+typed metadata, and the search/filter list — the core of the move workflow.
+
 ## Requirements
 
 ### Requirement: Category management
 
 The system MUST provide a flat, admin-managed list of categories used to
-classify items. Categories have a unique name and a generated ID. A category
-MUST NOT be deleted while any item references it.
+classify items. Categories have a unique name, a generated ID, and a
+`schemaType` selected from the built-in schema catalogue. A category MUST NOT be
+deleted while any item references it. A category's `schemaType` defaults to the
+generic type, under which the category behaves exactly as an untyped category.
 
 #### Scenario: Create a category
 
 - **WHEN** an authenticated user POSTs a non-empty category name to
   `/categories`
-- **THEN** a new category record is created and appears in the category list
+- **THEN** a new category record is created with `schemaType` defaulting to the
+  generic type and appears in the category list
+
+#### Scenario: Create a category with a schema type
+
+- **WHEN** an authenticated user creates a category and selects a `schemaType`
+  that exists in the built-in catalogue
+- **THEN** the category record is stored with that `schemaType`
+
+#### Scenario: Unknown schema type is rejected
+
+- **WHEN** an authenticated user creates or edits a category with a `schemaType`
+  not present in the built-in catalogue
+- **THEN** the system returns a validation error and no record is created or
+  modified
 
 #### Scenario: Duplicate category name is rejected
 
@@ -470,3 +493,245 @@ the primary item records.
 
 - **WHEN** an item is deleted
 - **THEN** it no longer appears in any category, room, or time index prefix scan
+
+### Requirement: Built-in category schema catalogue
+
+The system MUST resolve a category schema by `schemaType` from two layers: a
+user-editable storage overlay checked first, then a fixed, code-defined
+catalogue of built-in schemas as the fallback. Each schema has a `schemaType`
+identifier, a display label, and an ordered list of field definitions. Each
+field definition has a stable `key`, a display label, a `type` from the set
+{text, number, enum, date, boolean}, and — for `enum` fields only — a non-empty
+list of allowed options. The built-in catalogue MUST include a generic schema
+whose field list is empty; the generic schema is the default for any category
+that does not specify one and MUST NOT be editable. Built-in schema labels and
+options are referenced by i18n key; user-defined schema labels and options are
+stored as literal display text. Schema resolution MUST be exposed only through
+typed accessors so callers do not depend on whether a schema is built-in or
+user-defined.
+
+#### Scenario: Generic schema is the default and has no fields
+
+- **WHEN** the schema for the generic type is requested
+- **THEN** a schema is returned whose field list is empty
+
+#### Scenario: A built-in schema is returned when no overlay exists
+
+- **WHEN** a schema is requested for a built-in `schemaType` with no stored
+  override
+- **THEN** the seeded built-in schema is returned
+
+#### Scenario: A stored overlay takes precedence over a built-in
+
+- **WHEN** a user-defined schema is stored under the same `schemaType` id as a
+  built-in
+- **THEN** the stored schema is returned instead of the built-in
+
+#### Scenario: Unknown schema type falls back to generic
+
+- **WHEN** a schema is requested for a `schemaType` present in neither the
+  overlay nor the catalogue
+- **THEN** the generic schema is returned rather than an error
+
+### Requirement: Item typed metadata
+
+An item MUST carry a `metadata` map holding values for the fields defined by its
+category's schema. When an item is created or edited, the system MUST validate
+the submitted metadata against the schema of the item's category at the write
+boundary: keys not defined by the schema MUST be dropped, and each retained
+value MUST conform to its field's type (number is finite, date is an ISO
+calendar date, boolean is true/false, enum is one of the field's options, text
+is a trimmed non-empty string). Fields with no value MUST be absent from the
+stored map rather than stored as null. An item whose category uses the generic
+schema MUST store an empty metadata map. Metadata MUST be stored on the item
+record itself, not in a separate key, and MUST NOT introduce a new index.
+
+#### Scenario: Metadata conforming to the schema is stored
+
+- **WHEN** an item in a typed category is saved with metadata whose keys and
+  value types match the category's schema
+- **THEN** the item record stores exactly those key/value pairs in `metadata`
+
+#### Scenario: Keys outside the schema are dropped
+
+- **WHEN** an item is saved with a metadata key not defined by its category's
+  schema
+- **THEN** that key is omitted from the stored `metadata` and the rest is stored
+
+#### Scenario: A value of the wrong type is rejected
+
+- **WHEN** an item is saved with a metadata value that does not conform to its
+  field type (e.g. a non-numeric value for a number field, or an out-of-list
+  value for an enum field)
+- **THEN** the system returns a validation error and the item is not saved
+
+#### Scenario: Generic-category item stores empty metadata
+
+- **WHEN** an item whose category uses the generic schema is created or edited
+- **THEN** its stored `metadata` is empty
+
+#### Scenario: Existing items remain valid
+
+- **WHEN** an item created before this change (with no metadata) is read
+- **THEN** it is treated as having an empty `metadata` map and renders normally
+
+### Requirement: Schema-driven item detail editing
+
+The item detail/edit page MUST render the fields of the item's category schema,
+in definition order, after the standard item fields, using an input control
+appropriate to each field type (text input, number input, date picker,
+single-select, and checkbox respectively). Submitted values MUST be validated
+against the schema using the same rules as the write boundary. When the item's
+category uses the generic schema, no extra fields MUST be shown. All field
+labels and option labels MUST be rendered through the i18n helper.
+
+#### Scenario: Typed category shows its schema fields for editing
+
+- **WHEN** a user opens the edit page for an item whose category has a typed
+  schema
+- **THEN** the schema's fields are shown in order, each with a control matching
+  its field type, pre-filled with the item's current metadata values
+
+#### Scenario: Editing and saving schema fields persists metadata
+
+- **WHEN** the user fills in or changes schema field values and saves
+- **THEN** the validated values are persisted to the item's `metadata` and shown
+  on the next load
+
+#### Scenario: Generic category shows no extra fields
+
+- **WHEN** a user opens the edit page for an item whose category uses the
+  generic schema
+- **THEN** no schema-specific fields are shown
+
+### Requirement: Item warranty date field
+
+Every item MUST support an optional `warrantyUntil` date as a core item field,
+independent of its category schema. It is editable on every item alongside the
+existing estimated-value field, MUST accept an ISO calendar date or be absent,
+and MUST be validated at the write boundary. It MUST NOT be part of the schema
+`metadata` map.
+
+#### Scenario: Set a warranty date on any item
+
+- **WHEN** a user sets a valid `warrantyUntil` date on an item, regardless of
+  the item's category or schema
+- **THEN** the date is stored on the item record and shown on the next load
+
+#### Scenario: Warranty date is optional
+
+- **WHEN** an item is saved without a `warrantyUntil` value
+- **THEN** the item is stored with no warranty date and renders normally
+
+#### Scenario: Invalid warranty date is rejected
+
+- **WHEN** an item is saved with a `warrantyUntil` value that is not an ISO
+  calendar date
+- **THEN** the system returns a validation error and the item is not saved
+
+### Requirement: Item list excludes typed fields
+
+The item list view MUST remain minimal, showing only the item's photo thumbnail,
+name, and category. Schema-specific metadata fields MUST NOT appear in the list
+view; they are presented only on the item detail/edit page.
+
+#### Scenario: List view omits metadata
+
+- **WHEN** the item list is rendered for items in typed categories
+- **THEN** each row shows only thumbnail, name, and category, and no
+  schema-specific metadata values appear in the list
+
+### Requirement: Create a user-defined category schema
+
+An authenticated user MUST be able to create a new category schema through the
+UI by providing a display name and an ordered list of fields. The created schema
+MUST be persisted to the storage overlay and MUST immediately be selectable as a
+category type and usable to drive item fields, exactly like a built-in schema.
+The new schema's `schemaType` id MUST be generated or validated to be unique
+across both the overlay and the built-in catalogue.
+
+#### Scenario: Create a schema with fields
+
+- **WHEN** a user submits a new schema with a name and one or more valid fields
+- **THEN** the schema is stored, appears in the category type list, and its
+  fields render on the item edit page for categories using it
+
+#### Scenario: New schema id is unique
+
+- **WHEN** a user creates a schema whose id would collide with an existing
+  overlay or built-in schemaType
+- **THEN** the system rejects it or assigns a distinct id, and no existing
+  schema is overwritten unintentionally
+
+### Requirement: Edit a category schema
+
+An authenticated user MUST be able to edit the display name and field list of a
+user-defined schema, and MUST be able to extend a built-in schema by editing it
+— which materialises an editable copy into the overlay (copy-on-write) that then
+takes precedence. A schema's `schemaType` id MUST be immutable once created.
+Editing a schema's fields MUST NOT corrupt existing items: values for fields
+that no longer exist are simply not rendered, and remaining fields continue to
+validate normally.
+
+#### Scenario: Edit a user-defined schema's fields
+
+- **WHEN** a user adds, removes, or reorders fields on a user-defined schema and
+  saves
+- **THEN** the stored schema reflects the change and item edit pages render the
+  updated field set
+
+#### Scenario: Extending a built-in materialises an override
+
+- **WHEN** a user edits a built-in schema (e.g. adds a field) and saves
+- **THEN** an overlay copy is stored under the same `schemaType` id and is
+  returned by subsequent schema resolution, while the seed remains the fallback
+
+#### Scenario: Removed field does not break existing items
+
+- **WHEN** a field is removed from a schema that existing items have values for
+- **THEN** those items load without error and the removed field's value is not
+  shown
+
+### Requirement: Category schema definition validation
+
+The system MUST validate a submitted schema definition at the write boundary.
+The `schemaType` id MUST be non-empty and unique; each field MUST have a
+non-empty key that is unique within the schema; each field's type MUST be one of
+the five allowed types; and an `enum` field MUST declare at least one option. A
+definition violating any of these MUST be rejected with a validation error and
+MUST NOT be persisted.
+
+#### Scenario: Duplicate field key is rejected
+
+- **WHEN** a user submits a schema with two fields sharing the same key
+- **THEN** the system returns a validation error and the schema is not saved
+
+#### Scenario: Enum field without options is rejected
+
+- **WHEN** a user submits a schema with a single-select field that has no
+  options
+- **THEN** the system returns a validation error and the schema is not saved
+
+### Requirement: Delete a user-defined category schema
+
+An authenticated user MUST be able to delete a user-defined schema only when no
+category references it. Built-in schemas (including generic) MUST NOT be
+deletable; deleting an overlay override of a built-in MUST revert resolution to
+the seeded built-in.
+
+#### Scenario: Delete an unused user-defined schema
+
+- **WHEN** a user deletes a user-defined schema that no category uses
+- **THEN** the schema is removed from the overlay and no longer appears in the
+  category type list
+
+#### Scenario: Delete a schema in use is rejected
+
+- **WHEN** a user attempts to delete a schema that one or more categories use
+- **THEN** the system returns an error and the schema is not deleted
+
+#### Scenario: Removing a built-in override reverts to the seed
+
+- **WHEN** a user deletes an overlay override that shadowed a built-in
+  schemaType
+- **THEN** schema resolution for that id returns the seeded built-in again

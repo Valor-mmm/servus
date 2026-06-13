@@ -542,6 +542,7 @@
       "npm:@types/qrcode@1.5.5",
       "npm:aws4fetch@1.0.20",
       "npm:hash-wasm@4.12.0",
+      "npm:preact-render-to-string@^6.7.0",
       "npm:preact@^10.29.1",
       "npm:qrcode@1.5.4"
     ]
