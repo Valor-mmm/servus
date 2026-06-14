@@ -5,6 +5,7 @@ import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 import { findCategory } from "@/lib/inventory/categoryRepo.ts";
 import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
+import { listItemGroups } from "@/lib/inventory/groupRepo.ts";
 import { SchemaFieldsDisplay } from "@/components/SchemaFields.tsx";
 import { findRoom } from "@/lib/inventory/roomRepo.ts";
 import { findBox } from "@/lib/inventory/boxRepo.ts";
@@ -12,6 +13,7 @@ import type {
   Box,
   Category,
   CategorySchema,
+  Group,
   Item,
   Room,
 } from "@/lib/inventory/types.ts";
@@ -22,12 +24,14 @@ interface PageProps {
   schema: CategorySchema;
   room: Room | null;
   box: Box | null;
+  groups: Group[];
   csrfToken: string;
   photoUrls: string[];
 }
 
 function ItemDetailPage(
-  { item, category, schema, room, box, csrfToken, photoUrls }: PageProps,
+  { item, category, schema, room, box, groups, csrfToken, photoUrls }:
+    PageProps,
 ) {
   const displayName = item.name ||
     (item.status === "pending" ? t("items.placeholderName") : "–");
@@ -94,6 +98,21 @@ function ItemDetailPage(
 
         <SchemaFieldsDisplay schema={schema} metadata={item.metadata} />
 
+        {groups.length > 0 && (
+          <>
+            <dt>{t("items.groups_label")}</dt>
+            <dd>
+              <ul class="group-chips">
+                {groups.map((g) => (
+                  <li key={g.id} class="group-chip">
+                    <a href={`/groups/${g.id}`}>{g.name}</a>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </>
+        )}
+
         <dt>{t("items.created_at")}</dt>
         <dd>{new Date(item.createdAt).toLocaleDateString("de-DE")}</dd>
 
@@ -126,10 +145,11 @@ export const handler = define.handlers({
     if (!item) {
       return new Response(t("error.not_found"), { status: 404 });
     }
-    const [category, room, box] = await Promise.all([
+    const [category, room, box, groups] = await Promise.all([
       item.categoryId ? findCategory(item.categoryId) : Promise.resolve(null),
       item.roomId ? findRoom(item.roomId) : Promise.resolve(null),
       item.boxId ? findBox(item.boxId) : Promise.resolve(null),
+      listItemGroups(item.id),
     ]);
     const schema = await resolveSchema(category?.schemaType ?? "generic");
     let photoUrls: string[] = [];
@@ -146,6 +166,7 @@ export const handler = define.handlers({
         schema={schema}
         room={room}
         box={box}
+        groups={groups}
         csrfToken={ctx.state.csrfToken ?? ""}
         photoUrls={photoUrls}
       />,

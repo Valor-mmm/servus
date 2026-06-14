@@ -334,6 +334,18 @@ export async function deleteItem(
   await op.commit();
   if (item.boxId) await updateBoxStatus(item.boxId);
 
+  // Clear the item's group memberships from both index sides. Inlined here
+  // (rather than calling groupRepo) to avoid an itemRepo↔groupRepo import cycle.
+  for await (
+    const e of kv.list<true>({ prefix: ["item-group", id] })
+  ) {
+    const groupId = e.key[2] as string;
+    await kv.atomic()
+      .delete(["item-group", id, groupId])
+      .delete(["group-item", groupId, id])
+      .commit();
+  }
+
   // Fire R2 deletes after KV commit; failures are logged and never surface to caller
   if (r2cfg && item.photos.length > 0) {
     for (const key of item.photos) {

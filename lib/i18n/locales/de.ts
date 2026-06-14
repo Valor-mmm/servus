@@ -44,7 +44,33 @@ const de = {
   "nav.items": "Gegenstände",
   "nav.categories": "Kategorien",
   "nav.rooms": "Räume",
+  "nav.groups": "Gruppen",
   "nav.more": "Mehr",
+
+  // ── Groups ────────────────────────────────────────────────────────────────
+  "groups.title": "Gruppen",
+  "groups.add": "Neue Gruppe",
+  "groups.name_label": "Name",
+  "groups.name_placeholder": "z. B. Campingkram",
+  "groups.empty": "Noch keine Gruppen vorhanden.",
+  "groups.error.duplicate": "Diese Gruppe existiert bereits.",
+  "groups.member_count": "{count} Gegenstände",
+  "groups.detail_title": "Gruppe",
+  "groups.members_heading": "Gegenstände",
+  "groups.no_members": "Noch keine Gegenstände in dieser Gruppe.",
+  "groups.remove_member": "Entfernen",
+  "groups.rename": "Umbenennen",
+  "groups.delete": "Gruppe löschen",
+  "groups.delete_confirm": 'Gruppe "{name}" wirklich löschen?',
+  "groups.reorder_hint": "Zum Sortieren ziehen, dann speichern",
+  "groups.save_order": "Reihenfolge speichern",
+
+  // Item ↔ group controls
+  "items.groups_label": "Gruppen",
+  "items.add_to_group": "Zu Gruppe hinzufügen",
+  "items.add_to_group_placeholder": "Gruppenname …",
+  "items.group_add_button": "Hinzufügen",
+  "items.remove_from_group": "Entfernen",
 
   // ── Mehr / secondary menu ─────────────────────────────────────────────────
   "menu.title": "Mehr",

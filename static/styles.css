@@ -531,6 +531,77 @@ p {
   line-height: 1;
 }
 
+/* ── Groups ─────────────────────────────────────────────────────────────────── */
+.item-groups {
+  margin-top: 1.5rem;
+}
+
+.group-chips {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--servus-surface-raised);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius-pill);
+  font-size: 0.85rem;
+}
+
+.group-chip a {
+  color: var(--servus-text);
+  text-decoration: none;
+}
+
+.chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--servus-text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.add-to-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.group-reorder .group-members {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.group-reorder .group-members li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--servus-surface);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+}
+
+.reorder-controls {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
 /* ── Theme toggle FAB (mobile only) ────────────────────────────────────────── */
 .theme-toggle-fab {
   display: flex;

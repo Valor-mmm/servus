@@ -25,6 +25,12 @@ export function MehrMenu({ csrfToken }: { csrfToken: string }) {
           </a>
         </li>
         <li>
+          <a href="/groups">
+            <span class="nav-icon">🔗</span>
+            {t("nav.groups")}
+          </a>
+        </li>
+        <li>
           <a href="/admin">
             <span class="nav-icon">🛠️</span>
             {t("admin.nav")}

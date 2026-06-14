@@ -5,6 +5,14 @@ export interface Category {
   createdAt: number;
 }
 
+export interface Group {
+  id: string;
+  name: string;
+  note: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type FieldType = "text" | "number" | "enum" | "date" | "boolean";
 
 export interface FieldDef {
