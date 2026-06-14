@@ -44,6 +44,10 @@ const de = {
   "nav.items": "Gegenstände",
   "nav.categories": "Kategorien",
   "nav.rooms": "Räume",
+  "nav.more": "Mehr",
+
+  // ── Mehr / secondary menu ─────────────────────────────────────────────────
+  "menu.title": "Mehr",
 
   // ── Categories ────────────────────────────────────────────────────────────
   "categories.title": "Kategorien",
