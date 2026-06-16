@@ -115,3 +115,49 @@ Deno.test("remove-photo: returns 404 for unknown item", async () => {
     assertEquals(result.status, 404);
   });
 });
+
+Deno.test("remove-photo: deleteIfEmpty deletes the item once its last photo is removed", async () => {
+  await withKv(async () => {
+    const pending = await createItem({
+      name: "",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+      photos: ["only-key"],
+      status: "pending",
+    });
+
+    const result = await handleRemovePhoto(
+      { itemId: pending.id, photoKey: "only-key", deleteIfEmpty: true },
+      null,
+    );
+
+    assertEquals(result.status, 200);
+    assertEquals(result.deleted, true);
+    assertEquals(result.item, undefined);
+    assertEquals(await findItem(pending.id), null);
+  });
+});
+
+Deno.test("remove-photo: deleteIfEmpty does not delete the item while other photos remain", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+      photos: ["k1", "k2"],
+      status: "pending",
+    });
+
+    const result = await handleRemovePhoto(
+      { itemId: item.id, photoKey: "k1", deleteIfEmpty: true },
+      null,
+    );
+
+    assertEquals(result.status, 200);
+    assertEquals(result.deleted, undefined);
+    assertEquals(result.item?.photos, ["k2"]);
+    assertExists(await findItem(item.id));
+  });
+});

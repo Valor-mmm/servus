@@ -4,7 +4,6 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
-import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -38,10 +37,10 @@ async function setupR2Mocks(page: import("@playwright/test").Page) {
 }
 
 async function captureOneItem(page: import("@playwright/test").Page) {
-  const fileInput = page.locator(".photo-capture input[type=file]");
+  const fileInput = page.locator(".photo-capture input[type=file][capture]");
   await fileInput.setInputFiles(FIXTURE);
-  // After the first create the island shows "Weiteres Foto" + "Fertig".
-  // Tap Fertig to commit and let the page reload.
+  // Once the upload completes, the island shows a "Fertig" action.
+  // Tap it to commit and let the page reload.
   await expect(page.locator("button", { hasText: "Fertig" })).toBeVisible({
     timeout: 20_000,
   });
@@ -50,7 +49,6 @@ async function captureOneItem(page: import("@playwright/test").Page) {
 }
 
 test("two quick-add photos appear in pending list and items list", async ({ page }) => {
-  await denyGetUserMedia(page);
   await setupR2Mocks(page);
 
   await page.goto("/items/quick-add", { waitUntil: "networkidle" });

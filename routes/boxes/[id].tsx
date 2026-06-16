@@ -12,7 +12,7 @@ import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
 import QuantityControl from "@/islands/QuantityControl.tsx";
-import CaptureSurface from "@/components/CaptureSurface.tsx";
+import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 
@@ -129,7 +129,11 @@ function BoxDetailPage(
         )}
 
         {box.status !== "delivered" && (
-          <CaptureSurface boxId={box.id} csrfToken={csrfToken} />
+          <NativePhotoCapture
+            mode="create-from-photo"
+            boxId={box.id}
+            csrfToken={csrfToken}
+          />
         )}
 
         <h2>{t("boxes.item_count")}</h2>

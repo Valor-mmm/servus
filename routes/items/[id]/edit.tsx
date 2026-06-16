@@ -26,7 +26,7 @@ import {
   removeMembership,
 } from "@/lib/inventory/groupRepo.ts";
 import type { Group } from "@/lib/inventory/types.ts";
-import PhotoCapture from "@/islands/PhotoCapture.tsx";
+import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 
@@ -89,8 +89,8 @@ function EditItemPage(
         </section>
       )}
 
-      <PhotoCapture
-        mode="append"
+      <NativePhotoCapture
+        mode="append-to-existing"
         itemId={item.id}
         csrfToken={csrfToken}
       />

@@ -16,8 +16,7 @@ import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { CategorySchema, Room } from "@/lib/inventory/types.ts";
 import ItemCategoryFields from "@/islands/ItemCategoryFields.tsx";
 import GroupAutocomplete from "@/islands/GroupAutocomplete.tsx";
-import PhotoAttach from "@/islands/PhotoAttach.tsx";
-import CaptureSurface from "@/components/CaptureSurface.tsx";
+import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
 
 interface PageProps {
   categories: { id: string; name: string }[];
@@ -103,14 +102,12 @@ function NewItemPage(
 
         <div class="new-item-photos">
           <span class="field-heading">{t("items.photos_label")}</span>
-          <PhotoAttach csrfToken={csrfToken} />
+          <NativePhotoCapture mode="attach-to-form" csrfToken={csrfToken} />
         </div>
 
         <button type="submit">{t("action.save")}</button>
         <a href="/items">{t("action.cancel")}</a>
       </form>
-
-      <CaptureSurface csrfToken={csrfToken} />
     </main>
   );
 }
