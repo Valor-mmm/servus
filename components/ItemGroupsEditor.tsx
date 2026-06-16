@@ -1,5 +1,6 @@
 import { t } from "@/lib/i18n/t.ts";
 import type { Group } from "@/lib/inventory/types.ts";
+import GroupAutocomplete from "@/islands/GroupAutocomplete.tsx";
 
 /**
  * Item-side group membership UI: the item's current groups as removable chips,
@@ -45,17 +46,7 @@ export function ItemGroupsEditor(
       <form method="post" action={action} class="add-to-group">
         <input type="hidden" name="csrf_token" value={csrfToken} />
         <input type="hidden" name="_action" value="add_group" />
-        <input
-          type="text"
-          name="groupName"
-          list="group-names"
-          placeholder={t("items.add_to_group_placeholder")}
-        />
-        <datalist id="group-names">
-          {allGroupNames.map((name) => (
-            <option key={name} value={name}>{name}</option>
-          ))}
-        </datalist>
+        <GroupAutocomplete name="groupName" suggestions={allGroupNames} />
         <button type="submit" class="btn-small">
           {t("items.group_add_button")}
         </button>

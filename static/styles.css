@@ -581,6 +581,79 @@ p {
   align-items: center;
 }
 
+/* Autocomplete dropdown (island replacement for native <datalist>) */
+.autocomplete {
+  position: relative;
+  flex: 1;
+}
+
+.autocomplete > input {
+  width: 100%;
+}
+
+.autocomplete-list {
+  position: absolute;
+  z-index: 50;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--servus-surface);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  box-shadow: var(--servus-shadow-raised);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.autocomplete-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.8rem;
+  background: transparent;
+  border: none;
+  color: var(--servus-text);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.autocomplete-list button:hover {
+  background: var(--servus-surface-raised);
+}
+
+.new-item-photos {
+  margin: 0.75rem 0;
+}
+
+.new-item-photos .field-heading {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.photo-attach-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.photo-attach-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--servus-radius);
+  border: 1px solid var(--servus-border);
+}
+
+.photo-attach-error {
+  color: var(--servus-danger);
+  font-size: 0.85rem;
+}
+
 .group-reorder .group-members {
   list-style: none;
   margin: 0.5rem 0;

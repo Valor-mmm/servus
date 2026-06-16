@@ -228,6 +228,7 @@ const de = {
   "items.room_label": "Raum (optional)",
   "items.value_label": "Geschätzter Wert (€, optional)",
   "items.warranty_label": "Garantie bis (optional)",
+  "items.photos_label": "Fotos",
   "items.warranty_display": "Garantie bis",
   "items.error.warranty_invalid": "Garantiedatum muss ein gültiges Datum sein.",
   "items.error.metadata_invalid": "Ein Feldwert ist ungültig.",

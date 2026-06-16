@@ -2,22 +2,36 @@ import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { createItem } from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
+import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
+import { MetadataValidationError } from "@/lib/inventory/validateMetadata.ts";
+import { readMetadataFromForm } from "@/components/SchemaFields.tsx";
+import {
+  addMembership,
+  findOrCreateGroup,
+  listGroups,
+} from "@/lib/inventory/groupRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import { listBoxes } from "@/lib/inventory/boxRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
-import type { Category, Room } from "@/lib/inventory/types.ts";
+import type { CategorySchema, Room } from "@/lib/inventory/types.ts";
+import ItemCategoryFields from "@/islands/ItemCategoryFields.tsx";
+import GroupAutocomplete from "@/islands/GroupAutocomplete.tsx";
+import PhotoAttach from "@/islands/PhotoAttach.tsx";
 import CaptureSurface from "@/components/CaptureSurface.tsx";
 
 interface PageProps {
-  categories: Category[];
+  categories: { id: string; name: string }[];
+  schemas: Record<string, CategorySchema>;
   rooms: Room[];
   boxes: BoxWithItemCount[];
+  groupNames: string[];
   error: string | null;
   csrfToken: string;
 }
 
 function NewItemPage(
-  { categories, rooms, boxes, error, csrfToken }: PageProps,
+  { categories, schemas, rooms, boxes, groupNames, error, csrfToken }:
+    PageProps,
 ) {
   return (
     <main class="page">
@@ -36,15 +50,7 @@ function NewItemPage(
           />
         </label>
 
-        <label>
-          {t("items.category_label")}
-          <select name="categoryId" required>
-            <option value="">– {t("items.category_label")} –</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </label>
+        <ItemCategoryFields categories={categories} schemas={schemas} />
 
         <label>
           {t("items.room_label")}
@@ -85,6 +91,21 @@ function NewItemPage(
           <input type="number" name="estimatedValue" min="0" step="0.01" />
         </label>
 
+        <label>
+          {t("items.warranty_label")}
+          <input type="date" name="warrantyUntil" />
+        </label>
+
+        <label>
+          {t("items.add_to_group")}
+          <GroupAutocomplete name="groupName" suggestions={groupNames} />
+        </label>
+
+        <div class="new-item-photos">
+          <span class="field-heading">{t("items.photos_label")}</span>
+          <PhotoAttach csrfToken={csrfToken} />
+        </div>
+
         <button type="submit">{t("action.save")}</button>
         <a href="/items">{t("action.cancel")}</a>
       </form>
@@ -94,18 +115,32 @@ function NewItemPage(
   );
 }
 
+async function loadFormData() {
+  const [categories, rooms, boxes, groups] = await Promise.all([
+    listCategories(),
+    listRooms(),
+    listBoxes(),
+    listGroups(),
+  ]);
+  const schemas: Record<string, CategorySchema> = {};
+  for (const c of categories) {
+    schemas[c.id] = await resolveSchema(c.schemaType);
+  }
+  return {
+    categories: categories.map((c) => ({ id: c.id, name: c.name })),
+    schemas,
+    rooms,
+    boxes,
+    groupNames: groups.map((g) => g.name),
+  };
+}
+
 export const handler = define.handlers({
   async GET(ctx) {
-    const [categories, rooms, boxes] = await Promise.all([
-      listCategories(),
-      listRooms(),
-      listBoxes(),
-    ]);
+    const data = await loadFormData();
     return ctx.render(
       <NewItemPage
-        categories={categories}
-        rooms={rooms}
-        boxes={boxes}
+        {...data}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
       />,
@@ -120,18 +155,18 @@ export const handler = define.handlers({
     const boxId = (form.get("boxId") as string | null) ?? "";
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
+    const warrantyRaw = (form.get("warrantyUntil") as string | null) ?? "";
+    const groupName = ((form.get("groupName") as string | null) ?? "").trim();
+    const photos = form.getAll("photoKey").map((v) => String(v)).filter((v) =>
+      v !== ""
+    );
+    const metadata = readMetadataFromForm(form);
 
     const renderError = async (error: string) => {
-      const [categories, rooms, boxes] = await Promise.all([
-        listCategories(),
-        listRooms(),
-        listBoxes(),
-      ]);
+      const data = await loadFormData();
       return ctx.render(
         <NewItemPage
-          categories={categories}
-          rooms={rooms}
-          boxes={boxes}
+          {...data}
           error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
         />,
@@ -147,16 +182,36 @@ export const handler = define.handlers({
     }
 
     const estimatedValue = valueRaw ? parseFloat(valueRaw) : null;
-    await createItem({
-      name,
-      categoryId,
-      roomId: roomId || null,
-      boxId: boxId || null,
-      quantity,
-      estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
-        ? null
-        : estimatedValue,
-    });
+    let item;
+    try {
+      item = await createItem({
+        name,
+        categoryId,
+        roomId: roomId || null,
+        boxId: boxId || null,
+        quantity,
+        estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
+          ? null
+          : estimatedValue,
+        warrantyUntil: warrantyRaw || null,
+        metadata,
+        photos,
+      });
+    } catch (e) {
+      if (e instanceof MetadataValidationError) {
+        return renderError(
+          e.message.includes("warrantyUntil")
+            ? t("items.error.warranty_invalid")
+            : t("items.error.metadata_invalid"),
+        );
+      }
+      throw e;
+    }
+
+    if (groupName) {
+      const group = await findOrCreateGroup(groupName);
+      await addMembership(group.id, item.id);
+    }
 
     return new Response(null, { status: 302, headers: { Location: "/items" } });
   },
