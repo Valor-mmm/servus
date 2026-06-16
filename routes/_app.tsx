@@ -1,6 +1,7 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { classNameFor, THEME_COLOR, THEME_RAUTE } from "@/lib/styles/theme.ts";
+import { BottomNav } from "@/components/BottomNav.tsx";
 
 function navActive(current: string, href: string): string {
   const match = current === href || current.startsWith(href + "/");
@@ -116,54 +117,7 @@ export default define.page(function App({ Component, state, url }) {
             </nav>
 
             {/* Mobile bottom nav */}
-            <nav class="bottom-nav">
-              <a
-                href="/items"
-                class={navActive(path, "/items").trim() || undefined}
-              >
-                <span class="nav-icon">📦</span>
-                {t("nav.items")}
-              </a>
-              <a
-                href="/boxes"
-                class={navActive(path, "/boxes").trim() || undefined}
-              >
-                <span class="nav-icon">🗃️</span>
-                {t("nav.boxes")}
-              </a>
-              <a
-                href="/items/quick-add"
-                class={`nav-quick-add${navActive(path, "/items/quick-add")}`}
-              >
-                <span class="nav-icon">➕</span>
-                {t("nav.quickAdd")}
-              </a>
-              <a
-                href="/categories"
-                class={navActive(path, "/categories").trim() || undefined}
-              >
-                <span class="nav-icon">🏷️</span>
-                {t("nav.categories")}
-              </a>
-              <a
-                href="/rooms"
-                class={navActive(path, "/rooms").trim() || undefined}
-              >
-                <span class="nav-icon">🏠</span>
-                {t("nav.rooms")}
-              </a>
-              <form method="post" action="/logout">
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value={state.csrfToken ?? ""}
-                />
-                <button type="submit">
-                  <span class="nav-icon">🚪</span>
-                  {t("auth.logout")}
-                </button>
-              </form>
-            </nav>
+            <BottomNav path={path} />
 
             {/* Mobile theme toggle FAB */}
             <button

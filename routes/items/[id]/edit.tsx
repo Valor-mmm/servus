@@ -17,6 +17,15 @@ import {
   readMetadataFromForm,
   SchemaFields,
 } from "@/components/SchemaFields.tsx";
+import { ItemGroupsEditor } from "@/components/ItemGroupsEditor.tsx";
+import {
+  addMembership,
+  findOrCreateGroup,
+  listGroups,
+  listItemGroups,
+  removeMembership,
+} from "@/lib/inventory/groupRepo.ts";
+import type { Group } from "@/lib/inventory/types.ts";
 import PhotoCapture from "@/islands/PhotoCapture.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
@@ -27,6 +36,8 @@ interface PageProps {
   schema: CategorySchema;
   rooms: Room[];
   boxes: BoxWithItemCount[];
+  groups: Group[];
+  allGroupNames: string[];
   error: string | null;
   csrfToken: string;
   photoUrls: string[]; // presigned URLs for each photo in order
@@ -38,8 +49,18 @@ async function schemaForItem(item: Item): Promise<CategorySchema> {
 }
 
 function EditItemPage(
-  { item, categories, schema, rooms, boxes, error, csrfToken, photoUrls }:
-    PageProps,
+  {
+    item,
+    categories,
+    schema,
+    rooms,
+    boxes,
+    groups,
+    allGroupNames,
+    error,
+    csrfToken,
+    photoUrls,
+  }: PageProps,
 ) {
   return (
     <main class="page">
@@ -169,8 +190,25 @@ function EditItemPage(
         <button type="submit">{t("action.save")}</button>
         <a href={`/items/${item.id}`}>{t("action.cancel")}</a>
       </form>
+
+      <ItemGroupsEditor
+        itemId={item.id}
+        groups={groups}
+        allGroupNames={allGroupNames}
+        csrfToken={csrfToken}
+      />
     </main>
   );
+}
+
+async function groupData(
+  itemId: string,
+): Promise<{ groups: Group[]; allGroupNames: string[] }> {
+  const [groups, all] = await Promise.all([
+    listItemGroups(itemId),
+    listGroups(),
+  ]);
+  return { groups, allGroupNames: all.map((g) => g.name) };
 }
 
 function buildPhotoUrls(photos: string[]): string[] {
@@ -188,12 +226,14 @@ export const handler = define.handlers({
     const item = await findItem(ctx.params.id);
     if (!item) return new Response(t("error.not_found"), { status: 404 });
 
-    const [categories, rooms, boxes, schema] = await Promise.all([
-      listCategories(),
-      listRooms(),
-      listBoxes(),
-      schemaForItem(item),
-    ]);
+    const [categories, rooms, boxes, schema, { groups, allGroupNames }] =
+      await Promise.all([
+        listCategories(),
+        listRooms(),
+        listBoxes(),
+        schemaForItem(item),
+        groupData(item.id),
+      ]);
     const photoUrls = buildPhotoUrls(item.photos);
     return ctx.render(
       <EditItemPage
@@ -202,6 +242,8 @@ export const handler = define.handlers({
         schema={schema}
         rooms={rooms}
         boxes={boxes}
+        groups={groups}
+        allGroupNames={allGroupNames}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
         photoUrls={photoUrls}
@@ -235,6 +277,27 @@ export const handler = define.handlers({
       });
     }
 
+    if (action === "add_group") {
+      const groupName = ((form.get("groupName") as string | null) ?? "").trim();
+      if (groupName) {
+        const group = await findOrCreateGroup(groupName);
+        await addMembership(group.id, item.id);
+      }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/items/${item.id}/edit` },
+      });
+    }
+
+    if (action === "remove_group") {
+      const groupId = (form.get("groupId") as string | null) ?? "";
+      if (groupId) await removeMembership(groupId, item.id);
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/items/${item.id}/edit` },
+      });
+    }
+
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) || null;
     const roomId = (form.get("roomId") as string | null) ?? "";
@@ -246,12 +309,14 @@ export const handler = define.handlers({
     const metadata = readMetadataFromForm(form);
 
     const renderError = async (error: string) => {
-      const [categories, rooms, boxes, schema] = await Promise.all([
-        listCategories(),
-        listRooms(),
-        listBoxes(),
-        schemaForItem(item),
-      ]);
+      const [categories, rooms, boxes, schema, { groups, allGroupNames }] =
+        await Promise.all([
+          listCategories(),
+          listRooms(),
+          listBoxes(),
+          schemaForItem(item),
+          groupData(item.id),
+        ]);
       return ctx.render(
         <EditItemPage
           item={item}
@@ -259,6 +324,8 @@ export const handler = define.handlers({
           schema={schema}
           rooms={rooms}
           boxes={boxes}
+          groups={groups}
+          allGroupNames={allGroupNames}
           error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
           photoUrls={buildPhotoUrls(item.photos)}

@@ -1,6 +1,13 @@
 # Design System Specification
 
-## ADDED Requirements
+## Purpose
+
+The visual and interaction design system: themes and tokens, color palette,
+typography, navigation (desktop top nav + mobile bottom bar + the "Mehr" menu),
+buttons, badges, the lion mascot, micro-animations, PWA installability, and
+mobile layout rules. The contract for how the app looks and feels.
+
+## Requirements
 
 ### Requirement: Comfortable and efficient UX
 
@@ -188,9 +195,11 @@ convey the status at a glance without relying on text alone:
 ### Requirement: Bottom navigation bar
 
 When a user is authenticated the app MUST render a bottom navigation bar visible
-on viewports narrower than 768 px. The bar MUST contain links to Items, Boxes,
-Categories, and Rooms, and a logout action. A top navigation bar MUST be shown
-instead on viewports 768 px and wider.
+on viewports narrower than 768 px. The bar MUST contain links to Items and
+Boxes, the Quick-add action, and a "Mehr" (More) link to the secondary menu.
+Secondary destinations (Categories, Rooms, administration, logout, theme) MUST
+NOT appear directly in the bottom bar; they are reached through the Mehr menu. A
+top navigation bar MUST be shown instead on viewports 768 px and wider.
 
 #### Scenario: Bottom nav visible on narrow viewport
 
@@ -203,13 +212,17 @@ instead on viewports 768 px and wider.
 - **WHEN** an authenticated user views the app on a viewport 768 px or wider
 - **THEN** a `nav.top-nav` element is visible and `nav.bottom-nav` is hidden
 
-#### Scenario: Bottom nav contains required links
+#### Scenario: Bottom nav contains the primary entries plus Mehr
 
 - **WHEN** the bottom nav is rendered
-- **THEN** it contains links to `/items`, `/boxes`, `/categories`, `/rooms`, and
-  a logout form
+- **THEN** it contains links to `/items` and `/boxes`, the Quick-add action, and
+  a link to the Mehr menu (`/mehr`)
 
----
+#### Scenario: Bottom nav excludes secondary destinations
+
+- **WHEN** the bottom nav is rendered
+- **THEN** it does not contain direct links to `/categories` or `/rooms`, and it
+  does not contain the logout form
 
 ### Requirement: Lion mascot asset
 
@@ -338,9 +351,10 @@ and full opacity (non-active items are at reduced opacity).
 
 ### Requirement: Quick-add visual distinction in bottom nav
 
-The quick-add nav item (linking to `/items/quick-add`) in the bottom navigation
-MUST be visually distinct from other nav items to identify it as the primary
-action. It MUST display a gold accent pill background behind its icon.
+The quick-add nav item in the bottom navigation MUST be visually distinct from
+other nav items to identify it as the primary action. It links to
+`/items/quick-add` and MUST display a gold accent pill background behind its
+icon.
 
 #### Scenario: Quick-add button is visually distinct
 
@@ -365,9 +379,9 @@ available width with horizontal padding only.
 
 ### Requirement: Mobile touch target minimum
 
-Interactive controls within list rows (quantity increment and decrement buttons)
-MUST have a minimum touch target height of 44 px on viewports < 768 px to meet
-iOS Human Interface Guidelines.
+Interactive controls within list rows MUST have a minimum touch target height of
+44 px on viewports < 768 px to meet iOS Human Interface Guidelines. This applies
+to the quantity increment and decrement buttons.
 
 #### Scenario: Quantity buttons meet 44 px minimum on mobile
 
@@ -403,3 +417,29 @@ desktop density of the current layout.
 - **WHEN** an authenticated user views `/items` on a viewport ≥ 768 px
 - **THEN** each item row displays name, badge (if applicable), and meta text on
   a single horizontal line alongside the quantity controls
+
+### Requirement: Secondary navigation menu ("Mehr")
+
+The app MUST provide a server-rendered secondary navigation page at `/mehr`,
+reachable from the bottom navigation's "Mehr" entry, for authenticated users.
+The page MUST list the secondary destinations — Categories, Rooms, and
+administration — and MUST provide the logout action as a CSRF-protected POST
+form and access to the theme (Design) control. The page MUST be reachable
+without client-side JavaScript (no island/bottom-sheet dependency). All labels
+MUST be rendered through the i18n helper.
+
+#### Scenario: Mehr page lists secondary destinations
+
+- **WHEN** an authenticated user opens `/mehr`
+- **THEN** the page shows links to `/categories` and `/rooms` and the
+  administration area
+
+#### Scenario: Logout works from the Mehr page
+
+- **WHEN** an authenticated user submits the logout form on `/mehr`
+- **THEN** the session is ended and the user is returned to the logged-out state
+
+#### Scenario: Mehr page requires authentication
+
+- **WHEN** an unauthenticated client requests `/mehr`
+- **THEN** it is redirected to login rather than shown the menu

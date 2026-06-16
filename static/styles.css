@@ -54,6 +54,7 @@ html.theme-raute {
   --servus-primary-text: #ffffff;
   --servus-accent: #e5a82e;
   --servus-accent-hover: #c9931f;
+  --servus-accent-text: #0a1a2e;
   --servus-danger: #b4332d;
   --servus-danger-hover: #962416;
   --servus-success: #2e7d32;
@@ -123,6 +124,7 @@ html.theme-sternenhimmel {
   --servus-primary-text: #0e1830;
   --servus-accent: #f0d87a;
   --servus-accent-hover: #c9b452;
+  --servus-accent-text: #0e1830;
   --servus-danger: #b85050;
   --servus-danger-hover: #963535;
   --servus-success: #5a7848;
@@ -472,20 +474,209 @@ p {
 }
 
 .bottom-nav .nav-quick-add .nav-icon {
-  font-size: 1.5rem;
-  background: var(--servus-primary);
-  color: var(--servus-primary-text);
+  font-size: 1.2rem;
+  /* Gold accent pill (via the nav-active token) — distinct from the blue nav
+     bar in the light theme; unchanged gold in dark. Dark text for contrast. */
+  background: var(--servus-nav-active);
+  color: var(--servus-accent-text);
   border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.2rem;
+  height: 2.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  margin-top: -1.25rem;
+  margin-top: -0.8rem;
   box-shadow:
     var(--servus-shadow-raised),
     0 0 0 3px var(--servus-nav-bg);
+}
+
+/* ── Mehr / secondary menu page ────────────────────────────────────────────── */
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.menu-list li,
+.menu-list form {
+  display: block;
+}
+
+.menu-list a,
+.menu-list .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: var(--servus-surface);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  color: var(--servus-text);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-list a:hover,
+.menu-list .menu-item:hover {
+  background: var(--servus-surface-raised);
+}
+
+.menu-list .nav-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* ── Groups ─────────────────────────────────────────────────────────────────── */
+.item-groups {
+  margin-top: 1.5rem;
+}
+
+.group-chips {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--servus-surface-raised);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius-pill);
+  font-size: 0.85rem;
+}
+
+.group-chip a {
+  color: var(--servus-text);
+  text-decoration: none;
+}
+
+.chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--servus-text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.add-to-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Autocomplete dropdown (island replacement for native <datalist>) */
+.autocomplete {
+  position: relative;
+  flex: 1;
+}
+
+.autocomplete > input {
+  width: 100%;
+}
+
+.autocomplete-list {
+  position: absolute;
+  z-index: 50;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--servus-surface);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  box-shadow: var(--servus-shadow-raised);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.autocomplete-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.8rem;
+  background: transparent;
+  border: none;
+  color: var(--servus-text);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.autocomplete-list button:hover {
+  background: var(--servus-surface-raised);
+}
+
+.new-item-photos {
+  margin: 0.75rem 0;
+}
+
+.new-item-photos .field-heading {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.photo-attach-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.photo-attach-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--servus-radius);
+  border: 1px solid var(--servus-border);
+}
+
+.photo-attach-error {
+  color: var(--servus-danger);
+  font-size: 0.85rem;
+}
+
+.group-reorder .group-members {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.group-reorder .group-members li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--servus-surface);
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+}
+
+.reorder-controls {
+  display: inline-flex;
+  gap: 0.3rem;
 }
 
 /* ── Theme toggle FAB (mobile only) ────────────────────────────────────────── */
