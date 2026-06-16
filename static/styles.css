@@ -54,6 +54,7 @@ html.theme-raute {
   --servus-primary-text: #ffffff;
   --servus-accent: #e5a82e;
   --servus-accent-hover: #c9931f;
+  --servus-accent-text: #0a1a2e;
   --servus-danger: #b4332d;
   --servus-danger-hover: #962416;
   --servus-success: #2e7d32;
@@ -123,6 +124,7 @@ html.theme-sternenhimmel {
   --servus-primary-text: #0e1830;
   --servus-accent: #f0d87a;
   --servus-accent-hover: #c9b452;
+  --servus-accent-text: #0e1830;
   --servus-danger: #b85050;
   --servus-danger-hover: #963535;
   --servus-success: #5a7848;
@@ -472,17 +474,19 @@ p {
 }
 
 .bottom-nav .nav-quick-add .nav-icon {
-  font-size: 1.5rem;
-  background: var(--servus-primary);
-  color: var(--servus-primary-text);
+  font-size: 1.2rem;
+  /* Gold accent pill (via the nav-active token) — distinct from the blue nav
+     bar in the light theme; unchanged gold in dark. Dark text for contrast. */
+  background: var(--servus-nav-active);
+  color: var(--servus-accent-text);
   border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.2rem;
+  height: 2.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  margin-top: -1.25rem;
+  margin-top: -0.8rem;
   box-shadow:
     var(--servus-shadow-raised),
     0 0 0 3px var(--servus-nav-bg);

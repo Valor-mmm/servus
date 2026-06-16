@@ -50,10 +50,11 @@ export function ItemGroupsEditor(
           name="groupName"
           list="group-names"
           placeholder={t("items.add_to_group_placeholder")}
-          autocomplete="off"
         />
         <datalist id="group-names">
-          {allGroupNames.map((name) => <option key={name} value={name} />)}
+          {allGroupNames.map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
         </datalist>
         <button type="submit" class="btn-small">
           {t("items.group_add_button")}

@@ -22,6 +22,9 @@ Deno.test("ItemGroupsEditor: renders an add input backed by a datalist of names"
   assertStringIncludes(html, 'value="Campingkram"');
   assertStringIncludes(html, 'value="Harry Potter"');
   assertStringIncludes(html, 'value="add_group"');
+  // Regression: autocomplete="off" suppresses the datalist popup on mobile —
+  // the input must NOT carry it.
+  assertEquals(html.includes('autocomplete="off"'), false);
 });
 
 Deno.test("ItemGroupsEditor: renders current groups as removable chips", () => {
