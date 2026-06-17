@@ -13,7 +13,6 @@
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
-import { denyGetUserMedia } from "../helpers/camera.ts";
 
 const FIXTURE = path.resolve("tests/e2e/fixtures/sample-item.jpg");
 const R2_BASE = "https://r2-e2e.example.com";
@@ -73,7 +72,6 @@ async function setupR2Mocks(page: import("@playwright/test").Page) {
 test("photo capture on box creates pending item; editing name keeps pending status", async ({ page }) => {
   const boxLabel = `PhotoBox-${RUN}`;
 
-  await denyGetUserMedia(page);
   await createBox(page, boxLabel);
   const boxUrl = page.url();
 
@@ -82,11 +80,11 @@ test("photo capture on box creates pending item; editing name keeps pending stat
   await setupR2Mocks(page);
 
   // Trigger photo capture by setting a file on the hidden input
-  const fileInput = page.locator(".photo-capture input[type=file]");
+  const fileInput = page.locator(".photo-capture input[type=file][capture]");
   await fileInput.setInputFiles(FIXTURE);
 
-  // After the first create, the island shows "Weiteres Foto" + "Fertig" instead
-  // of reloading immediately. Tap Fertig to commit and reload the page.
+  // Once the upload completes, the island shows a "Fertig" action instead of
+  // reloading immediately. Tap it to commit and reload the page.
   await expect(page.locator("button", { hasText: "Fertig" })).toBeVisible({
     timeout: 20_000,
   });

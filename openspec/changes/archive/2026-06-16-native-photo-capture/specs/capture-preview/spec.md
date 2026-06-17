@@ -1,6 +1,4 @@
-# Capture Preview Specification
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Captured photos are previewed inline during multi-photo session
 
@@ -28,8 +26,6 @@ appears from the first capture, regardless of which data-flow mode is active.
 - **WHEN** the capture surface is in its initial state with no photos captured
 - **THEN** no thumbnail strip is rendered
 
----
-
 ### Requirement: Photo count is shown next to the "add another" button
 
 The capture surface MUST display the number of photos captured in the current
@@ -46,7 +42,7 @@ captured. The count MUST update as photos are added or removed.
 - **WHEN** the capture surface is in its initial state with no photos captured
 - **THEN** no count is shown next to the add-photo control label
 
----
+## ADDED Requirements
 
 ### Requirement: Each previewed photo can be removed before finishing
 

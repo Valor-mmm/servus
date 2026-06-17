@@ -254,7 +254,6 @@ const de = {
 
   // ── Photos / capture ─────────────────────────────────────────────────────
   "items.placeholderName": "(unbenannt)",
-  "items.captureButton": "Foto aufnehmen",
   "items.captureFailed": "Upload fehlgeschlagen. Bitte erneut versuchen.",
   "items.captureFailedPresign":
     "Upload-URL fehlgeschlagen (HTTP {status}). R2-Konfiguration prüfen.",
@@ -269,8 +268,11 @@ const de = {
   "items.captureWrongType":
     "Dieser Dateityp wird nicht unterstützt. Bitte ein JPEG, PNG oder WebP aufnehmen.",
   "items.addPhoto": "Foto hinzufügen",
+  "items.fromGallery": "Aus Galerie",
   "items.removePhoto": "Foto entfernen",
-  "items.addAnotherPhoto": "Weiteres Foto",
+  "items.removePhotoFailed":
+    "Entfernen fehlgeschlagen. Bitte erneut versuchen.",
+  "items.retry": "Wiederholen",
   "items.captureFinished": "Fertig",
   "items.pending": "Ausstehend",
   "items.needsReview": "Zur Überprüfung",
@@ -308,20 +310,6 @@ const de = {
   "invite.error.invalid": "Ungültiger oder abgelaufener Einladungscode.",
   "invite.error.rate_limited":
     "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
-
-  // ── Continuous capture ────────────────────────────────────────────────────
-  "capture.activate": "Kamera aktivieren",
-  "capture.shutterLabel": "Aufnehmen",
-  "capture.confirmLabel": "✓ Fertig",
-  "capture.closeLabel": "✕ Schließen",
-  "capture.permissionDeniedHint":
-    "Kamerazugriff verweigert. Bitte erlaube den Zugriff in den Browser-Einstellungen und versuche es erneut.",
-  "capture.noCameraHint":
-    "Keine Kamera gefunden. Bitte verwende die Dateiauswahl.",
-  "capture.unsupportedHint":
-    "Dein Browser unterstützt keinen direkten Kamerazugriff. Bitte verwende die Dateiauswahl.",
-  "capture.zoomSliderLabel": "Zoom",
-  "capture.focusRingLabel": "Fokuspunkt",
 
   // ── Admin ─────────────────────────────────────────────────────────────────
   "admin.title": "Verwaltung",

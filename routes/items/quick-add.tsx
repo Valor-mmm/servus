@@ -1,6 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
-import CaptureSurface from "@/components/CaptureSurface.tsx";
+import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
 
 interface PageProps {
   csrfToken: string;
@@ -13,7 +13,7 @@ function QuickAddPage({ csrfToken }: PageProps) {
         <h1>{t("items.quick_add_title")}</h1>
         <a href="/items" class="btn-secondary">{t("action.back")}</a>
       </div>
-      <CaptureSurface csrfToken={csrfToken} />
+      <NativePhotoCapture mode="create-from-photo" csrfToken={csrfToken} />
     </main>
   );
 }

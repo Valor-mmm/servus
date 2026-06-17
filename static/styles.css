@@ -931,78 +931,6 @@ button:focus-visible,
   }
 }
 
-/* ── Continuous capture viewfinder wrapper (relative container for overlays) ── */
-.capture-viewfinder-wrap {
-  position: relative;
-  width: 100%;
-  line-height: 0;
-}
-
-.capture-viewfinder {
-  width: 100%;
-  border-radius: 8px;
-  display: block;
-  touch-action: none; /* Prevent browser pinch-zoom on the viewfinder */
-}
-
-/* ── Zoom slider overlay ─────────────────────────────────────────────────── */
-.capture-zoom-slider {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 5%;
-  width: 90%;
-  appearance: none;
-  -webkit-appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.4);
-  outline: none;
-  cursor: pointer;
-}
-
-.capture-zoom-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-}
-
-.capture-zoom-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  border: none;
-}
-
-/* ── Focus ring overlay ──────────────────────────────────────────────────── */
-@keyframes focus-ring-fade {
-  0% {
-    transform: translate(-50%, -50%) scale(1.4);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-  }
-}
-
-.capture-focus-ring {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: focus-ring-fade 1.5s ease-out forwards;
-  transform-origin: center;
-}
-
 /* ── Capture preview strip (in-session thumbnails during multi-photo capture) ── */
 .capture-preview-strip {
   display: flex;
@@ -1365,6 +1293,69 @@ button:focus-visible,
   justify-content: center;
   min-height: 3rem;
   font-size: 1rem;
+}
+
+.capture-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.capture-controls .capture-btn {
+  flex: 3;
+}
+
+.capture-gallery-btn {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.capture-preview-item {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.capture-preview-item--uploading .capture-preview-thumb {
+  opacity: 0.55;
+}
+
+.capture-preview-item--failed .capture-preview-thumb {
+  outline: 2px solid var(--servus-danger);
+}
+
+.capture-preview-remove {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--servus-danger);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.capture-preview-retry {
+  position: absolute;
+  bottom: -0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--servus-radius);
+  border: 1px solid var(--servus-border);
+  background: var(--servus-surface);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .capture-error {

@@ -22,6 +22,9 @@ export const handler = define.handlers({
     if (result.error) {
       return Response.json({ error: result.error }, { status: result.status });
     }
-    return Response.json({ item: result.item }, { status: result.status });
+    return Response.json(
+      { item: result.item, deleted: result.deleted },
+      { status: result.status },
+    );
   },
 });
