@@ -9,19 +9,19 @@ const CAT_BY_NAME_KEY = (name: string): Deno.KvKey => [
 ];
 const CAT_INDEX_PREFIX = (id: string): Deno.KvKey => ["item-by-category", id];
 
-// Legacy records predate `schemaType`; default them to generic on read. No
-// write-side migration needed — see design.md "Backward compatibility".
 // deno-lint-ignore no-explicit-any
 function normalizeCategory(raw: any): Category {
   return {
     ...raw,
     schemaType: typeof raw.schemaType === "string" ? raw.schemaType : "generic",
+    canContain: typeof raw.canContain === "boolean" ? raw.canContain : false,
   };
 }
 
 export async function createCategory(
   name: string,
   schemaType: string = "generic",
+  canContain: boolean = false,
 ): Promise<Category> {
   if (!(await schemaTypeExists(schemaType))) {
     throw new Error(`Unknown schemaType '${schemaType}'`);
@@ -36,7 +36,13 @@ export async function createCategory(
   }
 
   const id = crypto.randomUUID();
-  const category: Category = { id, name, schemaType, createdAt: Date.now() };
+  const category: Category = {
+    id,
+    name,
+    schemaType,
+    canContain,
+    createdAt: Date.now(),
+  };
 
   const result = await kv.atomic()
     .check({ key: nameKey, versionstamp: null })
@@ -70,6 +76,23 @@ export async function listCategories(): Promise<Category[]> {
 export interface UpdateCategoryInput {
   name?: string;
   schemaType?: string;
+  canContain?: boolean;
+}
+
+async function categoryHasOccupiedContainers(
+  kv: Deno.Kv,
+  categoryId: string,
+): Promise<boolean> {
+  // Walk all items in this category and check if any have items inside them.
+  for await (
+    const entry of kv.list<true>({ prefix: ["item-by-category", categoryId] })
+  ) {
+    const itemId = entry.key[2] as string;
+    const containerIndex = kv.list({ prefix: ["item-by-container", itemId] });
+    const first = await containerIndex.next();
+    if (!first.done) return true;
+  }
+  return false;
 }
 
 export async function updateCategory(
@@ -87,6 +110,16 @@ export async function updateCategory(
   }
 
   const kv = await getKv();
+
+  // Guard: cannot disable canContain while any item in this category has contents
+  if (input.canContain === false && existing.canContain === true) {
+    if (await categoryHasOccupiedContainers(kv, id)) {
+      throw new Error(
+        `Category '${id}' has occupied containers — empty them before disabling canContain`,
+      );
+    }
+  }
+
   const newName = input.name?.trim() ? input.name.trim() : existing.name;
   const renamed = newName.toLowerCase() !== existing.name.toLowerCase();
 
@@ -101,6 +134,9 @@ export async function updateCategory(
     ...existing,
     name: newName,
     schemaType: input.schemaType ?? existing.schemaType,
+    canContain: input.canContain !== undefined
+      ? input.canContain
+      : existing.canContain,
   };
 
   const op = kv.atomic().set(CAT_KEY(id), updated);

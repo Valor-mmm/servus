@@ -338,6 +338,27 @@ const de = {
   "admin.delete_confirm.button": "Ja, alle Daten unwiderruflich löschen",
   "admin.delete_confirm.cancel": "Abbrechen",
 
+  // ── Containment ──────────────────────────────────────────────────────────
+  "items.container_label": "Behälter (optional)",
+  "items.no_container": "Kein Behälter",
+  "items.container_derived_room": "Raum kommt vom Behälter",
+  "items.container_derived_room_hint":
+    "Raum wird automatisch vom Behälter übernommen.",
+  "items.contents_heading": "Inhalt",
+  "items.contents_empty": "Dieser Behälter ist leer.",
+  "items.contained_in": "Enthalten in",
+  "items.location_breadcrumb": "Standort",
+  "items.delete_container_warning":
+    "{count} Gegenstand/Gegenstände befindet sich in diesem Behälter.",
+  "items.delete_container_room_offer":
+    "Zielraum für die Gegenstände (optional)",
+  "items.delete_container_confirm": "Trotzdem löschen",
+  "items.label_page_title": "Behälter-Etikett",
+  "items.label_action": "Etikett drucken",
+  "categories.can_contain_label": "Kann Gegenstände enthalten",
+  "categories.error.occupied_containers":
+    "Kategorie enthält noch befüllte Behälter. Bitte erst leeren.",
+
   // ── Boxes ──────────────────────────────────────────────────────────────────
   "boxes.title": "Kartons",
   "boxes.add": "Karton hinzufügen",

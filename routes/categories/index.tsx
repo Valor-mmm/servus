@@ -75,6 +75,10 @@ function CategoriesPage(
             types={schemaTypes}
           />
         </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="canContain" value="1" />
+          {t("categories.can_contain_label")}
+        </label>
         <button type="submit">{t("categories.add")}</button>
       </form>
 
@@ -96,6 +100,15 @@ function CategoriesPage(
                       selected={cat.schemaType}
                       types={schemaTypes}
                     />
+                  </label>
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="canContain"
+                      value="1"
+                      checked={cat.canContain}
+                    />
+                    {t("categories.can_contain_label")}
                   </label>
                   <button type="submit" class="btn-small">
                     {t("categories.save")}
@@ -141,8 +154,9 @@ export const handler = define.handlers({
     if (action === "create") {
       const name = ((form.get("name") as string | null) ?? "").trim();
       const schemaType = (form.get("schemaType") as string | null) ?? "generic";
+      const canContain = form.get("canContain") === "1";
       try {
-        await createCategory(name, schemaType);
+        await createCategory(name, schemaType, canContain);
         return new Response(null, {
           status: 302,
           headers: { Location: "/categories" },
@@ -155,14 +169,17 @@ export const handler = define.handlers({
     } else if (action === "update") {
       const id = (form.get("id") as string | null) ?? "";
       const schemaType = (form.get("schemaType") as string | null) ?? "generic";
+      const canContain = form.get("canContain") === "1";
       try {
-        await updateCategory(id, { schemaType });
+        await updateCategory(id, { schemaType, canContain });
         return new Response(null, {
           status: 302,
           headers: { Location: "/categories" },
         });
       } catch (e) {
-        error = (e instanceof Error && e.message.includes("schemaType"))
+        error = e instanceof Error && e.message.includes("occupied")
+          ? t("categories.error.occupied_containers")
+          : (e instanceof Error && e.message.includes("schemaType"))
           ? t("categories.error.invalid_schema")
           : t("categories.error.duplicate");
       }
