@@ -47,9 +47,6 @@ test("containment: create container item, place item inside, verify room resolut
   // Create the content item by selecting the container
   await page.goto("/items/new");
   await page.fill('[name="name"]', contentName);
-  // Open the container selector
-  await page.click(`text=${contentName}`);
-  // Use a generic category for the content item
   // Click the container selector button
   const containerBtn = page.locator("button", { hasText: /Behälter/ });
   await containerBtn.click();
