@@ -49,10 +49,13 @@ export function presignGet(
   nowSeconds?: number,
 ): string {
   const now = nowSeconds ?? Math.floor(Date.now() / 1000);
-  // Pin to the start of the current 15-min window — same window = same expiry
+  // Pin to the start of the current 15-min window so that all requests within
+  // the same window produce an identical URL (browser-cacheable). The URL is
+  // valid for TWO full windows (30 min) so that a URL generated near the end
+  // of a window stays valid for at least another 15 minutes.
   const windowStart = Math.floor(now / GET_WINDOW_SECONDS) * GET_WINDOW_SECONDS;
-  const expiresAt = windowStart + GET_WINDOW_SECONDS;
-  const ttl = expiresAt - windowStart;
+  const expiresAt = windowStart + GET_WINDOW_SECONDS * 2;
+  const ttl = expiresAt - windowStart; // always 1800 s
 
   const url = new URL(`${cfg.publicUrl}/${key}`);
   url.searchParams.set("X-Amz-Expires", String(ttl));
