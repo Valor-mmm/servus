@@ -85,7 +85,7 @@ function CategoriesPage(
       {categories.length === 0
         ? <p class="empty">{t("categories.empty")}</p>
         : (
-          <ul class="item-list">
+          <ul class="item-list category-list">
             {categories.map((cat) => (
               <li key={cat.id} class="item-row">
                 <span>{cat.name}</span>

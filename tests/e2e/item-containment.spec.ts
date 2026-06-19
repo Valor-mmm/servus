@@ -47,6 +47,7 @@ test("containment: create container item, place item inside, verify room resolut
   // Create the content item by selecting the container
   await page.goto("/items/new");
   await page.fill('[name="name"]', contentName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
   // Click the container selector button
   const containerBtn = page.locator("button", { hasText: /Behälter/ });
   await containerBtn.click();
@@ -66,7 +67,7 @@ test("containment: create container item, place item inside, verify room resolut
 
   // Verify the room view includes the content item
   await page.goto("/rooms");
-  await page.click(`text=${roomName}`);
+  await page.click(`a:has-text("${roomName}")`);
   await expect(page.locator(`text=${contentName}`)).toBeVisible();
 });
 

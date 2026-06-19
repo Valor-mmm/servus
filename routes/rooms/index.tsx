@@ -36,7 +36,7 @@ function RoomsPage({ rooms, error, csrfToken }: PageProps) {
           <ul class="item-list">
             {rooms.map((room) => (
               <li key={room.id} class="item-row">
-                <span>{room.name}</span>
+                <a href={`/items?room=${room.id}`}>{room.name}</a>
                 <form method="post" action="/rooms">
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
