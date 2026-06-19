@@ -896,6 +896,32 @@ button:focus-visible,
   box-shadow: var(--servus-shadow-raised);
 }
 
+/* Allow forms inside item-rows to shrink below their content size on narrow viewports */
+.item-row form {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Category list: on narrow viewports the update form + delete button are too wide
+   to sit inline with the name. Wrap so the name occupies its own line. */
+@media (max-width: 479px) {
+  .category-list .item-row {
+    flex-wrap: wrap;
+  }
+  .category-list .item-row > span:first-child {
+    flex: 1 1 100%;
+  }
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
 .item-thumbnail {
   width: 2.5rem;
   height: 2.5rem;

@@ -1,6 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
-import { findItem, updateItem } from "@/lib/inventory/itemRepo.ts";
+import { findItem, resolveRoom, updateItem } from "@/lib/inventory/itemRepo.ts";
 import { findCategory, listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
 import { MetadataValidationError } from "@/lib/inventory/validateMetadata.ts";
@@ -27,6 +27,7 @@ import {
 } from "@/lib/inventory/groupRepo.ts";
 import type { Group } from "@/lib/inventory/types.ts";
 import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
+import ItemLocationFields from "@/islands/ItemLocationFields.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 
@@ -40,7 +41,9 @@ interface PageProps {
   allGroupNames: string[];
   error: string | null;
   csrfToken: string;
-  photoUrls: string[]; // presigned URLs for each photo in order
+  photoUrls: string[];
+  containerName: string | null;
+  derivedRoomId: string | null;
 }
 
 async function schemaForItem(item: Item): Promise<CategorySchema> {
@@ -60,6 +63,8 @@ function EditItemPage(
     error,
     csrfToken,
     photoUrls,
+    containerName,
+    derivedRoomId,
   }: PageProps,
 ) {
   return (
@@ -121,37 +126,19 @@ function EditItemPage(
           </select>
         </label>
 
-        <label>
-          {t("items.room_label")}
-          <select name="roomId">
-            <option
-              value=""
-              selected={item.roomId === null && item.boxId === null}
-            >
-              {t("items.no_room")}
-            </option>
-            {rooms.map((r) => (
-              <option key={r.id} value={r.id} selected={r.id === item.roomId}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          {t("items.box_label")}
-          <select name="boxId">
-            <option value="" selected={item.boxId === null}>
-              {t("items.no_box")}
-            </option>
-            {boxes.map((b) => (
-              <option key={b.id} value={b.id} selected={b.id === item.boxId}>
-                {b.code}
-                {b.label ? ` – ${b.label}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ItemLocationFields
+          rooms={rooms}
+          boxes={boxes.map((b) => ({
+            id: b.id,
+            code: b.code,
+            label: b.label,
+          }))}
+          initialContainerId={item.containerId}
+          initialContainerName={containerName}
+          initialRoomId={item.roomId}
+          initialBoxId={item.boxId}
+          initialDerivedRoomId={derivedRoomId}
+        />
 
         <label>
           {t("items.quantity_label")}
@@ -234,6 +221,15 @@ export const handler = define.handlers({
         schemaForItem(item),
         groupData(item.id),
       ]);
+
+    let containerName: string | null = null;
+    let derivedRoomId: string | null = null;
+    if (item.containerId) {
+      const containerItem = await findItem(item.containerId);
+      containerName = containerItem?.name ?? null;
+      derivedRoomId = await resolveRoom(item);
+    }
+
     const photoUrls = buildPhotoUrls(item.photos);
     return ctx.render(
       <EditItemPage
@@ -247,6 +243,8 @@ export const handler = define.handlers({
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
         photoUrls={photoUrls}
+        containerName={containerName}
+        derivedRoomId={derivedRoomId}
       />,
     );
   },
@@ -300,6 +298,7 @@ export const handler = define.handlers({
 
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) || null;
+    const containerId = (form.get("containerId") as string | null) ?? "";
     const roomId = (form.get("roomId") as string | null) ?? "";
     const boxId = (form.get("boxId") as string | null) ?? "";
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
@@ -317,6 +316,13 @@ export const handler = define.handlers({
           schemaForItem(item),
           groupData(item.id),
         ]);
+      let containerName: string | null = null;
+      let derivedRoomId: string | null = null;
+      if (item.containerId) {
+        const containerItem = await findItem(item.containerId);
+        containerName = containerItem?.name ?? null;
+        derivedRoomId = await resolveRoom(item);
+      }
       return ctx.render(
         <EditItemPage
           item={item}
@@ -329,6 +335,8 @@ export const handler = define.handlers({
           error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
           photoUrls={buildPhotoUrls(item.photos)}
+          containerName={containerName}
+          derivedRoomId={derivedRoomId}
         />,
       );
     };
@@ -341,10 +349,16 @@ export const handler = define.handlers({
     }
 
     const estimatedValue = valueRaw ? parseFloat(valueRaw) : null;
+    // Server-side: reject if both containerId and boxId are set
+    if (containerId && boxId) {
+      return renderError(t("items.error.category_required"));
+    }
+
     try {
       await updateItem(item.id, {
         name,
         categoryId,
+        containerId: containerId || null,
         roomId: roomId || null,
         boxId: boxId || null,
         quantity,

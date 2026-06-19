@@ -10,6 +10,7 @@ function typedItem(): Item {
     id: "i1",
     name: "Der Hobbit",
     categoryId: "c1",
+    containerId: null,
     roomId: null,
     boxId: null,
     quantity: 1,
@@ -27,6 +28,7 @@ const bookCategory: Category = {
   id: "c1",
   name: "Bücher",
   schemaType: "book",
+  canContain: false,
   createdAt: 0,
 };
 

@@ -48,6 +48,7 @@ Deno.test("legacy record without quantity field reads back as quantity: 1", asyn
       id: "legacy-id",
       name: "Altes Ding",
       categoryId: CAT,
+      containerId: null,
       roomId: null,
       boxId: null,
       estimatedValue: null,

@@ -2,6 +2,7 @@ export interface Category {
   id: string;
   name: string;
   schemaType: string;
+  canContain: boolean;
   createdAt: number;
 }
 
@@ -67,6 +68,7 @@ export interface Item {
   id: string;
   name: string;
   categoryId: string | null;
+  containerId: string | null;
   roomId: string | null;
   boxId: string | null;
   quantity: number;

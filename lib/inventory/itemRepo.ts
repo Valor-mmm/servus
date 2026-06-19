@@ -28,6 +28,10 @@ const BOX_IDX_KEY = (boxId: string, itemId: string): Deno.KvKey => [
   boxId,
   itemId,
 ];
+const CONTAINER_IDX_KEY = (
+  containerId: string,
+  itemId: string,
+): Deno.KvKey => ["item-by-container", containerId, itemId];
 const TIME_IDX_KEY = (ts: number, itemId: string): Deno.KvKey => [
   "item-by-time",
   ts,
@@ -37,6 +41,7 @@ const TIME_IDX_KEY = (ts: number, itemId: string): Deno.KvKey => [
 export interface CreateItemInput {
   name: string;
   categoryId: string | null;
+  containerId?: string | null;
   roomId: string | null;
   boxId?: string | null;
   quantity?: number;
@@ -50,6 +55,7 @@ export interface CreateItemInput {
 export interface UpdateItemInput {
   name?: string;
   categoryId?: string | null;
+  containerId?: string | null;
   roomId?: string | null;
   boxId?: string | null;
   quantity?: number;
@@ -74,14 +80,59 @@ async function metadataForCategory(
   return validateMetadata(schema, raw);
 }
 
+// Verify that the candidate container item is container-capable.
+async function assertContainerCapable(containerId: string): Promise<void> {
+  const container = await findItem(containerId);
+  if (!container) {
+    throw new Error(`Container item '${containerId}' not found`);
+  }
+  if (!container.categoryId) {
+    throw new Error(
+      `Container item '${containerId}' has no category and cannot contain items`,
+    );
+  }
+  const category = await findCategory(container.categoryId);
+  if (!category?.canContain) {
+    throw new Error(
+      `Container item '${containerId}' belongs to a category that cannot contain items`,
+    );
+  }
+}
+
+// Reject if assigning containerId would create a cycle (item inside itself or
+// inside one of its own descendants).
+async function assertNoCycle(
+  itemId: string,
+  containerId: string,
+): Promise<void> {
+  if (itemId === containerId) {
+    throw new Error(`Item '${itemId}' cannot contain itself`);
+  }
+  // Walk from containerId up through its ancestors; if itemId appears, it's a cycle.
+  let current: Item | null = await findItem(containerId);
+  while (current !== null && current.containerId !== null) {
+    if (current.containerId === itemId) {
+      throw new Error(
+        `Assigning container '${containerId}' would create a cycle`,
+      );
+    }
+    current = await findItem(current.containerId);
+  }
+}
+
 export async function createItem(input: CreateItemInput): Promise<Item> {
   const kv = await getKv();
   const id = crypto.randomUUID();
   const now = Date.now();
 
-  // Enforce mutual exclusion: boxId and roomId cannot both be set
-  const boxId = input.boxId ?? null;
-  const roomId = boxId ? null : (input.roomId ?? null);
+  const containerId = input.containerId ?? null;
+  const boxId = !containerId ? (input.boxId ?? null) : null;
+  // root-owns-room: contained items always have roomId=null in storage
+  const roomId = (containerId || boxId) ? null : (input.roomId ?? null);
+
+  if (containerId) {
+    await assertContainerCapable(containerId);
+  }
 
   const warrantyUntil = validateWarrantyDate(input.warrantyUntil);
   const metadata = await metadataForCategory(
@@ -93,6 +144,7 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     id,
     name: input.name,
     categoryId: input.categoryId,
+    containerId,
     roomId,
     boxId,
     quantity: coerceQuantity(input.quantity),
@@ -111,6 +163,9 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
   if (item.categoryId) {
     op.set(CAT_IDX_KEY(item.categoryId, id), true);
   }
+  if (item.containerId) {
+    op.set(CONTAINER_IDX_KEY(item.containerId, id), true);
+  }
   if (item.roomId) {
     op.set(ROOM_IDX_KEY(item.roomId, id), true);
   }
@@ -127,11 +182,9 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
 function normalizeItem(raw: any): Item {
   return {
     ...raw,
+    containerId: raw.containerId ?? null,
     quantity: coerceQuantity(raw.quantity),
-    // Legacy records missing `photos` or carrying the old `photoKey` field
-    // are coerced to an empty array at read time. No write-side migration needed.
     photos: Array.isArray(raw.photos) ? raw.photos : [],
-    // Legacy records predate typed fields; default them on read.
     warrantyUntil: typeof raw.warrantyUntil === "string"
       ? raw.warrantyUntil
       : null,
@@ -169,9 +222,11 @@ export async function listItemsByCategory(categoryId: string): Promise<Item[]> {
   return items.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function listItemsByRoom(roomId: string): Promise<Item[]> {
+export async function listItemsByContainer(
+  containerId: string,
+): Promise<Item[]> {
   const kv = await getKv();
-  const index = kv.list<true>({ prefix: ["item-by-room", roomId] });
+  const index = kv.list<true>({ prefix: ["item-by-container", containerId] });
   const items: Item[] = [];
   for await (const entry of index) {
     const itemId = entry.key[2] as string;
@@ -179,6 +234,62 @@ export async function listItemsByRoom(roomId: string): Promise<Item[]> {
     if (item) items.push(item);
   }
   return items.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Walk the containment chain upward and return the root item's roomId.
+export async function resolveRoom(item: Item): Promise<string | null> {
+  let current: Item = item;
+  let depth = 0;
+  while (current.containerId !== null) {
+    if (++depth > 100) break; // safety guard against unexpected cycles
+    const parent = await findItem(current.containerId);
+    if (!parent) break;
+    current = parent;
+  }
+  return current.roomId;
+}
+
+// Collect all descendant item IDs in the subtree rooted at containerId.
+async function collectDescendants(containerId: string): Promise<Item[]> {
+  const kv = await getKv();
+  const results: Item[] = [];
+  const queue = [containerId];
+  while (queue.length > 0) {
+    const parentId = queue.shift()!;
+    for await (
+      const entry of kv.list<true>({ prefix: ["item-by-container", parentId] })
+    ) {
+      const childId = entry.key[2] as string;
+      const child = await findItem(childId);
+      if (child) {
+        results.push(child);
+        queue.push(childId);
+      }
+    }
+  }
+  return results;
+}
+
+export async function listItemsByRoom(roomId: string): Promise<Item[]> {
+  const kv = await getKv();
+  const index = kv.list<true>({ prefix: ["item-by-room", roomId] });
+  const directItems: Item[] = [];
+  for await (const entry of index) {
+    const itemId = entry.key[2] as string;
+    const item = await findItem(itemId);
+    if (item) directItems.push(item);
+  }
+
+  // Include all items contained (transitively) by roots in this room.
+  const contained: Item[] = [];
+  for (const root of directItems) {
+    const descendants = await collectDescendants(root.id);
+    contained.push(...descendants);
+  }
+
+  return [...directItems, ...contained].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
 }
 
 export async function listItemsByBox(boxId: string): Promise<Item[]> {
@@ -201,24 +312,41 @@ export async function updateItem(
   const existing = await findItem(id);
   if (!existing) throw new Error(`Item '${id}' not found`);
 
-  // Mutual exclusion: setting boxId clears roomId and vice versa
-  let resolvedBoxId = input.boxId !== undefined ? input.boxId : existing.boxId;
-  let resolvedRoomId = input.roomId !== undefined
-    ? input.roomId
-    : existing.roomId;
+  const settingContainer = input.containerId !== undefined;
+  const resolvedContainerId = settingContainer
+    ? input.containerId ?? null
+    : existing.containerId;
 
-  if (input.boxId !== undefined && input.boxId !== null) {
-    resolvedRoomId = null;
-  } else if (input.roomId !== undefined && input.roomId !== null) {
+  if (resolvedContainerId && resolvedContainerId !== existing.containerId) {
+    await assertContainerCapable(resolvedContainerId);
+    await assertNoCycle(id, resolvedContainerId);
+  }
+
+  // Triple mutual exclusion: containerId, boxId, roomId
+  let resolvedBoxId: string | null;
+  let resolvedRoomId: string | null;
+
+  if (resolvedContainerId) {
+    // Contained items always have roomId=null and boxId=null
     resolvedBoxId = null;
+    resolvedRoomId = null;
+  } else {
+    resolvedBoxId = input.boxId !== undefined ? input.boxId : existing.boxId;
+    resolvedRoomId = input.roomId !== undefined
+      ? input.roomId
+      : existing.roomId;
+
+    if (input.boxId !== undefined && input.boxId !== null) {
+      resolvedRoomId = null;
+    } else if (input.roomId !== undefined && input.roomId !== null) {
+      resolvedBoxId = null;
+    }
   }
 
   const resolvedCategoryId = input.categoryId !== undefined
     ? input.categoryId
     : existing.categoryId;
 
-  // Re-validate metadata against the effective category's schema. Changing the
-  // category re-filters existing metadata to the new schema (orphan keys drop).
   const rawMetadata = input.metadata !== undefined
     ? input.metadata
     : existing.metadata;
@@ -232,6 +360,7 @@ export async function updateItem(
     ...existing,
     name: input.name ?? existing.name,
     categoryId: resolvedCategoryId,
+    containerId: resolvedContainerId,
     roomId: resolvedRoomId,
     boxId: resolvedBoxId,
     quantity: input.quantity !== undefined
@@ -254,6 +383,16 @@ export async function updateItem(
   ) {
     if (existing.categoryId) op.delete(CAT_IDX_KEY(existing.categoryId, id));
     if (updated.categoryId) op.set(CAT_IDX_KEY(updated.categoryId, id), true);
+  }
+
+  // Container index
+  if (resolvedContainerId !== existing.containerId) {
+    if (existing.containerId) {
+      op.delete(CONTAINER_IDX_KEY(existing.containerId, id));
+    }
+    if (updated.containerId) {
+      op.set(CONTAINER_IDX_KEY(updated.containerId, id), true);
+    }
   }
 
   // Room index
@@ -318,24 +457,43 @@ export async function deleteItem(
   id: string,
   r2cfg?: R2Config | null,
   fetchFn: FetchLike = fetch,
+  options?: { replacementRoomId?: string | null },
 ): Promise<void> {
   const kv = await getKv();
   const item = await findItem(id);
   if (!item) return;
 
+  // Gather direct children before deletion so we can repoint them.
+  const children = await listItemsByContainer(id);
+
   const op = kv.atomic().delete(ITEM_KEY(id));
 
   op.delete(TIME_IDX_KEY(item.createdAt, id));
   if (item.categoryId) op.delete(CAT_IDX_KEY(item.categoryId, id));
+  if (item.containerId) op.delete(CONTAINER_IDX_KEY(item.containerId, id));
   if (item.roomId) op.delete(ROOM_IDX_KEY(item.roomId, id));
   if (item.boxId) op.delete(BOX_IDX_KEY(item.boxId, id));
 
-  // KV commit first — orphan cleanup is best-effort and must not block deletion
+  // Children: clear containerId and optionally set roomId — all in same atomic.
+  const replacementRoomId = options?.replacementRoomId ?? null;
+  for (const child of children) {
+    op.delete(CONTAINER_IDX_KEY(id, child.id));
+    const updatedChild: Item = {
+      ...child,
+      containerId: null,
+      roomId: replacementRoomId,
+      updatedAt: Date.now(),
+    };
+    op.set(ITEM_KEY(child.id), updatedChild);
+    if (replacementRoomId) {
+      op.set(ROOM_IDX_KEY(replacementRoomId, child.id), true);
+    }
+  }
+
   await op.commit();
   if (item.boxId) await updateBoxStatus(item.boxId);
 
-  // Clear the item's group memberships from both index sides. Inlined here
-  // (rather than calling groupRepo) to avoid an itemRepo↔groupRepo import cycle.
+  // Clear the item's group memberships from both index sides.
   for await (
     const e of kv.list<true>({ prefix: ["item-group", id] })
   ) {

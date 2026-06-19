@@ -15,6 +15,7 @@ import { listBoxes } from "@/lib/inventory/boxRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
 import type { CategorySchema, Room } from "@/lib/inventory/types.ts";
 import ItemCategoryFields from "@/islands/ItemCategoryFields.tsx";
+import ItemLocationFields from "@/islands/ItemLocationFields.tsx";
 import GroupAutocomplete from "@/islands/GroupAutocomplete.tsx";
 import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
 
@@ -51,27 +52,19 @@ function NewItemPage(
 
         <ItemCategoryFields categories={categories} schemas={schemas} />
 
-        <label>
-          {t("items.room_label")}
-          <select name="roomId">
-            <option value="">{t("items.no_room")}</option>
-            {rooms.map((r) => <option key={r.id} value={r.id}>{r.name}
-            </option>)}
-          </select>
-        </label>
-
-        <label>
-          {t("items.box_label")}
-          <select name="boxId">
-            <option value="">{t("items.no_box")}</option>
-            {boxes.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.code}
-                {b.label ? ` – ${b.label}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ItemLocationFields
+          rooms={rooms}
+          boxes={boxes.map((b) => ({
+            id: b.id,
+            code: b.code,
+            label: b.label,
+          }))}
+          initialContainerId={null}
+          initialContainerName={null}
+          initialRoomId={null}
+          initialBoxId={null}
+          initialDerivedRoomId={null}
+        />
 
         <label>
           {t("items.quantity_label")}
@@ -148,6 +141,7 @@ export const handler = define.handlers({
     const form = await ctx.req.formData();
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) ?? "";
+    const containerId = (form.get("containerId") as string | null) ?? "";
     const roomId = (form.get("roomId") as string | null) ?? "";
     const boxId = (form.get("boxId") as string | null) ?? "";
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
@@ -170,6 +164,11 @@ export const handler = define.handlers({
       );
     };
 
+    // Server-side: reject if both containerId and boxId are set
+    if (containerId && boxId) {
+      return renderError(t("items.error.category_required"));
+    }
+
     if (!name) return renderError(t("items.error.name_required"));
     if (!categoryId) return renderError(t("items.error.category_required"));
 
@@ -184,6 +183,7 @@ export const handler = define.handlers({
       item = await createItem({
         name,
         categoryId,
+        containerId: containerId || null,
         roomId: roomId || null,
         boxId: boxId || null,
         quantity,
