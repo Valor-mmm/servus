@@ -28,6 +28,11 @@ Deno.test("exportKv: all EXPORT_PREFIXES entries appear in output", async () => 
     await kv.set(["item-by-room", "r1", "i1"], true);
     await kv.set(["item-by-box", "b1", "i1"], true);
     await kv.set(["item-by-time", 1234, "i1"], true);
+    await kv.set(["item-by-container", "c1", "i1"], true);
+    await kv.set(["item-group", "i1", "g1"], true);
+    await kv.set(["category-schema", "cat1"], { fields: [] });
+    await kv.set(["group", "g1"], { id: "g1", name: "Test" });
+    await kv.set(["group-item", "g1", "i1"], { itemId: "i1", groupId: "g1" });
     await kv.set(["box", "b1"], { code: "B-001" });
     await kv.set(["box-by-code", "B-001"], "b1");
     await kv.set(["box-tombstone", "b0"], { code: "B-000" });
@@ -115,5 +120,34 @@ Deno.test("exportKv: empty store produces zero lines", async () => {
     assertEquals(lines.length, 0);
   } finally {
     kv.close();
+  }
+});
+
+// All kv.list prefixes used in lib/inventory/ must appear in EXPORT_PREFIXES.
+// This regression test prevents silent data loss when new KV prefixes are added
+// without updating the export list.
+Deno.test("EXPORT_PREFIXES covers all kv.list prefixes used in lib/inventory/", () => {
+  const exportedRoots = new Set(
+    EXPORT_PREFIXES.map((p) => p[0] as string),
+  );
+
+  const inventoryPrefixes = [
+    "item",
+    "item-by-category",
+    "item-by-room",
+    "item-by-box",
+    "item-by-time",
+    "item-by-container",
+    "item-group",
+    "group",
+    "group-item",
+    "category-schema",
+  ];
+
+  for (const prefix of inventoryPrefixes) {
+    assert(
+      exportedRoots.has(prefix),
+      `Prefix "${prefix}" used in lib/inventory/ is missing from EXPORT_PREFIXES`,
+    );
   }
 });
