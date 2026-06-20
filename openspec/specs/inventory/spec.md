@@ -184,8 +184,7 @@ introduced MUST be read back as `photos: []` (coerced at read time).
 The system MUST provide a `POST /api/items/create-from-photo` endpoint that,
 given a previously uploaded R2 photo key and an optional `boxId`, creates a new
 item with `name: ""`, `categoryId: null`, `photos: [<key>]`,
-`status:
-"pending"`, `quantity: 1`, and `estimatedValue: null`. The endpoint
+`status: "incomplete"`, `quantity: 1`, and `estimatedValue: null`. The endpoint
 MUST require an authenticated session and a valid CSRF token.
 
 #### Scenario: Create item from photo with no box
@@ -193,16 +192,15 @@ MUST require an authenticated session and a valid CSRF token.
 - **WHEN** an authenticated user POSTs to `/api/items/create-from-photo` with a
   valid photo key and no `boxId`
 - **THEN** an item record is created with empty name, null category,
-  `quantity:
-  1`, `photos: [<key>]`, `status: "pending"`, and appears in the
-  item list and in the pending list
+  `quantity: 1`, `photos: [<key>]`, `status: "incomplete"`, and appears in the
+  item list and in the incomplete triage list
 
 #### Scenario: Create item from photo into a box
 
 - **WHEN** an authenticated user POSTs to `/api/items/create-from-photo` with a
   valid photo key and `boxId: "B"`
 - **THEN** an item record is created with `boxId: "B"`, `roomId: null`,
-  `photos: [<key>]`, `status: "pending"`, and the box's status auto-tracks to
+  `photos: [<key>]`, `status: "incomplete"`, and the box's status auto-tracks to
   `"packed"` if it was previously `"empty"`
 
 #### Scenario: Create-from-photo requires authentication
@@ -219,18 +217,18 @@ previously uploaded R2 photo key to an existing item's `photos` array. The
 endpoint MUST require an authenticated session and a valid CSRF token. Status
 MUST NOT change.
 
-#### Scenario: Append photo to confirmed item
+#### Scenario: Append photo to complete item
 
-- **WHEN** an authenticated user appends a new photo to a `confirmed` item that
+- **WHEN** an authenticated user appends a new photo to a `complete` item that
   already has one photo
 - **THEN** the item's `photos` array has two elements; `status` remains
-  `"confirmed"`
+  `"complete"`
 
-#### Scenario: Append photo to pending item
+#### Scenario: Append photo to incomplete item
 
-- **WHEN** an authenticated user appends a new photo to a `pending` item
+- **WHEN** an authenticated user appends a new photo to an `incomplete` item
 - **THEN** the item's `photos` array grows by one and `status` remains
-  `"pending"`
+  `"incomplete"`
 
 ---
 
@@ -247,54 +245,95 @@ delete. Status MUST NOT change as a consequence of removing a photo.
 - **THEN** the persisted `photos` array has two elements and a best-effort R2
   DELETE is issued for the removed key
 
-#### Scenario: Remove the only photo of a pending item
+#### Scenario: Remove the only photo of an incomplete item
 
-- **WHEN** an authenticated user removes the only photo from a `pending` item
+- **WHEN** an authenticated user removes the only photo from an `incomplete` item
 - **THEN** the persisted `photos` array is empty and `status` remains
-  `"pending"`
+  `"incomplete"`
 
 ---
 
-### Requirement: Pending status for photo-first items
+### Requirement: Incomplete status for photo-first items
 
 Items created through `/api/items/create-from-photo` MUST have
-`status:
-"pending"`. Pending items MUST remain in `pending` state regardless of
-edits to name, category, room, box, quantity, or photos made in the standard
-edit form. While pending, an item behaves identically to a `confirmed` item for
-box assignment, room assignment, quantity actions, and inclusion in lists.
+`status: "incomplete"`. Editing an incomplete item's name, category, room, box,
+quantity, or photos does NOT automatically change its status — the user must
+explicitly save with the "Speichern & fertig" button to mark it complete, or
+"Speichern & unvollständig" to save and keep it incomplete. While incomplete, an
+item behaves identically to a `complete` item for box assignment, room
+assignment, quantity actions, and inclusion in all list views.
 
-#### Scenario: Pending item with name remains pending
+#### Scenario: Incomplete item with name stays incomplete unless explicitly completed
 
-- **WHEN** an authenticated user edits a `pending` item and gives it a name
-- **THEN** the persisted record has the new name and `status: "pending"`
+- **WHEN** an authenticated user edits an `incomplete` item, gives it a name,
+  and saves using "Speichern & unvollständig"
+- **THEN** the persisted record has the new name and `status: "incomplete"`
 
-#### Scenario: Pending item counts toward box packed status
+#### Scenario: Incomplete item saved as complete transitions status
 
-- **WHEN** a photo-first capture creates a `pending` item assigned to an empty
-  box
+- **WHEN** an authenticated user edits an `incomplete` item and saves using
+  "Speichern & fertig"
+- **THEN** the persisted record has `status: "complete"`
+
+#### Scenario: Incomplete item counts toward box packed status
+
+- **WHEN** a photo-first capture creates an `incomplete` item assigned to an
+  empty box
 - **THEN** the box's status auto-transitions from `"empty"` to `"packed"`
 
 ---
 
-### Requirement: Pending-items triage list
+### Requirement: Incomplete-items sequential triage
 
-The system MUST provide a route `/items/pending` that lists all items with
-`status: "pending"`, ordered by creation time (newest first). Each row MUST show
-the item's primary photo as a thumbnail, the display name (`(unbenannt)` if
-`name` is empty), the box assignment if any, the quantity, and a link to edit.
+The system MUST provide a route `/items/incomplete` that presents items with
+`status: "incomplete"` as a sequential, one-at-a-time editor. Items MUST be
+ordered by creation time (oldest first). The page MUST show:
 
-#### Scenario: Pending list shows only pending items
+- The position indicator "N von M" (current index 1-based of total incomplete
+  count).
+- The current item's full inline edit form.
+- Two save buttons: "Speichern & fertig" (saves with `status: "complete"` and
+  advances to the next incomplete item) and "Speichern & unvollständig" (saves
+  with `status: "incomplete"` and advances to the next incomplete item).
+- Prev / next navigation links to manually step through items by index.
+- A thumbnail of the item's primary photo when present.
 
-- **WHEN** an authenticated user visits `/items/pending` with five items in the
-  system (three `pending`, two `confirmed`)
-- **THEN** exactly three item rows are shown
+When no incomplete items remain, the route MUST show an empty-state message.
 
-#### Scenario: Pending list ordering
+The old route `/items/pending` MUST redirect with HTTP 301 to
+`/items/incomplete`.
 
-- **WHEN** an authenticated user visits `/items/pending` with multiple pending
-  items
-- **THEN** rows appear with the most recently created item first
+#### Scenario: Triage shows the oldest incomplete item first
+
+- **WHEN** an authenticated user visits `/items/incomplete` with three
+  incomplete items
+- **THEN** the item with the earliest `createdAt` is shown in the edit form and
+  the indicator reads "1 von 3"
+
+#### Scenario: Save as complete auto-advances
+
+- **WHEN** an authenticated user saves the current triage item with "Speichern &
+  fertig"
+- **THEN** the item's `status` becomes `"complete"`, the triage page advances to
+  the next incomplete item, and the indicator updates
+
+#### Scenario: Save as incomplete advances without completing
+
+- **WHEN** an authenticated user saves the current triage item with "Speichern &
+  unvollständig"
+- **THEN** the item's `status` remains `"incomplete"` and the triage page
+  advances to the next incomplete item
+
+#### Scenario: Empty state when all items are complete
+
+- **WHEN** an authenticated user visits `/items/incomplete` and no incomplete
+  items exist
+- **THEN** an empty-state message is shown and no edit form is rendered
+
+#### Scenario: Redirect from old URL
+
+- **WHEN** a client GETs `/items/pending`
+- **THEN** the server responds with HTTP 301 and `Location: /items/incomplete`
 
 ---
 
@@ -306,48 +345,39 @@ assignment, optional container assignment, optional estimated value, and a
 quantity (positive integer, default `1`). When a container is selected, the room
 field MUST be locked and the item's stored `roomId` MUST be `null` (its room is
 derived per the `containment` capability). On creation through the standard form
-the system MUST set `status` to `"confirmed"`, `photos` to `[]`, `containerId`
+the system MUST set `status` to `"complete"`, `photos` to `[]`, `containerId`
 per the selection (default `null`), and timestamps to the current time.
 
 Items MAY also be created through `/api/items/create-from-photo` (see
-"Photo-first item creation" above), which sets `status: "pending"`, `name: ""`,
-`categoryId: null`, `containerId: null`, and `photos: [<key>]`.
+"Incomplete status for photo-first items" above), which sets
+`status: "incomplete"`, `name: ""`, `categoryId: null`, `containerId: null`, and
+`photos: [<key>]`.
 
 #### Scenario: Create an item with required fields
 
 - **WHEN** an authenticated user submits a new item form with a non-empty name
   and a valid category (no quantity specified)
-- **THEN** an item record is created with `status: "confirmed"`, `photos: []`,
-  `quantity: 1`, `containerId: null`, and timestamps set to the current time
+- **THEN** an item record is created with `status: "complete"`, `photos: []`,
+  `quantity: 1`, and `estimatedValue: null`. The endpoint redirects to `/items`.
 
-#### Scenario: Create an item with all optional fields
+#### Scenario: Photo-first item creation
 
-- **WHEN** an authenticated user submits a new item with name, category, room,
-  estimated value, and `quantity: 4`
-- **THEN** the item record contains all provided values including `quantity: 4`,
-  `photos: []`, and appears in the item list
-
-#### Scenario: Create an item inside a container
-
-- **WHEN** an authenticated user submits a new item with a container selected
-- **THEN** the item record has `containerId` set, `roomId: null`, and appears in
-  that container's contents
-
-#### Scenario: Selecting a container locks the room field on create
-
-- **WHEN** an authenticated user selects a container on the create form
-- **THEN** the room field is disabled and shows the container's derived room
-  read-only with a hint that the room is taken from the container
-
-#### Scenario: Item name is required for standard creation
-
-- **WHEN** an authenticated user submits a new item form with an empty name
-- **THEN** the system returns a validation error and no record is created
-
-#### Scenario: Empty name is permitted for photo-first creation
-
-- **WHEN** an authenticated user creates an item through
+- **WHEN** an authenticated user uploads a photo to
   `/api/items/create-from-photo`
+- **THEN** an item record is created with `name: ""`, `photos: [<key>]`,
+  `status: "incomplete"`, and appears in the item list and in the incomplete
+  triage list
+
+#### Scenario: Photo-first item assigned to box at capture
+
+- **WHEN** an authenticated user captures a photo with a box QR code scanned
+- **THEN** an item is created with `photos: [<key>]`, `status: "incomplete"`,
+  and the box's status auto-tracks to `"packed"` if it was empty
+
+#### Scenario: Photo-first item without name accepted
+
+- **WHEN** an authenticated user submits the create form with `name: ""` (as
+  emitted by `/api/items/create-from-photo`)
 - **THEN** an item record is created with `name: ""` and the standard
   name-required validation does NOT apply
 
@@ -356,10 +386,13 @@ Items MAY also be created through `/api/items/create-from-photo` (see
 The system MUST allow authenticated users to edit an item's name, category, room
 assignment, container assignment, estimated value, quantity, and `photos` (add
 or remove individual photos). Index entries MUST be updated atomically with the
-primary record. Editing an item MUST NOT change its `status`. When an item has a
-container assigned, the room field MUST be locked and stored `roomId` MUST be
-`null`. Clearing the container assignment MUST unlock the room field with an
-empty value, requiring the user to re-place the item.
+primary record. The edit form MUST present two save buttons: **"Speichern &
+fertig"** (saves the item with `status: "complete"`) and **"Speichern &
+unvollständig"** (saves the item with `status: "incomplete"`). The chosen button
+determines the persisted status; the existing status value is not preserved on
+save. When an item has a container assigned, the room field MUST be locked and
+stored `roomId` MUST be `null`. Clearing the container assignment MUST unlock
+the room field with an empty value, requiring the user to re-place the item.
 
 #### Scenario: Change an item's category
 
@@ -399,12 +432,17 @@ empty value, requiring the user to re-place the item.
 - **THEN** the updated quantity is persisted and shown in the item list and box
   detail
 
-#### Scenario: Editing does not transition status
+#### Scenario: Save as complete transitions status
 
-- **WHEN** an authenticated user edits the name of a `pending` item to a
-  non-empty value
-- **THEN** the persisted record has `status: "pending"` (status is unchanged by
-  editing)
+- **WHEN** an authenticated user edits an `incomplete` item and saves with
+  "Speichern & fertig"
+- **THEN** the persisted record has `status: "complete"`
+
+#### Scenario: Save as incomplete keeps status
+
+- **WHEN** an authenticated user edits a `complete` item and saves with
+  "Speichern & unvollständig"
+- **THEN** the persisted record has `status: "incomplete"`
 
 ### Requirement: Item deletion
 
@@ -438,11 +476,10 @@ cause the user-facing operation to fail.
 The system MUST provide a list view of items with server-side search by name
 (case-insensitive substring) and filter by category and by room. Each item row
 MUST display the item's primary photo (`photos[0]`) as a thumbnail when present,
-its display name (`(unbenannt)` if `name` is empty and `status` is `"pending"`,
-otherwise the name), category, room, and quantity. Items with
-`status: "pending"` MUST be visually distinguishable from `confirmed` items.
-Each row MUST provide inline `−` and `+` actions to decrement or increment the
-quantity by 1.
+its display name (`(unbenannt)` if `name` is empty, otherwise the name),
+category, room, and quantity. Items with `status: "incomplete"` MUST be visually
+distinguishable from `complete` items. Each row MUST provide inline `−` and `+`
+actions to decrement or increment the quantity by 1.
 
 The default view (no filter params) MUST load only the 50 most recently created
 items using `listItemsRecent(50)`. A full load of all items MUST only occur when
@@ -465,17 +502,18 @@ of a limited result set is forbidden.
 - **THEN** that item's row renders an `<img>` element whose `src` is a presigned
   GET URL for `photos[0]`
 
-#### Scenario: List shows placeholder name for pending unnamed item
+#### Scenario: List shows placeholder name for unnamed incomplete item
 
 - **WHEN** an authenticated user visits `/items` and at least one item has
-  `status: "pending"` and `name: ""`
+  `name: ""`
 - **THEN** that item's row shows the placeholder display name `(unbenannt)`
 
-#### Scenario: Pending items are visually distinguishable
+#### Scenario: Incomplete items are visually distinguishable
 
-- **WHEN** an authenticated user visits `/items` with a mix of `pending` and
-  `confirmed` items
-- **THEN** pending rows display a status indicator distinct from confirmed rows
+- **WHEN** an authenticated user visits `/items` with a mix of `incomplete` and
+  `complete` items
+- **THEN** incomplete rows display a status indicator distinct from complete
+  rows
 
 #### Scenario: Increment quantity from item list
 
