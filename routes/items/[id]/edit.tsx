@@ -174,8 +174,27 @@ function EditItemPage(
 
         <SchemaFields schema={schema} metadata={item.metadata} />
 
-        <button type="submit">{t("action.save")}</button>
-        <a href={`/items/${item.id}`}>{t("action.cancel")}</a>
+        <div class="form-actions">
+          <button
+            type="submit"
+            name="status"
+            value="complete"
+            class="btn-primary"
+          >
+            {t("items.saveComplete")}
+          </button>
+          <button
+            type="submit"
+            name="status"
+            value="incomplete"
+            class="btn-secondary"
+          >
+            {t("items.saveIncomplete")}
+          </button>
+          <a href={`/items/${item.id}`} class="btn-secondary">
+            {t("action.cancel")}
+          </a>
+        </div>
       </form>
 
       <ItemGroupsEditor
@@ -303,6 +322,10 @@ export const handler = define.handlers({
     const boxId = (form.get("boxId") as string | null) ?? "";
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
+    const statusRaw = (form.get("status") as string | null) ?? "";
+    const status: "incomplete" | "complete" = statusRaw === "incomplete"
+      ? "incomplete"
+      : "complete";
 
     const warrantyRaw = (form.get("warrantyUntil") as string | null) ?? "";
     const metadata = readMetadataFromForm(form);
@@ -367,6 +390,7 @@ export const handler = define.handlers({
           : estimatedValue,
         warrantyUntil: warrantyRaw || null,
         metadata,
+        status,
       });
     } catch (e) {
       if (e instanceof MetadataValidationError) {

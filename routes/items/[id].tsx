@@ -59,16 +59,15 @@ function ItemDetailPage(
     rooms,
   }: PageProps,
 ) {
-  const displayName = item.name ||
-    (item.status === "pending" ? t("items.placeholderName") : "–");
+  const displayName = item.name || t("items.placeholderName");
   const isContainer = category?.canContain === true;
 
   return (
     <main class="page">
       <h1>
         {t("items.detail_title")}: {displayName}
-        {item.status === "pending" && (
-          <span class="badge badge-pending">{t("items.pending")}</span>
+        {item.status === "incomplete" && (
+          <span class="badge badge-incomplete">{t("items.incomplete")}</span>
         )}
       </h1>
       {photoUrls.length > 0 && (

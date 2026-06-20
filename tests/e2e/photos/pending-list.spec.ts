@@ -1,6 +1,6 @@
 /**
- * Task 9.4: Two photo-first items appear in /items/pending and /items with
- * the pending badge.
+ * Task 9.4: Two photo-first items appear in /items/incomplete and /items with
+ * the incomplete badge.
  */
 import { expect, test } from "@playwright/test";
 import path from "node:path";
@@ -48,21 +48,29 @@ async function captureOneItem(page: import("@playwright/test").Page) {
   await page.waitForLoadState("networkidle");
 }
 
-test("two quick-add photos appear in pending list and items list", async ({ page }) => {
+test("two quick-add photos appear in incomplete triage and items list", async ({ page }) => {
   await setupR2Mocks(page);
 
   await page.goto("/items/quick-add", { waitUntil: "networkidle" });
   await captureOneItem(page);
   await captureOneItem(page);
 
-  // ── /items/pending shows pending items ────────────────────────────────────
-  await page.goto("/items/pending");
-  const pendingRows = page.locator("li.item-pending");
-  await expect(pendingRows.first()).toBeVisible();
-  expect(await pendingRows.count()).toBeGreaterThanOrEqual(2);
-  await expect(page.locator("text=(unbenannt)").first()).toBeVisible();
+  // ── /items/incomplete shows triage with at least 2 items ─────────────────
+  await page.goto("/items/incomplete");
+  // Triage shows one item at a time; position indicator shows "N von M"
+  await expect(page.locator(".triage-index")).toBeVisible();
+  const indexText = await page.locator(".triage-index").innerText();
+  // Extract M from "N von M"
+  const mMatch = indexText.match(/von\s+(\d+)/);
+  const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+  expect(m, `triage shows "${indexText}" — M should be >= 2`)
+    .toBeGreaterThanOrEqual(2);
+  // Placeholder name shown for unnamed items
+  await expect(
+    page.locator("h2.triage-item-name", { hasText: "(unbenannt)" }),
+  ).toBeVisible();
 
-  // ── /items (main list) shows pending badge ────────────────────────────────
+  // ── /items (main list) shows incomplete badge ─────────────────────────────
   await page.goto("/items");
-  await expect(page.locator("span.badge-pending").first()).toBeVisible();
+  await expect(page.locator("span.badge-incomplete").first()).toBeVisible();
 });

@@ -25,7 +25,7 @@ const CAT_B = "cat-b";
 const ROOM_X = "room-x";
 const ROOM_Y = "room-y";
 
-Deno.test("createItem sets status:confirmed and photos:[]", async () => {
+Deno.test("createItem sets status:complete and photos:[]", async () => {
   await withKv(async () => {
     const item = await createItem({
       name: "Sofa",
@@ -34,13 +34,38 @@ Deno.test("createItem sets status:confirmed and photos:[]", async () => {
       estimatedValue: null,
     });
     assertExists(item.id);
-    assertEquals(item.status, "confirmed");
+    assertEquals(item.status, "complete");
     assertEquals(item.photos, []);
     assertEquals(item.name, "Sofa");
     assertEquals(item.categoryId, CAT_A);
     assertEquals(item.roomId, ROOM_X);
     assertEquals(typeof item.createdAt, "number");
     assertEquals(typeof item.updatedAt, "number");
+  });
+});
+
+Deno.test("updateItem: status=complete saves complete, status=incomplete saves incomplete", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Stuhl",
+      categoryId: CAT_A,
+      roomId: null,
+      estimatedValue: null,
+      status: "incomplete",
+    });
+    assertEquals(item.status, "incomplete");
+
+    const updated = await updateItem(item.id, {
+      status: "complete",
+      name: item.name,
+    });
+    assertEquals(updated.status, "complete");
+
+    const reverted = await updateItem(item.id, {
+      status: "incomplete",
+      name: item.name,
+    });
+    assertEquals(reverted.status, "incomplete");
   });
 });
 

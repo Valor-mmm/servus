@@ -107,8 +107,8 @@ Deno.test("badge variants reference theme palette tokens", () => {
   assert(packed.includes("var(--servus-badge-packed-bg)"));
   const delivered = extractBlock(CSS, ".badge-delivered");
   assert(delivered.includes("var(--servus-badge-delivered-bg)"));
-  const pending = extractBlock(CSS, ".badge-pending");
-  assert(pending.includes("var(--servus-badge-pending-bg)"));
+  const incomplete = extractBlock(CSS, ".badge-incomplete");
+  assert(incomplete.includes("var(--servus-badge-incomplete-bg)"));
 });
 
 // ── Group 6: Top + bottom navigation ──────────────────────────────────────────

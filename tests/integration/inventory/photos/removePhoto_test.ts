@@ -63,7 +63,7 @@ Deno.test("remove-photo: status unchanged even if photos becomes empty", async (
       roomId: null,
       estimatedValue: null,
       photos: ["only-key"],
-      status: "pending",
+      status: "incomplete",
     });
 
     const result = await handleRemovePhoto(
@@ -73,7 +73,7 @@ Deno.test("remove-photo: status unchanged even if photos becomes empty", async (
 
     assertEquals(result.status, 200);
     assertEquals(result.item?.photos, []);
-    assertEquals(result.item?.status, "pending");
+    assertEquals(result.item?.status, "incomplete");
   });
 });
 
@@ -124,7 +124,7 @@ Deno.test("remove-photo: deleteIfEmpty deletes the item once its last photo is r
       roomId: null,
       estimatedValue: null,
       photos: ["only-key"],
-      status: "pending",
+      status: "incomplete",
     });
 
     const result = await handleRemovePhoto(
@@ -147,7 +147,7 @@ Deno.test("remove-photo: deleteIfEmpty does not delete the item while other phot
       roomId: null,
       estimatedValue: null,
       photos: ["k1", "k2"],
-      status: "pending",
+      status: "incomplete",
     });
 
     const result = await handleRemovePhoto(

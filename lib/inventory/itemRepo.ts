@@ -49,7 +49,7 @@ export interface CreateItemInput {
   warrantyUntil?: string | null;
   metadata?: Record<string, unknown>;
   photos?: string[];
-  status?: "pending" | "confirmed";
+  status?: "incomplete" | "complete";
 }
 
 export interface UpdateItemInput {
@@ -63,6 +63,7 @@ export interface UpdateItemInput {
   warrantyUntil?: string | null;
   metadata?: Record<string, unknown>;
   photos?: string[];
+  status?: "incomplete" | "complete";
 }
 
 function coerceQuantity(raw: unknown): number {
@@ -152,7 +153,7 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     warrantyUntil,
     metadata,
     photos: input.photos ?? [],
-    status: input.status ?? "confirmed",
+    status: input.status ?? "complete",
     createdAt: now,
     updatedAt: now,
   };
@@ -372,6 +373,7 @@ export async function updateItem(
     warrantyUntil,
     metadata,
     photos: input.photos !== undefined ? input.photos : existing.photos,
+    status: input.status !== undefined ? input.status : existing.status,
     updatedAt: Date.now(),
   };
 

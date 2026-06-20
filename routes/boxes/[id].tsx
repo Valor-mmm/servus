@@ -30,8 +30,7 @@ interface PageProps {
 
 function displayName(item: Item): string {
   if (item.name) return item.name;
-  if (item.status === "pending") return t("items.placeholderName");
-  return "–";
+  return t("items.placeholderName");
 }
 
 function BoxDetailPage(
@@ -146,7 +145,7 @@ function BoxDetailPage(
                 <li
                   key={item.id}
                   class={`item-row${
-                    item.status === "pending" ? " item-pending" : ""
+                    item.status === "incomplete" ? " item-incomplete" : ""
                   }`}
                 >
                   {thumbnailUrls[item.id] && (
@@ -158,9 +157,9 @@ function BoxDetailPage(
                     />
                   )}
                   <a href={`/items/${item.id}`}>{displayName(item)}</a>
-                  {item.status === "pending" && (
-                    <span class="badge badge-pending">
-                      {t("items.pending")}
+                  {item.status === "incomplete" && (
+                    <span class="badge badge-incomplete">
+                      {t("items.incomplete")}
                     </span>
                   )}
                   <span class="meta">

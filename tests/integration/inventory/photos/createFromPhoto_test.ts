@@ -24,7 +24,7 @@ Deno.test("create-from-photo: creates pending item with photos:[key]", async () 
 
     assertEquals(result.status, 201);
     assertExists(result.item);
-    assertEquals(result.item.status, "pending");
+    assertEquals(result.item.status, "incomplete");
     assertEquals(result.item.name, "");
     assertEquals(result.item.photos, [key]);
     assertEquals(result.item.categoryId, null);
@@ -41,7 +41,7 @@ Deno.test("create-from-photo: item appears in findItem and listItems", async () 
     const found = await findItem(result.item.id);
     assertExists(found);
     assertEquals(found.photos, [key]);
-    assertEquals(found.status, "pending");
+    assertEquals(found.status, "incomplete");
 
     const all = await listItems();
     const inList = all.find((i) => i.id === result.item!.id);
@@ -63,7 +63,7 @@ Deno.test("create-from-photo: with boxId assigns item and packs empty box", asyn
     assertEquals(result.status, 201);
     assertExists(result.item);
     assertEquals(result.item.boxId, box.id);
-    assertEquals(result.item.status, "pending");
+    assertEquals(result.item.status, "incomplete");
 
     const updatedBox = await findBox(box.id);
     assertEquals(updatedBox?.status, "packed");

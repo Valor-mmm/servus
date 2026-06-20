@@ -21,7 +21,7 @@ Deno.test("append-photo: appends key to existing item photos", async () => {
       roomId: null,
       estimatedValue: null,
       photos: ["key1"],
-      status: "confirmed",
+      status: "complete",
     });
 
     const result = await handleAppendPhoto({
@@ -43,13 +43,13 @@ Deno.test("append-photo: does NOT change status", async () => {
       roomId: null,
       estimatedValue: null,
       photos: ["k1"],
-      status: "confirmed",
+      status: "complete",
     });
     const resultC = await handleAppendPhoto({
       itemId: confirmed.id,
       photoKey: "k2",
     });
-    assertEquals(resultC.item?.status, "confirmed");
+    assertEquals(resultC.item?.status, "complete");
 
     const pending = await createItem({
       name: "",
@@ -57,13 +57,13 @@ Deno.test("append-photo: does NOT change status", async () => {
       roomId: null,
       estimatedValue: null,
       photos: ["p1"],
-      status: "pending",
+      status: "incomplete",
     });
     const resultP = await handleAppendPhoto({
       itemId: pending.id,
       photoKey: "p2",
     });
-    assertEquals(resultP.item?.status, "pending");
+    assertEquals(resultP.item?.status, "incomplete");
   });
 });
 

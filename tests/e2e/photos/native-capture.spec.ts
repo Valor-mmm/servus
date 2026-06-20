@@ -128,8 +128,15 @@ test("two captures attach to one item with no reload; removing one keeps the oth
 });
 
 test("removing the last photo in quick-add leaves no blank item", async ({ page }) => {
-  await page.goto("/items/pending");
-  const baseline = await page.locator("li.item-pending").count();
+  await page.goto("/items/incomplete");
+  // record baseline M (total incomplete) from the triage index text, or 0 if empty state
+  const triageEl = page.locator(".triage-index");
+  const baselineCount = await triageEl.isVisible()
+    ? parseInt(
+      ((await triageEl.textContent()) ?? "").replace(/.*von\s*/, ""),
+      10,
+    )
+    : 0;
 
   await page.goto("/items/quick-add", { waitUntil: "networkidle" });
   await setupR2Mocks(page);
@@ -145,9 +152,16 @@ test("removing the last photo in quick-add leaves no blank item", async ({ page 
   await items.nth(0).locator(".capture-preview-remove").click();
   await expect(items).toHaveCount(0, { timeout: 10_000 });
 
-  await page.goto("/items/pending");
+  await page.goto("/items/incomplete");
+  const afterEl = page.locator(".triage-index");
+  const afterCount = await afterEl.isVisible()
+    ? parseInt(
+      ((await afterEl.textContent()) ?? "").replace(/.*von\s*/, ""),
+      10,
+    )
+    : 0;
   expect(
-    await page.locator("li.item-pending").count(),
-    "removing the only photo must delete the pending item, not leave it blank",
-  ).toBe(baseline);
+    afterCount,
+    "removing the only photo must delete the incomplete item, not leave it blank",
+  ).toBe(baselineCount);
 });

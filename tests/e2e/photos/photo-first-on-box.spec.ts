@@ -69,7 +69,7 @@ async function setupR2Mocks(page: import("@playwright/test").Page) {
 
 // ── 9.2 + 9.3: photo-first item creation and subsequent name edit ─────────────
 
-test("photo capture on box creates pending item; editing name keeps pending status", async ({ page }) => {
+test("photo capture on box creates incomplete item; editing name keeps incomplete status", async ({ page }) => {
   const boxLabel = `PhotoBox-${RUN}`;
 
   await createBox(page, boxLabel);
@@ -90,16 +90,16 @@ test("photo capture on box creates pending item; editing name keeps pending stat
   });
   await page.locator("button", { hasText: "Fertig" }).click();
 
-  // Box detail reloads — wait for the pending item row
+  // Box detail reloads — wait for the incomplete item row
   await expect(
     page.locator("li.item-row"),
-    "pending item row should appear after capture",
+    "incomplete item row should appear after capture",
   ).toBeVisible({ timeout: 20_000 });
 
   // ── Assertions for task 9.2 ───────────────────────────────────────────────
 
   await expect(page.locator("text=(unbenannt)")).toBeVisible();
-  await expect(page.locator("span.badge-pending").first()).toBeVisible();
+  await expect(page.locator("span.badge-incomplete").first()).toBeVisible();
 
   // Thumbnail src points to fake R2 endpoint (presignGet used TEST_KEY)
   const thumb = page.locator("img.item-thumbnail");
@@ -109,21 +109,21 @@ test("photo capture on box creates pending item; editing name keeps pending stat
 
   await expect(page.locator("dd", { hasText: "Gepackt" })).toBeVisible();
 
-  // ── Assertions for task 9.3: edit name, pending badge persists ───────────
+  // ── Assertions for task 9.3: edit name, incomplete badge persists ─────────
 
   await page.locator("a", { hasText: "(unbenannt)" }).click();
   await page.locator('a[href*="/edit"]').click();
 
   await page.fill('[name="name"]', "Bohrmaschine");
-  // Use "Speichern" text to avoid clicking the photo-gallery "remove" button
-  await page.locator("main button", { hasText: "Speichern" }).click();
+  // Save as incomplete to keep the status badge
+  await page.locator("main button[value='incomplete']").click();
 
   await expect(page.locator("h1", { hasText: "Bohrmaschine" })).toBeVisible();
 
   await page.goto(boxUrl);
   await expect(page.locator("text=Bohrmaschine")).toBeVisible();
   await expect(
-    page.locator("span.badge-pending"),
-    "pending badge must persist after name edit",
+    page.locator("span.badge-incomplete"),
+    "incomplete badge must persist after name edit with save-incomplete",
   ).toBeVisible();
 });

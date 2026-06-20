@@ -152,7 +152,7 @@ Deno.test("legacy item record (no metadata/warrantyUntil) decodes to defaults an
       quantity: 1,
       estimatedValue: null,
       photos: [],
-      status: "confirmed",
+      status: "complete",
       createdAt: now,
       updatedAt: now,
     });

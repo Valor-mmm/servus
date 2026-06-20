@@ -21,7 +21,7 @@ const requiredClasses = [
   ".photo-gallery-img",
   ".qty-controls",
   ".qty-label",
-  ".badge-pending",
+  ".badge-incomplete",
   ".photo-capture",
   ".photo-capture--multi",
   ".capture-btn",

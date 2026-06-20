@@ -69,9 +69,9 @@ html.theme-raute {
   --servus-badge-packed-text: #ffffff;
   --servus-badge-delivered-bg: #2e7d32;
   --servus-badge-delivered-text: #ffffff;
-  --servus-badge-pending-bg: #fef3c7;
-  --servus-badge-pending-text: #92400e;
-  --servus-badge-pending-border: rgba(229, 168, 46, 0.50);
+  --servus-badge-incomplete-bg: #fef3c7;
+  --servus-badge-incomplete-text: #92400e;
+  --servus-badge-incomplete-border: rgba(229, 168, 46, 0.50);
 
   --servus-nav-bg: #0e4fa0;
   --servus-nav-text: #ffffff;
@@ -139,9 +139,9 @@ html.theme-sternenhimmel {
   --servus-badge-packed-text: #0e1830;
   --servus-badge-delivered-bg: rgba(90, 120, 72, 0.22);
   --servus-badge-delivered-text: #9db779;
-  --servus-badge-pending-bg: rgba(217, 119, 43, 0.18);
-  --servus-badge-pending-text: #f0b98a;
-  --servus-badge-pending-border: rgba(217, 119, 43, 0.45);
+  --servus-badge-incomplete-bg: rgba(217, 119, 43, 0.18);
+  --servus-badge-incomplete-text: #f0b98a;
+  --servus-badge-incomplete-border: rgba(217, 119, 43, 0.45);
 
   --servus-nav-bg: #060c1a;
   --servus-nav-text: #c5cfdc;
@@ -863,10 +863,10 @@ button:focus-visible,
   color: var(--servus-badge-delivered-text);
 }
 
-.badge-pending {
-  background: var(--servus-badge-pending-bg);
-  color: var(--servus-badge-pending-text);
-  border: 1px solid var(--servus-badge-pending-border);
+.badge-incomplete {
+  background: var(--servus-badge-incomplete-bg);
+  color: var(--servus-badge-incomplete-text);
+  border: 1px solid var(--servus-badge-incomplete-border);
 }
 
 /* ── Lists ─────────────────────────────────────────────────────────────────── */
