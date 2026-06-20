@@ -6,11 +6,12 @@ const USER_KEY = (username: string): Deno.KvKey => ["user", username];
 export async function createUser(
   username: string,
   passwordHash: string,
+  role: "admin" | "user" = "user",
 ): Promise<User> {
   const kv = await getKv();
   const key = USER_KEY(username);
 
-  const user: User = { username, passwordHash, createdAt: Date.now() };
+  const user: User = { username, passwordHash, createdAt: Date.now(), role };
 
   const result = await kv.atomic()
     .check({ key, versionstamp: null })

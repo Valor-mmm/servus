@@ -22,6 +22,7 @@ const de = {
   "auth.rate_limited": "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
   "auth.locked_out":
     "Konto vorübergehend gesperrt. Bitte warte {seconds} Sekunden.",
+  "auth.forbidden": "Kein Zugriff. Diese Seite ist nur für Administratoren.",
 
   // ── Errors ────────────────────────────────────────────────────────────────
   "error.not_found": "Seite nicht gefunden.",

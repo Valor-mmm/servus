@@ -1,9 +1,12 @@
 import { define } from "@/utils.ts";
 import { getKv } from "@/lib/kv/client.ts";
 import { exportKv } from "@/lib/kv/export.ts";
+import { requireAdmin } from "@/lib/auth/middleware.ts";
 
 export const handler = define.handlers({
-  async GET(_ctx) {
+  async GET(ctx) {
+    const guard = await requireAdmin(ctx);
+    if (guard) return guard;
     const kv = await getKv();
     const date = new Date().toISOString().slice(0, 10);
     const filename = `servus-export-${date}.ndjson`;

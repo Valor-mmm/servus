@@ -84,7 +84,12 @@ export async function consumeInvite(
   const result = await kv.atomic()
     .check({ key: inviteKey, versionstamp: inviteEntry.versionstamp })
     .check({ key: userKey, versionstamp: null })
-    .set(userKey, { username, passwordHash, createdAt: Date.now() })
+    .set(userKey, {
+      username,
+      passwordHash,
+      createdAt: Date.now(),
+      role: "user",
+    })
     .delete(inviteKey)
     .delete(codeLookupKey)
     .delete(expiryIndexKey)
@@ -95,7 +100,7 @@ export async function consumeInvite(
   }
 
   const csrfToken = generateCsrfToken();
-  const session = await createSession(username, csrfToken);
+  const session = await createSession(username, csrfToken, "user");
   const cookieValue = await signSessionId(session.sessionId, sessionKey);
   const cookie = [
     `${COOKIE_NAME}=${cookieValue}`,

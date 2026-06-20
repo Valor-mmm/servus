@@ -6,8 +6,11 @@ import {
   applyCsrfGuard,
   applyRequireAuth,
   applySecurityHeaders,
+  requireAdmin,
 } from "@/lib/auth/middleware.ts";
 import { IDLE_TTL_MS } from "@/lib/auth/sessionRepo.ts";
+import type { State } from "@/utils.ts";
+import type { FreshContext } from "fresh";
 
 async function withKv(fn: () => Promise<void>): Promise<void> {
   const kv = await Deno.openKv(":memory:");
@@ -62,7 +65,7 @@ Deno.test("requireAuth: unauthenticated non-GET to protected route returns 401",
 
 Deno.test("requireAuth: authenticated GET passes through and populates user", async () => {
   await withKv(async () => {
-    const session = await createSession("alice", "csrf-token");
+    const session = await createSession("alice", "csrf-token", "admin");
     const cookieVal = await signSessionId(session.sessionId, SESSION_KEY);
     const req = makeReq("GET", "/items", {
       cookie: `servus_session=${cookieVal}`,
@@ -85,7 +88,7 @@ Deno.test("requireAuth: public routes (login, healthz, static) pass through unau
 
 Deno.test("requireAuth: renews lastSeen when older than the throttle window", async () => {
   await withKv(async () => {
-    const session = await createSession("renew-me", "csrf-token");
+    const session = await createSession("renew-me", "csrf-token", "admin");
     // Force lastSeen to be more than the 1-hour throttle window ago.
     const kv = await import("@/lib/kv/client.ts").then((m) => m.getKv());
     const stale = Date.now() - 2 * 60 * 60 * 1000;
@@ -113,7 +116,7 @@ Deno.test("requireAuth: renews lastSeen when older than the throttle window", as
 
 Deno.test("requireAuth: does not write when lastSeen is within the throttle window", async () => {
   await withKv(async () => {
-    const session = await createSession("fresh-me", "csrf-token");
+    const session = await createSession("fresh-me", "csrf-token", "admin");
     const originalLastSeen = session.lastSeen;
 
     const cookieVal = await signSessionId(session.sessionId, SESSION_KEY);
@@ -131,7 +134,7 @@ Deno.test("requireAuth: does not write when lastSeen is within the throttle wind
 
 Deno.test("requireAuth: expired session is rejected and removed lazily", async () => {
   await withKv(async () => {
-    const session = await createSession("bob", "csrf-token");
+    const session = await createSession("bob", "csrf-token", "admin");
     // Force session to appear expired (lastSeen > IDLE_TTL_MS ago)
     const kv = await import("@/lib/kv/client.ts").then((m) => m.getKv());
     const expiredSession = {
@@ -159,7 +162,7 @@ Deno.test("requireAuth: expired session is rejected and removed lazily", async (
 
 Deno.test("csrfGuard: missing token on POST returns 403", async () => {
   await withKv(async () => {
-    const session = await createSession("carol", "valid-csrf");
+    const session = await createSession("carol", "valid-csrf", "admin");
     const result = await applyCsrfGuard(
       makeReq("POST", "/items"),
       session.csrfToken,
@@ -171,7 +174,7 @@ Deno.test("csrfGuard: missing token on POST returns 403", async () => {
 
 Deno.test("csrfGuard: wrong token on POST returns 403", async () => {
   await withKv(async () => {
-    const session = await createSession("dave", "valid-csrf");
+    const session = await createSession("dave", "valid-csrf", "admin");
     const req = makeReq("POST", "/items", { csrfHeader: "wrong-token" });
     const result = await applyCsrfGuard(req, session.csrfToken);
     assertEquals(result.pass, false);
@@ -183,7 +186,7 @@ Deno.test("csrfGuard: correct token passes", async () => {
   const session = await (async () => {
     const kv = await Deno.openKv(":memory:");
     setKv(kv);
-    const s = await createSession("eve", "valid-csrf");
+    const s = await createSession("eve", "valid-csrf", "admin");
     await closeKv();
     return s;
   })();
@@ -240,4 +243,29 @@ Deno.test("securityHeaders: no nonce → unsafe-inline used, no Cache-Control ov
   assertEquals(csp.includes("'unsafe-inline'"), true);
   assertEquals(csp.includes("nonce"), false);
   assertEquals(result.headers.get("cache-control"), null);
+});
+
+// ── requireAdmin ──────────────────────────────────────────────────────────────
+
+function makeCtx(
+  role?: "admin" | "user",
+): FreshContext<State> {
+  return {
+    state: role !== undefined ? { user: { username: "x", role } } : {},
+  } as unknown as FreshContext<State>;
+}
+
+Deno.test("requireAdmin: returns 403 for role user", async () => {
+  const resp = await requireAdmin(makeCtx("user"));
+  assertEquals(resp?.status, 403);
+});
+
+Deno.test("requireAdmin: returns 403 for unauthenticated (no user in state)", async () => {
+  const resp = await requireAdmin(makeCtx(undefined));
+  assertEquals(resp?.status, 403);
+});
+
+Deno.test("requireAdmin: returns null for role admin", async () => {
+  const resp = await requireAdmin(makeCtx("admin"));
+  assertEquals(resp, null);
 });

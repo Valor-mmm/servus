@@ -22,7 +22,7 @@ export async function seedUsers(entries: SeedEntry[]): Promise<SeedResult> {
       continue;
     }
     const passwordHash = await hashPassword(password);
-    await createUser(username, passwordHash);
+    await createUser(username, passwordHash, "admin");
     seeded++;
   }
 

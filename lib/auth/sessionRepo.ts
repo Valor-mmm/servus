@@ -25,6 +25,7 @@ function randomId(): string {
 export async function createSession(
   username: string,
   csrfToken: string,
+  role: "admin" | "user",
 ): Promise<Session> {
   const kv = await getKv();
   const sessionId = randomId();
@@ -33,6 +34,7 @@ export async function createSession(
   const session: Session = {
     sessionId,
     username,
+    role,
     createdAt: now,
     lastSeen: now,
     csrfToken,

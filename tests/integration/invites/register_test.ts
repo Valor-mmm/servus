@@ -2,13 +2,14 @@
  * Integration tests for invite code consumption (token-based session flow).
  */
 import { assertEquals, assertExists, assertMatch } from "@std/assert";
-import { closeKv, setKv } from "@/lib/kv/client.ts";
+import { closeKv, getKv, setKv } from "@/lib/kv/client.ts";
 import {
   consumeInvite,
   mintInvite,
   revokeInvite,
 } from "@/lib/invites/index.ts";
 import { findUser } from "@/lib/auth/userRepo.ts";
+import type { User } from "@/lib/auth/types.ts";
 
 const TEST_SESSION_KEY = "aa".repeat(32);
 
@@ -114,5 +115,23 @@ Deno.test("valid code: helper user cannot be found by login (unknowable password
     // is not polluted with any "null" or empty username
     const noUser = await findUser("");
     assertEquals(noUser, null);
+  });
+});
+
+Deno.test("valid code: helper user is created with role user", async () => {
+  await withKv(async () => {
+    const { rawCode } = await mintInvite(7);
+    const result = await consumeInvite(rawCode, TEST_SESSION_KEY);
+    assertEquals(result.ok, true);
+    if (!result.ok) return;
+
+    // Find the newly created helper user by listing all users
+    const kv = await getKv();
+    const users: User[] = [];
+    for await (const entry of kv.list<User>({ prefix: ["user"] })) {
+      if (entry.value) users.push(entry.value);
+    }
+    assertExists(users[0], "expected a user to be created");
+    assertEquals(users[0].role, "user");
   });
 });

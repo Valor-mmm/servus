@@ -93,3 +93,12 @@ Deno.test("seedUsers: plaintext password is not stored (hash starts with $argon2
     assertEquals(user.passwordHash.includes("secret"), false);
   });
 });
+
+Deno.test("seedUsers: seeded user has role admin", async () => {
+  await withKv(async () => {
+    await seedUsers([{ username: "owner", password: "pw" }]);
+    const user = await findUser("owner");
+    assertExists(user);
+    assertEquals(user.role, "admin");
+  });
+});
