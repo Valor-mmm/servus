@@ -203,6 +203,7 @@ test("delete empty box — box no longer in list", async ({ page }) => {
   await createBox(page, boxLabel);
 
   // Delete button visible for empty box
+  page.once("dialog", (d) => d.accept());
   await page.click("button.btn-danger");
 
   // Redirected to /boxes, box gone

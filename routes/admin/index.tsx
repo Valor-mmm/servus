@@ -154,6 +154,7 @@ function AdminPage(
                   <form
                     method="post"
                     action={`/admin/invites/${inv.id}/revoke`}
+                    data-confirm={t("invites.revoke_confirm")}
                   >
                     <input type="hidden" name="csrf_token" value={csrfToken} />
                     <button type="submit" class="btn-danger btn-small">

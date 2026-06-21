@@ -4,6 +4,7 @@ import {
   createItem,
   deleteItem,
   findItem,
+  findItemEntry,
   listItems,
   listItemsByCategory,
   listItemsByRoom,
@@ -218,6 +219,34 @@ Deno.test("updateItem throws for unknown id", async () => {
       () => updateItem("nonexistent", { name: "test" }),
       Error,
       "not found",
+    );
+  });
+});
+
+Deno.test("updateItem: versionstamp is available via findItemEntry", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Buch",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+    });
+
+    const entry = await findItemEntry(item.id);
+    assertExists(
+      entry.versionstamp,
+      "findItemEntry must return a versionstamp",
+    );
+    assertEquals(entry.value?.name, "Buch");
+
+    // After an update, the versionstamp must change
+    await updateItem(item.id, { name: "Buch 2" });
+    const entry2 = await findItemEntry(item.id);
+    assertExists(entry2.versionstamp);
+    assertEquals(
+      entry.versionstamp !== entry2.versionstamp,
+      true,
+      "versionstamp must change after an update",
     );
   });
 });

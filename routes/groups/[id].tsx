@@ -46,6 +46,7 @@ function GroupDetailPage(
           method="post"
           action={`/groups/${group.id}`}
           style="display:inline"
+          data-confirm={t("groups.delete_confirm", { name: group.name })}
         >
           <input type="hidden" name="csrf_token" value={csrfToken} />
           <input type="hidden" name="_action" value="delete" />

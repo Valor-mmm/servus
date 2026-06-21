@@ -201,6 +201,15 @@ export async function findItem(id: string): Promise<Item | null> {
   return entry.value ? normalizeItem(entry.value) : null;
 }
 
+export async function findItemEntry(
+  id: string,
+): Promise<Deno.KvEntryMaybe<Item>> {
+  const kv = await getKv();
+  const entry = await kv.get<Item>(ITEM_KEY(id));
+  if (!entry.value) return entry;
+  return { ...entry, value: normalizeItem(entry.value) };
+}
+
 export async function listItems(): Promise<Item[]> {
   const kv = await getKv();
   const entries = kv.list<Item>({ prefix: ["item"] });
@@ -310,8 +319,10 @@ export async function updateItem(
   input: UpdateItemInput,
 ): Promise<Item> {
   const kv = await getKv();
-  const existing = await findItem(id);
+  const entry = await findItemEntry(id);
+  const existing = entry.value;
   if (!existing) throw new Error(`Item '${id}' not found`);
+  const versionstamp = entry.versionstamp;
 
   const settingContainer = input.containerId !== undefined;
   const resolvedContainerId = settingContainer
@@ -377,7 +388,9 @@ export async function updateItem(
     updatedAt: Date.now(),
   };
 
-  const op = kv.atomic().set(ITEM_KEY(id), updated);
+  const op = kv.atomic()
+    .check({ key: ITEM_KEY(id), versionstamp })
+    .set(ITEM_KEY(id), updated);
 
   // Category index
   if (
@@ -409,7 +422,8 @@ export async function updateItem(
     if (updated.boxId) op.set(BOX_IDX_KEY(updated.boxId, id), true);
   }
 
-  await op.commit();
+  const result = await op.commit();
+  if (!result.ok) throw new Error(`Concurrent write conflict on item '${id}'`);
 
   // Update box status for any affected box
   if (resolvedBoxId !== existing.boxId) {

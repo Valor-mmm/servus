@@ -109,6 +109,14 @@
       if (form) form.requestSubmit();
     });
   });
+
+  /* ── data-confirm: require confirmation before destructive form submits ── */
+  document.addEventListener("submit", function (e) {
+    var form = e.target;
+    var msg = form.dataset && form.dataset.confirm;
+    if (!msg) return;
+    if (!confirm(msg)) e.preventDefault();
+  }, true);
 })();
 
 if ("serviceWorker" in navigator) {

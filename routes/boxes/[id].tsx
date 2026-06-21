@@ -93,6 +93,7 @@ function BoxDetailPage(
               method="post"
               action={`/boxes/${box.id}`}
               style="display:inline"
+              data-confirm={t("boxes.delete_confirm", { code: box.code })}
             >
               <input type="hidden" name="csrf_token" value={csrfToken} />
               <input type="hidden" name="_action" value="delete" />

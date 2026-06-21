@@ -196,6 +196,9 @@ function ItemDetailPage(
                   method="post"
                   action={`/items/${item.id}`}
                   style="display:block"
+                  data-confirm={t("items.delete_confirm", {
+                    name: item.name || t("items.placeholderName"),
+                  })}
                 >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
@@ -226,6 +229,9 @@ function ItemDetailPage(
               method="post"
               action={`/items/${item.id}`}
               style="display:inline"
+              data-confirm={t("items.delete_confirm", {
+                name: item.name || t("items.placeholderName"),
+              })}
             >
               <input type="hidden" name="csrf_token" value={csrfToken} />
               <input type="hidden" name="_action" value="delete" />

@@ -114,7 +114,13 @@ function CategoriesPage(
                     {t("categories.save")}
                   </button>
                 </form>
-                <form method="post" action="/categories">
+                <form
+                  method="post"
+                  action="/categories"
+                  data-confirm={t("categories.delete_confirm", {
+                    name: cat.label,
+                  })}
+                >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
                   <input type="hidden" name="id" value={cat.id} />

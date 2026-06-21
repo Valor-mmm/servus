@@ -86,6 +86,9 @@ export default defineConfig({
       R2_ACCESS_KEY_ID: "e2e-test-access-key",
       R2_SECRET_ACCESS_KEY: "e2e-test-secret-key",
       R2_PUBLIC_URL: "https://r2-e2e.example.com",
+      // Raise the IP rate limit so the E2E suite (login + auth tests) doesn't
+      // trigger the 5-attempts-per-15-min production threshold.
+      SERVUS_RATE_LIMIT_IP_THRESHOLD: "100",
     },
   },
 });

@@ -80,6 +80,7 @@ test("invite banner shows a QR code image after minting", async ({ page }) => {
   expect(src).toMatch(/^data:image\/svg\+xml/);
 
   // Clean up: revoke the created invite so subsequent tests start with empty list
+  page.once("dialog", (d) => d.accept());
   await page.locator("button.btn-danger").first().click();
   await page.waitForURL("/admin");
 });
@@ -92,6 +93,7 @@ test("admin can revoke an invite before it is used", async ({ page }) => {
   const inviteUrl = (await page.locator(".invite-url").textContent())!.trim();
 
   // Revoke the invite
+  page.once("dialog", (d) => d.accept());
   await page.locator("button.btn-danger").first().click();
   await page.waitForURL("/admin");
 

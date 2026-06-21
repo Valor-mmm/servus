@@ -12,19 +12,41 @@ const TYPE_LABEL = {
 } as const satisfies Record<FieldType, string>;
 
 function FieldRow(
-  { index, label, type, options, fieldKey }: {
+  { index, label, type, options, fieldKey, isExisting }: {
     index: number;
     label: string;
     type: FieldType;
     options: string[];
     fieldKey: string;
+    isExisting: boolean;
   },
 ) {
   return (
     <fieldset class="schema-field-row">
-      {fieldKey && (
-        <input type="hidden" name={`field_key_${index}`} value={fieldKey} />
-      )}
+      {isExisting
+        ? (
+          <>
+            <input
+              type="hidden"
+              name={`field_key_${index}`}
+              value={fieldKey}
+            />
+            <label>
+              {t("schemas.field_key_label")}
+              <input
+                type="text"
+                name={`field_key_display_${index}`}
+                value={fieldKey}
+                disabled
+                title={t("schemas.field_key_immutable_hint")}
+                class="input-disabled"
+              />
+            </label>
+          </>
+        )
+        : fieldKey
+        ? <input type="hidden" name={`field_key_${index}`} value={fieldKey} />
+        : null}
       <label>
         {t("schemas.field_label")}
         <input
@@ -99,6 +121,7 @@ export function SchemaEditorForm(
               type={(f?.type ?? "text") as FieldType}
               options={f?.options ?? []}
               fieldKey={f?.key ?? ""}
+              isExisting={!!f?.key}
             />
           );
         })}

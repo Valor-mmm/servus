@@ -81,6 +81,7 @@ function EditItemPage(
                 method="post"
                 action={`/items/${item.id}/edit`}
                 style="display:inline"
+                data-confirm={t("items.removePhoto_confirm")}
               >
                 <input type="hidden" name="csrf_token" value={csrfToken} />
                 <input type="hidden" name="_action" value="remove_photo" />

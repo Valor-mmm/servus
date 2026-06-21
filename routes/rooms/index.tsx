@@ -37,7 +37,11 @@ function RoomsPage({ rooms, error, csrfToken }: PageProps) {
             {rooms.map((room) => (
               <li key={room.id} class="item-row">
                 <a href={`/items?room=${room.id}`}>{room.name}</a>
-                <form method="post" action="/rooms">
+                <form
+                  method="post"
+                  action="/rooms"
+                  data-confirm={t("rooms.delete_confirm", { name: room.name })}
+                >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
                   <input type="hidden" name="id" value={room.id} />

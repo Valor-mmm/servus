@@ -105,6 +105,7 @@ test("delete item — item no longer appears in list", async ({ page }) => {
 
   // Navigate to detail and delete
   await page.click(`text=${itemName}`);
+  page.once("dialog", (d) => d.accept());
   await page.click("main button.btn-danger");
 
   await expect(page).toHaveURL("/items");
@@ -123,6 +124,7 @@ test("delete referenced category shows error and category persists", async ({ pa
   // Attempt to delete the in-use category
   await page.goto("/categories");
   const row = page.locator("li.item-row", { hasText: catName });
+  page.once("dialog", (d) => d.accept());
   await row.locator("button.btn-danger").click();
 
   // Error shown, category still listed

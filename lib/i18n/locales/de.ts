@@ -106,6 +106,9 @@ const de = {
   "schemas.fields_heading": "Felder",
   "schemas.field_label": "Bezeichnung",
   "schemas.field_label_placeholder": "z. B. Farbe",
+  "schemas.field_key_label": "Schlüssel",
+  "schemas.field_key_immutable_hint":
+    "Der Feldschlüssel kann nach dem Speichern nicht mehr geändert werden.",
   "schemas.field_type": "Feldtyp",
   "schemas.field_options": "Auswahlmöglichkeiten (eine pro Zeile)",
   "schemas.add_field": "Feld hinzufügen",
@@ -271,6 +274,7 @@ const de = {
   "items.addPhoto": "Foto hinzufügen",
   "items.fromGallery": "Aus Galerie",
   "items.removePhoto": "Foto entfernen",
+  "items.removePhoto_confirm": "Foto wirklich entfernen?",
   "items.removePhotoFailed":
     "Entfernen fehlgeschlagen. Bitte erneut versuchen.",
   "items.retry": "Wiederholen",
