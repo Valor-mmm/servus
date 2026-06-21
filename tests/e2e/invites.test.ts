@@ -51,6 +51,10 @@ test("full invite flow: admin mints code → helper confirms → helper lands on
   // Step 9: Consumed invite no longer appears in the admin list
   await page.goto("/admin");
   await expect(page.locator(".empty")).toBeVisible();
+
+  // Persist the fresh admin session so subsequent tests don't start with an
+  // invalidated cookie (the original session was destroyed by the logout above).
+  await page.context().storageState({ path: "tests/e2e/.auth/user.json" });
 });
 
 test("invite URL shows error after the code has been consumed", async ({ page }) => {
@@ -78,6 +82,15 @@ test("invite URL shows error after the code has been consumed", async ({ page })
   // Try using the same invite URL again — should show invalid error
   await page.goto(inviteUrl);
   await expect(page.locator(".error")).toBeVisible();
+
+  // Re-login as admin and persist the fresh session so subsequent tests
+  // don't start with the now-invalidated session cookie from user.json.
+  await page.goto("/login");
+  await page.fill('[name="username"]', ADMIN_USER);
+  await page.fill('[name="password"]', ADMIN_PASS);
+  await page.click('[type="submit"]');
+  await page.waitForURL("/");
+  await page.context().storageState({ path: "tests/e2e/.auth/user.json" });
 });
 
 test("invite banner shows a QR code image after minting", async ({ page }) => {

@@ -4,8 +4,25 @@ import { computeLookup } from "@/lib/invites/generate.ts";
 import { consumeInvite } from "@/lib/invites/index.ts";
 import { getInviteByCode } from "@/lib/invites/kv.ts";
 import { checkAndIncrementInviteIp } from "@/lib/invites/rateLimit.ts";
+import { COOKIE_NAME, verifySessionCookie } from "@/lib/auth/sessionCookie.ts";
+import { findSession } from "@/lib/auth/sessionRepo.ts";
 
 const SESSION_KEY = () => Deno.env.get("SERVUS_SESSION_KEY") ?? "";
+
+async function isLoggedIn(req: Request): Promise<boolean> {
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  for (const part of cookieHeader.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k.trim() === COOKIE_NAME) {
+      const sessionId = await verifySessionCookie(v.join("=").trim(), SESSION_KEY());
+      if (sessionId) {
+        const session = await findSession(sessionId);
+        return session !== null;
+      }
+    }
+  }
+  return false;
+}
 
 function formatExpiry(ms: number): string {
   return new Date(ms).toLocaleDateString("de-DE", {
@@ -64,8 +81,10 @@ function RateLimitedPage({ seconds }: { seconds: number }) {
 
 export const handler = define.handlers({
   async GET(ctx) {
-    // Block logged-in users — consuming a single-use code silently would be wrong
-    if (ctx.state.user) {
+    // Block logged-in users — consuming a single-use code silently would be wrong.
+    // The invite route is public (skipped by auth middleware), so we check the
+    // session directly rather than relying on ctx.state.user.
+    if (await isLoggedIn(ctx.req)) {
       return ctx.render(<AlreadyLoggedInPage />);
     }
 
@@ -91,7 +110,7 @@ export const handler = define.handlers({
 
   async POST(ctx) {
     // Block logged-in users from consuming the code via POST too
-    if (ctx.state.user) {
+    if (await isLoggedIn(ctx.req)) {
       return ctx.render(<AlreadyLoggedInPage />);
     }
 
