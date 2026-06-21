@@ -2,22 +2,23 @@
 
 ### Requirement: Consistent empty states
 
-Every list page MUST use the shared `EmptyState` component (icon + message)
-when no records exist. Ad-hoc empty paragraphs or divs are not permitted.
+Every list page MUST use the shared `EmptyState` component (icon + message) when
+no records exist. Ad-hoc empty paragraphs or divs are not permitted.
 
 #### Scenario: Empty list shows EmptyState
 
 - **WHEN** an authenticated user visits any list page (items, boxes, rooms,
   categories, groups) and the list is empty
-- **THEN** the `EmptyState` component is rendered with the lion SVG and a
-  German prompt
+- **THEN** the `EmptyState` component is rendered with the lion SVG and a German
+  prompt
 
 ---
 
 ### Requirement: Correct German pluralization
 
-Count strings (item counts, box counts) MUST use the `count(n, singular, plural)`
-helper and produce grammatically correct German for both n=1 and n≠1.
+Count strings (item counts, box counts) MUST use the
+`count(n, singular, plural)` helper and produce grammatically correct German for
+both n=1 and n≠1.
 
 #### Scenario: Singular item count
 
@@ -35,8 +36,8 @@ All Zurück and Abbrechen links/buttons MUST use the `.btn-secondary` class.
 ### Requirement: BottomNav exact active-tab matching
 
 The active tab indicator in the bottom navigation MUST fire only when the
-current path equals the tab's href exactly or starts with `href + "/"`.
-It MUST NOT fire for unrelated sibling paths that happen to share a prefix.
+current path equals the tab's href exactly or starts with `href + "/"`. It MUST
+NOT fire for unrelated sibling paths that happen to share a prefix.
 
 #### Scenario: /items tab active on sub-routes
 

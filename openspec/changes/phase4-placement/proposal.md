@@ -31,8 +31,8 @@ flows.
 
 ## Impact
 
-- `routes/items/[id]/edit.tsx` and shared item form components — placement fields
-  consolidated
+- `routes/items/[id]/edit.tsx` and shared item form components — placement
+  fields consolidated
 - `routes/boxes/[id].tsx` — Einpacken form/section added
 - `static/styles.css` — segmented control styles
 - No new KV queries, no new dependencies

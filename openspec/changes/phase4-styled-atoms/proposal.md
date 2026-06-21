@@ -20,6 +20,7 @@ different styles, empty states are each hand-rolled differently, item counts say
 ## Capabilities
 
 ### New Capabilities
+
 - `design-system`: Styled-atom shared components and i18n helpers added to the
   existing design system
 

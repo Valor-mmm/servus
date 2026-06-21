@@ -247,7 +247,8 @@ delete. Status MUST NOT change as a consequence of removing a photo.
 
 #### Scenario: Remove the only photo of an incomplete item
 
-- **WHEN** an authenticated user removes the only photo from an `incomplete` item
+- **WHEN** an authenticated user removes the only photo from an `incomplete`
+  item
 - **THEN** the persisted `photos` array is empty and `status` remains
   `"incomplete"`
 

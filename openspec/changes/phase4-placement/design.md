@@ -8,11 +8,13 @@ multiple existing items at once.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Single "Standort" section with a radio-based segmented control
 - Only one sub-picker visible at a time (CSS `:checked` sibling selector, no JS)
 - Bulk "Einpacken" form on `/boxes/[id]` using checkboxes
 
 **Non-Goals:**
+
 - New island or client-side framework
 - Drag-and-drop reordering
 - Changing the underlying KV data model
@@ -26,7 +28,8 @@ multiple existing items at once.
   <legend>Standort</legend>
   <label><input type="radio" name="standort_type" value="room"> Raum</label>
   <label><input type="radio" name="standort_type" value="box"> Karton</label>
-  <label><input type="radio" name="standort_type" value="container"> Behälter</label>
+  <label><input type="radio" name="standort_type" value="container">
+    Behälter</label>
   <div class="standort-panel" data-for="room">…room select…</div>
   <div class="standort-panel" data-for="box">…box select…</div>
   <div class="standort-panel" data-for="container">…container select…</div>

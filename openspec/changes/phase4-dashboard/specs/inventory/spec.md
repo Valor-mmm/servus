@@ -14,8 +14,8 @@ dashboard instead of a static page.
 #### Scenario: Dashboard shows recent items
 
 - **WHEN** an authenticated user visits `/`
-- **THEN** the page shows up to 5 most recently added items with their names
-  and thumbnails (if available)
+- **THEN** the page shows up to 5 most recently added items with their names and
+  thumbnails (if available)
 
 #### Scenario: Dashboard has primary Erfassen CTA
 
