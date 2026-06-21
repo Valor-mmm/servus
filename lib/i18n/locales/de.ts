@@ -310,14 +310,22 @@ const de = {
   "invites.code_warning":
     "Bitte kopiere diesen Code jetzt — er wird nicht erneut angezeigt.",
   "invites.code_label": "Einladungslink",
+  "invites.copy": "Link kopieren",
+  "invites.copy_done": "Kopiert!",
   "invites.qr_label": "QR-Code für Einladungslink",
   "invites.nav": "Einladungen",
 
   // ── Invite registration ────────────────────────────────────────────────────
   "invite.title": "Einladung",
+  "invite.app_context": "servus — Haushaltsmanagement",
+  "invite.access_context":
+    "Du wirst als Helfer:in hinzugefügt und kannst Gegenstände einsehen und bearbeiten.",
+  "invite.expiry_context": "Dieser Link ist gültig bis {expiry}.",
   "invite.confirm": "Einladung annehmen",
   "invite.confirm_subtitle":
     "Klicke auf den Button, um deinen Zugang zu aktivieren.",
+  "invite.already_logged_in":
+    "Du bist bereits angemeldet. Melde dich zuerst ab, um einen neuen Zugang zu aktivieren.",
   "invite.error.invalid": "Ungültiger oder abgelaufener Einladungscode.",
   "invite.error.rate_limited":
     "Zu viele Versuche. Bitte warte {seconds} Sekunden.",

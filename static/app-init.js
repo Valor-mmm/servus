@@ -117,6 +117,24 @@
     if (!msg) return;
     if (!confirm(msg)) e.preventDefault();
   }, true);
+
+  /* ── data-copy: copy-to-clipboard buttons ── */
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.dataset.copy;
+      var done = btn.dataset.copyDone || "✓";
+      if (!text || !navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var original = btn.textContent;
+        btn.textContent = done;
+        btn.disabled = true;
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.disabled = false;
+        }, 2000);
+      });
+    });
+  });
 })();
 
 if ("serviceWorker" in navigator) {

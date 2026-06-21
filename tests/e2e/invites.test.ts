@@ -18,32 +18,37 @@ test("full invite flow: admin mints code → helper confirms → helper lands on
   const inviteUrl = (await page.locator(".invite-url").textContent())!.trim();
   expect(inviteUrl).toMatch(/\/invite\/[A-Za-z0-9_-]{27,}/);
 
-  // Step 3: Navigate directly to the invite URL (public route — no logout needed)
+  // Step 3: Log out so the invite URL can be consumed as a new (unauthenticated) user
+  await page.locator('nav.top-nav form[action="/logout"] button[type="submit"]')
+    .click();
+  await page.waitForURL(/\/login/);
+
+  // Step 4: Navigate to invite URL as unauthenticated user
   await page.goto(inviteUrl);
   // Confirmation page: single button, no credential form
   await expect(page.locator("main button[type='submit']")).toBeVisible();
   await expect(page.locator('[name="username"]')).toHaveCount(0);
   await expect(page.locator('[name="password"]')).toHaveCount(0);
 
-  // Step 4: Helper clicks confirm → redirected to / already authenticated
+  // Step 5: Helper clicks confirm → redirected to / already authenticated
   await page.locator("main button[type='submit']").click();
   await page.waitForURL("/");
 
-  // Step 5: Helper is authenticated (nav is visible)
+  // Step 6: Helper is authenticated (nav is visible)
   await expect(page.locator("nav.top-nav")).toBeVisible();
 
-  // Step 6: Log out the helper session
+  // Step 7: Log out the helper session
   await page.locator('nav.top-nav form[action="/logout"] button[type="submit"]')
     .click();
   await page.waitForURL(/\/login/);
 
-  // Step 7: Admin logs back in
+  // Step 8: Admin logs back in
   await page.fill('[name="username"]', ADMIN_USER);
   await page.fill('[name="password"]', ADMIN_PASS);
   await page.click('[type="submit"]');
   await expect(page).toHaveURL("/");
 
-  // Step 8: Consumed invite no longer appears in the admin list
+  // Step 9: Consumed invite no longer appears in the admin list
   await page.goto("/admin");
   await expect(page.locator(".empty")).toBeVisible();
 });
@@ -55,12 +60,17 @@ test("invite URL shows error after the code has been consumed", async ({ page })
   await page.waitForLoadState("networkidle");
   const inviteUrl = (await page.locator(".invite-url").textContent())!.trim();
 
-  // Consume the invite
+  // Log out so we can consume the invite as an unauthenticated user
+  await page.locator('nav.top-nav form[action="/logout"] button[type="submit"]')
+    .click();
+  await page.waitForURL(/\/login/);
+
+  // Consume the invite as unauthenticated user
   await page.goto(inviteUrl);
   await page.locator("main button[type='submit']").click();
   await page.waitForURL("/");
 
-  // Log out so we can test the invite URL again without being redirected by auth
+  // Log out the helper session
   await page.locator('nav.top-nav form[action="/logout"] button[type="submit"]')
     .click();
   await page.waitForURL(/\/login/);
@@ -108,4 +118,26 @@ test("admin can revoke an invite before it is used", async ({ page }) => {
 test("/admin/invites redirects to /admin", async ({ page }) => {
   await page.goto("/admin/invites");
   await expect(page).toHaveURL("/admin");
+});
+
+test("logged-in user visiting invite URL sees already-logged-in message, not consume form", async ({ page }) => {
+  // Create an invite (as the pre-authenticated admin)
+  await page.goto("/admin");
+  await page.locator(CREATE_BTN).click();
+  await page.waitForLoadState("networkidle");
+  const inviteUrl = (await page.locator(".invite-url").textContent())!.trim();
+
+  // Visit the invite URL while still logged in
+  await page.goto(inviteUrl);
+
+  // Must NOT show a consume button
+  await expect(page.locator("main button[type='submit']")).toHaveCount(0);
+  // Must show the already-logged-in error
+  await expect(page.locator(".error")).toBeVisible();
+
+  // Clean up — go back and revoke
+  await page.goto("/admin");
+  page.once("dialog", (d) => d.accept());
+  await page.locator("button.btn-danger").first().click();
+  await page.waitForURL("/admin");
 });

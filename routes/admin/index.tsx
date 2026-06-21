@@ -109,6 +109,14 @@ function AdminPage(
               <strong>{t("invites.code_label")}:</strong>
             </p>
             <code class="invite-url">{newInviteUrl}</code>
+            <button
+              type="button"
+              class="btn-copy"
+              data-copy={newInviteUrl}
+              data-copy-done={t("invites.copy_done")}
+            >
+              {t("invites.copy")}
+            </button>
             {qrSvg && (
               <img
                 class="invite-qr"
