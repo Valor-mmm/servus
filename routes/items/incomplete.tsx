@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   findItem,
   listItems,
@@ -41,21 +42,14 @@ interface PageProps {
   derivedRoomId: string | null;
 }
 
-interface EmptyPageProps {
-  csrfToken: string;
-}
-
-function EmptyState(_props: EmptyPageProps) {
+function EmptyPage() {
   return (
     <main class="page">
       <div class="page-header">
         <h1>{t("items.incomplete_title")}</h1>
         <a href="/items" class="btn-secondary">{t("action.back")}</a>
       </div>
-      <div class="empty-state">
-        <p>{t("items.incomplete_empty")}</p>
-        <a href="/items" class="btn-primary">{t("action.back")}</a>
-      </div>
+      <EmptyState message={t("items.incomplete_empty")} />
     </main>
   );
 }
@@ -291,9 +285,7 @@ export const handler = define.handlers({
       .sort((a, b) => a.createdAt - b.createdAt);
 
     if (items.length === 0) {
-      return ctx.render(
-        <EmptyState csrfToken={ctx.state.csrfToken ?? ""} />,
-      );
+      return ctx.render(<EmptyPage />);
     }
 
     const idxParam = parseInt(ctx.url.searchParams.get("idx") ?? "0", 10);

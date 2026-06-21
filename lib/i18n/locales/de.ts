@@ -374,6 +374,8 @@ const de = {
   "items.delete_container_confirm": "Trotzdem löschen",
   "items.label_page_title": "Behälter-Etikett",
   "items.label_action": "Etikett drucken",
+  "items.singular": "Gegenstand",
+  "items.plural": "Gegenstände",
   "categories.can_contain_label": "Kann Gegenstände enthalten",
   "categories.error.occupied_containers":
     "Kategorie enthält noch befüllte Behälter. Bitte erst leeren.",
@@ -422,6 +424,8 @@ const de = {
   "boxes.place_item_label": "In Raum einlagern",
   "boxes.assign_room_heading": "Zielraum festlegen",
   "boxes.label_item_count": "{count} Gegenstände",
+  "boxes.singular": "Karton",
+  "boxes.plural": "Kartons",
 } as const;
 
 export default de;

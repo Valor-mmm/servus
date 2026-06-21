@@ -1,6 +1,7 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { createRoom, deleteRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import type { Room } from "@/lib/inventory/types.ts";
 
 interface PageProps {
@@ -31,7 +32,7 @@ function RoomsPage({ rooms, error, csrfToken }: PageProps) {
       </form>
 
       {rooms.length === 0
-        ? <p class="empty">{t("rooms.empty")}</p>
+        ? <EmptyState message={t("rooms.empty")} />
         : (
           <ul class="item-list">
             {rooms.map((room) => (

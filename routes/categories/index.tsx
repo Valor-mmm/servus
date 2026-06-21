@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t, td } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   createCategory,
   deleteCategory,
@@ -83,7 +84,7 @@ function CategoriesPage(
       </form>
 
       {categories.length === 0
-        ? <p class="empty">{t("categories.empty")}</p>
+        ? <EmptyState message={t("categories.empty")} />
         : (
           <ul class="item-list category-list">
             {categories.map((cat) => (

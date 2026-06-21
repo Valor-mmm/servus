@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import { listOutstandingInvites, mintInvite } from "@/lib/invites/index.ts";
 import { generateQrSvg } from "@/lib/invites/qr.ts";
 import type { Invite } from "@/lib/invites/types.ts";
@@ -149,7 +150,7 @@ function AdminPage(
         </form>
 
         {invites.length === 0
-          ? <p class="empty">{t("invites.empty")}</p>
+          ? <EmptyState message={t("invites.empty")} />
           : (
             <ul class="item-list">
               {invites.map((inv) => (

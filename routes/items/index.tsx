@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   countItems,
   listItems,
@@ -101,12 +102,7 @@ export function ItemsPage(
       </form>
 
       {items.length === 0
-        ? (
-          <div class="empty-state">
-            <img src="/lion.svg" alt="" aria-hidden="true" />
-            <p>{t("items.empty")}</p>
-          </div>
-        )
+        ? <EmptyState message={t("items.empty")} />
         : (
           <ul class="item-list">
             {items.map((item) => (

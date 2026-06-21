@@ -99,7 +99,7 @@ function NewItemPage(
         </div>
 
         <button type="submit">{t("action.save")}</button>
-        <a href="/items">{t("action.cancel")}</a>
+        <a href="/items" class="btn-secondary">{t("action.cancel")}</a>
       </form>
     </main>
   );

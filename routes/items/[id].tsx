@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   deleteItem,
   findItem,
@@ -248,7 +249,7 @@ function ItemDetailPage(
         <section class="container-contents">
           <h2>{t("items.contents_heading")}</h2>
           {contents.length === 0
-            ? <p class="empty">{t("items.contents_empty")}</p>
+            ? <EmptyState message={t("items.contents_empty")} />
             : (
               <ul class="item-list">
                 {contents.map((c) => (

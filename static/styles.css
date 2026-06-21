@@ -1180,7 +1180,8 @@ button:focus-visible,
   color: var(--servus-text-muted);
 }
 
-.empty-state img {
+.empty-state img,
+.empty-state-icon {
   width: 80px;
   height: 80px;
   opacity: 0.45;

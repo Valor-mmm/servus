@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   findBox,
   markBoxDelivered,
@@ -102,7 +103,7 @@ function BoxDetailPage(
               </button>
             </form>
           )}
-          <a href="/boxes">{t("action.back")}</a>
+          <a href="/boxes" class="btn-secondary">{t("action.back")}</a>
         </div>
 
         {error && <p class="error">{error}</p>}
@@ -139,7 +140,7 @@ function BoxDetailPage(
         <h2>{t("boxes.item_count")}</h2>
 
         {items.length === 0
-          ? <p class="empty">{t("boxes.items_empty")}</p>
+          ? <EmptyState message={t("boxes.items_empty")} />
           : (
             <ul class="item-list">
               {items.map((item) => (

@@ -11,6 +11,10 @@ export function t(
   return value.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
 }
 
+export function count(n: number, singular: string, plural: string): string {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
 /**
  * Translate a key known only at runtime (e.g. category-schema field labels from
  * `lib/inventory/schemas.ts`). Still resolves against `de.ts` — the single

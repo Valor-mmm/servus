@@ -30,7 +30,7 @@ function SchemasPage(
       </ul>
 
       <p>
-        <a href="/categories">{t("action.back")}</a>
+        <a href="/categories" class="btn-secondary">{t("action.back")}</a>
       </p>
     </main>
   );
