@@ -13,6 +13,13 @@ const de = {
   "home.welcome": "Willkommen bei servus.",
   "home.subtitle": "Dein privates Haushaltssystem.",
 
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+  "dashboard.totalItems": "Gegenstände",
+  "dashboard.incompleteItems": "Unvollständig",
+  "dashboard.packedBoxes": "Kartons gepackt",
+  "dashboard.recent": "Zuletzt erfasst",
+  "dashboard.cta": "Erfassen",
+
   // ── Auth ──────────────────────────────────────────────────────────────────
   "auth.login": "Anmelden",
   "auth.logout": "Abmelden",
