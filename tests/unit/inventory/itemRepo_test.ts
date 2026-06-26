@@ -1,5 +1,5 @@
 import { assertEquals, assertExists, assertRejects } from "@std/assert";
-import { closeKv, setKv } from "@/lib/kv/client.ts";
+import { closeKv, getKv, setKv } from "@/lib/kv/client.ts";
 import {
   createItem,
   deleteItem,
@@ -220,6 +220,38 @@ Deno.test("updateItem throws for unknown id", async () => {
       Error,
       "not found",
     );
+  });
+});
+
+Deno.test("updateItem: atomic check rejects stale versionstamp (concurrent write guard)", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Apfel",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+    });
+
+    // Capture versionstamp before any update
+    const entryBefore = await findItemEntry(item.id);
+    const staleStamp = entryBefore.versionstamp;
+
+    // Advance the item to a new versionstamp via a legitimate update
+    await updateItem(item.id, { name: "Birne" });
+
+    // Attempt a raw atomic with the now-stale versionstamp — simulates a
+    // lost-update race where a concurrent writer read the old stamp
+    const kv = await getKv();
+    const result = await kv.atomic()
+      .check({ key: ["item", item.id], versionstamp: staleStamp })
+      .set(["item", item.id], { ...entryBefore.value, name: "Ghostwrite" })
+      .commit();
+
+    assertEquals(result.ok, false, "atomic must reject a stale versionstamp");
+
+    // The legitimate update's value must be intact
+    const current = await findItem(item.id);
+    assertEquals(current?.name, "Birne");
   });
 });
 

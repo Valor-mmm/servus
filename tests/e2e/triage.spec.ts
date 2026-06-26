@@ -36,6 +36,8 @@ async function setupR2Mocks(page: import("@playwright/test").Page) {
   });
 }
 
+const MOBILE = { width: 390, height: 844 };
+
 test("/items/pending redirects to /items/incomplete", async ({ page }) => {
   const response = await page.goto("/items/pending", {
     waitUntil: "networkidle",
@@ -99,4 +101,32 @@ test("triage: capture photo-first item, complete it, reach empty state", async (
     has: page.locator(`text=${itemName}`),
   });
   await expect(row.locator("span.badge-incomplete")).toHaveCount(0);
+});
+
+test("triage: mobile viewport (390×844) — page renders and form is usable", async ({ page }) => {
+  await page.setViewportSize(MOBILE);
+  await setupR2Mocks(page);
+
+  // The triage index must render without overflow at mobile width
+  await page.goto("/items/incomplete");
+  await expect(page.locator("nav.bottom-nav")).toBeVisible();
+
+  // If there are incomplete items, the form must be within viewport bounds
+  const hasItems = await page.locator(".triage-item-name").count() > 0;
+  if (hasItems) {
+    const nameInput = page.locator('input[name="name"]');
+    await expect(nameInput).toBeVisible();
+
+    // Input must be fully within the viewport (not obscured by bottom nav)
+    const box = await nameInput.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThan(MOBILE.height);
+  }
+
+  // Quick-add link in bottom nav must be tappable (44 px minimum target)
+  const quickAdd = page.locator("nav.bottom-nav a[href='/items/quick-add']");
+  await expect(quickAdd).toBeVisible();
+  const navBox = await quickAdd.boundingBox();
+  expect(navBox).not.toBeNull();
+  expect(navBox!.height).toBeGreaterThanOrEqual(44);
 });

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const RUN = Date.now().toString(36);
+const MOBILE = { width: 390, height: 844 };
 
 test("new item: schema fields appear live on category change, group autocomplete works", async ({ page }) => {
   const catName = `Buch-${RUN}`;
@@ -46,4 +47,36 @@ test("new item: schema fields appear live on category change, group autocomplete
   await expect(page.locator("text=Autor")).toBeVisible();
   await expect(page.locator(`text=${author}`)).toBeVisible();
   await expect(page.locator(`.group-chips >> text=${groupName}`)).toBeVisible();
+});
+
+test("new item: mobile viewport (390×844) — form submits and redirects correctly", async ({ page }) => {
+  await page.setViewportSize(MOBILE);
+
+  const itemName = `MobileItem-${RUN}`;
+
+  await page.goto("/items/new");
+
+  // Bottom nav must be visible at mobile width
+  await expect(page.locator("nav.bottom-nav")).toBeVisible();
+
+  // The submit button must be within the viewport (not hidden behind bottom nav)
+  const submitBtn = page.locator('main form > button[type="submit"]');
+  await expect(submitBtn).toBeVisible();
+  const box = await submitBtn.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.y + box!.height).toBeLessThan(MOBILE.height);
+
+  // Fill name and submit — must land on /items
+  await page.fill('[name="name"]', itemName);
+  await submitBtn.click();
+  await expect(page).toHaveURL("/items");
+
+  // Item appears in the list at mobile width with no overflow
+  const row = page.locator("li.item-row", {
+    has: page.locator(`text=${itemName}`),
+  });
+  await expect(row).toBeVisible();
+  const rowBox = await row.boundingBox();
+  expect(rowBox).not.toBeNull();
+  expect(rowBox!.width).toBeLessThanOrEqual(MOBILE.width);
 });
