@@ -54,4 +54,4 @@
   - Create a helper via invite → assert "Verwaltung" not in nav
   - Navigate to `/admin` as helper → assert 403 page
   - Log in as admin → assert "Verwaltung" in nav → assert `/admin` loads 200
-- [ ] 7.3 Run `deno task e2e` — all E2E tests pass
+- [x] 7.3 Run `deno task e2e` — all E2E tests pass
