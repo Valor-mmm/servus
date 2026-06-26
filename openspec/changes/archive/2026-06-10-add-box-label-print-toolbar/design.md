@@ -113,9 +113,9 @@ Before `</body>`:
 
 ```html
 <script>
-  document.getElementById("print-btn").addEventListener("click", function () {
-    window.print();
-  });
+document.getElementById("print-btn").addEventListener("click", function () {
+  window.print();
+});
 </script>
 ```
 
