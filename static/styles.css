@@ -190,16 +190,20 @@ html.theme-sternenhimmel {
 }
 
 /* ── Reset ─────────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 * {
   margin: 0;
 }
-img, svg {
+img,
+svg {
   display: block;
 }
-img, video {
+img,
+video {
   max-width: 100%;
   height: auto;
 }
@@ -225,7 +229,8 @@ body {
   background-blend-mode: var(--servus-body-bg-blend);
 }
 
-code, pre {
+code,
+pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875em;
 }
@@ -354,7 +359,8 @@ p {
   height: 28px;
 }
 
-.top-nav a, .top-nav button {
+.top-nav a,
+.top-nav button {
   color: var(--servus-nav-text);
   text-decoration: none;
   padding: 0.75rem 0.875rem;
@@ -367,7 +373,8 @@ p {
   transition: opacity 0.15s, background 0.15s;
 }
 
-.top-nav a:hover, .top-nav button:hover {
+.top-nav a:hover,
+.top-nav button:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.12);
 }
@@ -712,7 +719,9 @@ p {
 }
 
 /* ── Forms ─────────────────────────────────────────────────────────────────── */
-input, select, textarea {
+input,
+select,
+textarea {
   font: inherit;
   border: 1.5px solid var(--servus-border);
   border-radius: var(--servus-radius);
@@ -723,7 +732,9 @@ input, select, textarea {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--servus-border-focus);
   box-shadow: 0 0 0 3px rgba(26, 95, 168, 0.2);
@@ -737,7 +748,10 @@ label {
 }
 
 /* ── Buttons ───────────────────────────────────────────────────────────────── */
-button, a.btn-primary, a.btn-secondary, a.btn-danger {
+button,
+a.btn-primary,
+a.btn-secondary,
+a.btn-danger {
   cursor: pointer;
   font: inherit;
   border-radius: var(--servus-radius);
@@ -753,7 +767,10 @@ button, a.btn-primary, a.btn-secondary, a.btn-danger {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  button, a.btn-primary, a.btn-secondary, a.btn-danger {
+  button,
+  a.btn-primary,
+  a.btn-secondary,
+  a.btn-danger {
     transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
   }
 
@@ -766,35 +783,41 @@ button, a.btn-primary, a.btn-secondary, a.btn-danger {
 }
 
 /* Primary — Bavarian blue (default for bare button) */
-button, .btn-primary {
+button,
+.btn-primary {
   background: var(--servus-primary);
   color: var(--servus-primary-text);
 }
 
-button:hover, .btn-primary:hover {
+button:hover,
+.btn-primary:hover {
   background: var(--servus-primary-hover);
   box-shadow: var(--servus-shadow);
 }
 
 /* Secondary */
-button.secondary, .btn-secondary {
+button.secondary,
+.btn-secondary {
   background: var(--servus-surface);
   color: var(--servus-text);
   border: 1.5px solid var(--servus-border);
 }
 
-button.secondary:hover, .btn-secondary:hover {
+button.secondary:hover,
+.btn-secondary:hover {
   background: var(--servus-surface-raised);
   border-color: var(--servus-text-muted);
 }
 
 /* Danger */
-button.danger, .btn-danger {
+button.danger,
+.btn-danger {
   background: var(--servus-danger);
   color: #ffffff;
 }
 
-button.danger:hover, .btn-danger:hover {
+button.danger:hover,
+.btn-danger:hover {
   background: var(--servus-danger-hover);
 }
 
@@ -1210,9 +1233,7 @@ button:focus-visible,
 }
 .standort-picker:has(#sp-room:checked) .standort-bar label[for="sp-room"],
 .standort-picker:has(#sp-box:checked) .standort-bar label[for="sp-box"],
-.standort-picker:has(#sp-container:checked)
-  .standort-bar
-  label[for="sp-container"] {
+.standort-picker:has(#sp-container:checked) .standort-bar label[for="sp-container"] {
   background: var(--servus-primary);
   color: #fff;
 }
