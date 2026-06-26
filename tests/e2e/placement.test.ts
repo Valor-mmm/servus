@@ -2,11 +2,27 @@ import { expect, test } from "@playwright/test";
 
 const RUN = Date.now().toString(36);
 
+async function ensureCategory(
+  page: import("@playwright/test").Page,
+  name: string,
+) {
+  await page.goto("/categories");
+  if (!(await page.locator(`text=${name}`).isVisible())) {
+    await page.fill('main [name="name"]', name);
+    await page.click('main [type="submit"]');
+    await expect(page.locator(`text=${name}`)).toBeVisible();
+  }
+}
+
 test("item edit form: Standort picker renders segmented control", async ({ page }) => {
+  const catName = `PlacementCat-${RUN}`;
+  await ensureCategory(page, catName);
+
   // Seed: create an item to edit
   const itemName = `PlacementItem-${RUN}`;
   await page.goto("/items/new");
   await page.fill('[name="name"]', itemName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
   await page.click('main form > button[type="submit"]');
   await expect(page).toHaveURL("/items");
 
@@ -28,10 +44,14 @@ test("item edit form: Standort picker renders segmented control", async ({ page 
 });
 
 test("item edit form: switching Standort radio shows correct panel", async ({ page }) => {
+  const catName = `PlacementCat-${RUN}`;
+  await ensureCategory(page, catName);
+
   // Seed: create an item to edit
   const itemName = `PlacementSwitch-${RUN}`;
   await page.goto("/items/new");
   await page.fill('[name="name"]', itemName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
   await page.click('main form > button[type="submit"]');
   await expect(page).toHaveURL("/items");
 
@@ -67,15 +87,15 @@ test("box detail: Einpacken section visible and can assign items", async ({ page
   const roomName = `PlacementRoom-${RUN}`;
   await page.goto("/rooms");
   await page.fill('[name="name"]', roomName);
-  await page.click('form [type="submit"]');
+  await page.click('main [type="submit"]');
   await page.waitForLoadState("networkidle");
 
   await page.goto("/boxes");
-  await page.fill('[name="code"]', `P${RUN}`);
+  await page.fill('[name="label"]', `P${RUN}`);
   await page.click('main form > button[type="submit"]');
   await page.waitForLoadState("networkidle");
 
-  // Open the newly created box
+  // Open the newly created box (matched by its label text)
   await page.click(`text=P${RUN}`);
   await expect(page).toHaveURL(/\/boxes\/.+/);
 

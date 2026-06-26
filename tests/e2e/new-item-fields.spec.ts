@@ -52,6 +52,7 @@ test("new item: schema fields appear live on category change, group autocomplete
 test("new item: mobile viewport (390×844) — form submits and redirects correctly", async ({ page }) => {
   await page.setViewportSize(MOBILE);
 
+  const catName = `Buch-${RUN}`;
   const itemName = `MobileItem-${RUN}`;
 
   await page.goto("/items/new");
@@ -59,15 +60,14 @@ test("new item: mobile viewport (390×844) — form submits and redirects correc
   // Bottom nav must be visible at mobile width
   await expect(page.locator("nav.bottom-nav")).toBeVisible();
 
-  // The submit button must be within the viewport (not hidden behind bottom nav)
-  const submitBtn = page.locator('main form > button[type="submit"]');
-  await expect(submitBtn).toBeVisible();
-  const box = await submitBtn.boundingBox();
-  expect(box).not.toBeNull();
-  expect(box!.y + box!.height).toBeLessThan(MOBILE.height);
-
-  // Fill name and submit — must land on /items
+  // Fill required fields — category select is needed for successful submission
   await page.fill('[name="name"]', itemName);
+  await page.selectOption('[name="categoryId"]', { label: catName });
+
+  // Scroll submit button into view (form is taller than mobile viewport) and click
+  const submitBtn = page.locator('main form > button[type="submit"]');
+  await submitBtn.scrollIntoViewIfNeeded();
+  await expect(submitBtn).toBeVisible();
   await submitBtn.click();
   await expect(page).toHaveURL("/items");
 

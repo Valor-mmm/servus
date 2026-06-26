@@ -34,8 +34,10 @@ test("helper (role:user) does not see Verwaltung link and gets 403 on /admin", a
   const inviteUrl = (await page.locator(".invite-url").textContent())!.trim();
   expect(inviteUrl).toMatch(/\/invite\//);
 
-  // --- Navigate to invite URL (public route; confirms creates a HELPER session
-  //     that replaces the browser cookie without invalidating the admin KV session) ---
+  // --- Clear admin cookies (client-side only) so storageState session in KV
+  //     remains valid for later tests, then accept the invite as a new helper ---
+  await page.context().clearCookies();
+
   await page.goto(inviteUrl);
   await expect(page.locator("main button[type='submit']")).toBeVisible();
   await page.locator("main button[type='submit']").click();

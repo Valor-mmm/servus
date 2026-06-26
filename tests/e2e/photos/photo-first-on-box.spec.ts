@@ -98,7 +98,9 @@ test("photo capture on box creates incomplete item; editing name keeps incomplet
 
   // ── Assertions for task 9.2 ───────────────────────────────────────────────
 
-  await expect(page.locator("text=(unbenannt)")).toBeVisible();
+  await expect(
+    page.locator("li.item-row").filter({ hasText: "(unbenannt)" }),
+  ).toBeVisible();
   await expect(page.locator("span.badge-incomplete").first()).toBeVisible();
 
   // Thumbnail src points to fake R2 endpoint (presignGet used TEST_KEY)
@@ -111,7 +113,7 @@ test("photo capture on box creates incomplete item; editing name keeps incomplet
 
   // ── Assertions for task 9.3: edit name, incomplete badge persists ─────────
 
-  await page.locator("a", { hasText: "(unbenannt)" }).click();
+  await page.locator("li.item-row a", { hasText: "(unbenannt)" }).click();
   await page.locator('a[href*="/edit"]').click();
 
   await page.fill('[name="name"]', "Bohrmaschine");

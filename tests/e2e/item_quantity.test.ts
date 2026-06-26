@@ -78,10 +78,11 @@ test("9.3 add item with quantity > 1 to box — quantity shown in box detail", a
   const boxDetailUrl = page.url();
   const boxId = new URL(boxDetailUrl).pathname.split("/").pop()!;
 
-  // Edit item to assign it to the box
+  // Edit item to assign it to the box (click Karton tab to expose boxId select)
   await page.goto("/items");
   await page.click(`text=${itemName}`);
   await page.click(`a[href*="/edit"]`);
+  await page.click('label[for="sp-box"]');
   await page.selectOption('[name="boxId"]', boxId);
   await page.click('main [type="submit"]');
 

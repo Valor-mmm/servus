@@ -50,7 +50,7 @@ test("full invite flow: admin mints code → helper confirms → helper lands on
 
   // Step 9: Consumed invite no longer appears in the admin list
   await page.goto("/admin");
-  await expect(page.locator(".empty")).toBeVisible();
+  await expect(page.locator(".empty-state")).toBeVisible();
 
   // Persist the fresh admin session so subsequent tests don't start with an
   // invalidated cookie (the original session was destroyed by the logout above).
@@ -121,7 +121,7 @@ test("admin can revoke an invite before it is used", async ({ page }) => {
   await page.waitForURL("/admin");
 
   // Invite list is now empty
-  await expect(page.locator(".empty")).toBeVisible();
+  await expect(page.locator(".empty-state")).toBeVisible();
 
   // Trying to use the revoked invite URL shows an error
   await page.goto(inviteUrl);

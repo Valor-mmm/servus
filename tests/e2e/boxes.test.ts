@@ -69,7 +69,7 @@ test("create box with label and destination room — appears in list", async ({ 
   // Item count shows 0
   await expect(
     page.locator("li", { hasText: boxLabel }).locator("span.meta"),
-  ).toContainText("Gegenstände: 0");
+  ).toContainText("0 Gegenstände");
 });
 
 // ── 12.3: Label page — QR code and short code visible ────────────────────────
@@ -159,6 +159,7 @@ test("assign item with room to box — room cleared, item in box detail", async 
   await page.goto("/items");
   await page.click(`text=${itemName}`);
   await page.click(`a[href*="/edit"]`);
+  await page.click('label[for="sp-box"]');
   await page.selectOption('[name="boxId"]', boxId);
   await page.click('main [type="submit"]');
 
@@ -323,6 +324,7 @@ test("unpack all from delivered box — box gone, items in room", async ({ page 
   await expect(page.locator("dd", { hasText: "Geliefert" })).toBeVisible();
 
   // Click "Alle entpacken nach [room]"
+  page.once("dialog", (d) => d.accept());
   await page.locator("button", { hasText: `Alle entpacken nach ${roomName}` })
     .click();
 

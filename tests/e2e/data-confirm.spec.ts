@@ -11,9 +11,8 @@ test("data-confirm: dismissing the dialog prevents a room deletion", async ({ pa
 
   // Create a room via UI
   await page.goto("/rooms");
-  await page.fill('[name="name"]', roomName);
-  await page.click('form [type="submit"]');
-  await page.waitForLoadState("networkidle");
+  await page.fill('main [name="name"]', roomName);
+  await page.click('main [type="submit"]');
   await expect(page.locator(`text=${roomName}`)).toBeVisible();
 
   // Dismiss the confirmation dialog — delete should be cancelled
@@ -31,9 +30,8 @@ test("data-confirm: accepting the dialog completes a room deletion", async ({ pa
 
   // Create a room via UI
   await page.goto("/rooms");
-  await page.fill('[name="name"]', roomName);
-  await page.click('form [type="submit"]');
-  await page.waitForLoadState("networkidle");
+  await page.fill('main [name="name"]', roomName);
+  await page.click('main [type="submit"]');
   await expect(page.locator(`text=${roomName}`)).toBeVisible();
 
   // Accept the confirmation dialog — delete should proceed

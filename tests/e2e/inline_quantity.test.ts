@@ -92,10 +92,11 @@ async function createBoxAndAssignItem(
   const boxDetailUrl = page.url();
   const boxId = new URL(boxDetailUrl).pathname.split("/").pop()!;
 
-  // Assign item to box via edit form
+  // Assign item to box via edit form (click Karton tab first to expose boxId select)
   await page.goto("/items");
   await page.click(`text=${itemName}`);
   await page.click(`a[href*="/edit"]`);
+  await page.click('label[for="sp-box"]');
   await page.selectOption('[name="boxId"]', boxId);
   await page.click('main [type="submit"]');
 
