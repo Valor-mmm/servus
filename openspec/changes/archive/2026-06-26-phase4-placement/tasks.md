@@ -36,9 +36,9 @@
 ## 3. Tests and E2E
 
 - [x] 3.1 Run `deno task test` — all pass
-- [ ] 3.2 E2E: open item edit form → only one placement panel visible; switch
+- [x] 3.2 E2E: open item edit form → only one placement panel visible; switch
       radio → different panel shown; save → correct placement stored, others
       cleared
-- [ ] 3.3 E2E: open box detail → Einpacken section visible; check item → submit
+- [x] 3.3 E2E: open box detail → Einpacken section visible; check item → submit
       → item appears in box list
-- [ ] 3.4 Run `deno task e2e` — all pass
+- [x] 3.4 Run `deno task e2e` — all pass
