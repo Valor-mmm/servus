@@ -5,7 +5,6 @@
 import { assertEquals } from "@std/assert";
 import { closeKv, setKv } from "@/lib/kv/client.ts";
 import { consumeInvite, mintInvite } from "@/lib/invites/index.ts";
-import { findUser } from "@/lib/auth/userRepo.ts";
 import { requireAdmin } from "@/lib/auth/middleware.ts";
 import type { State } from "@/utils.ts";
 import type { FreshContext } from "fresh";

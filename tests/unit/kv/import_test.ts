@@ -111,18 +111,15 @@ Deno.test("importKv: skips blank lines without error", async () => {
   }
 });
 
+async function* malformedStream(): AsyncGenerator<string> {
+  yield JSON.stringify({ key: ["item", "good"], value: { name: "Sofa" } });
+  yield "THIS IS NOT JSON {{{";
+  yield JSON.stringify({ key: ["item", "good2"], value: { name: "Regal" } });
+}
+
 Deno.test("importKv: malformed line aborts import and writes nothing", async () => {
   const kv = await Deno.openKv(":memory:");
   try {
-    async function* malformedStream(): AsyncGenerator<string> {
-      yield JSON.stringify({ key: ["item", "good"], value: { name: "Sofa" } });
-      yield "THIS IS NOT JSON {{{";
-      yield JSON.stringify({
-        key: ["item", "good2"],
-        value: { name: "Regal" },
-      });
-    }
-
     await assertRejects(
       () => importKv(kv, malformedStream()),
       ImportParseError,

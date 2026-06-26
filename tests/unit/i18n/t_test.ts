@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import { count } from "@/lib/i18n/t.ts";
 
 Deno.test("count: singular", () => {

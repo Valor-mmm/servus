@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n/t.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
-import type { Item, Room } from "@/lib/inventory/types.ts";
+import type { Room } from "@/lib/inventory/types.ts";
 
 interface ContainerItem {
   id: string;
@@ -17,7 +17,7 @@ interface Props {
 }
 
 function activeMode(
-  roomId: string | null,
+  _roomId: string | null,
   boxId: string | null,
   containerId: string | null,
 ): "room" | "box" | "container" {

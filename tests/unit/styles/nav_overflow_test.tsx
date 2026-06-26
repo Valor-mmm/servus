@@ -24,14 +24,14 @@ Deno.test("BottomNav: marks the active tab", () => {
 });
 
 Deno.test("MehrMenu: lists secondary destinations for admin", () => {
-  const html = renderToString(<MehrMenu csrfToken="tok" isAdmin={true} />);
+  const html = renderToString(<MehrMenu csrfToken="tok" isAdmin />);
   assertStringIncludes(html, 'href="/categories"');
   assertStringIncludes(html, 'href="/rooms"');
   assertStringIncludes(html, 'href="/admin"');
 });
 
 Deno.test("MehrMenu: includes a CSRF-protected logout form and theme control", () => {
-  const html = renderToString(<MehrMenu csrfToken="tok-123" isAdmin={true} />);
+  const html = renderToString(<MehrMenu csrfToken="tok-123" isAdmin />);
   assertStringIncludes(html, 'action="/logout"');
   assertStringIncludes(html, 'name="csrf_token"');
   assertStringIncludes(html, 'value="tok-123"');
@@ -44,6 +44,6 @@ Deno.test("MehrMenu: hides Verwaltung link for non-admin users", () => {
 });
 
 Deno.test("MehrMenu: shows Verwaltung link for admin users", () => {
-  const html = renderToString(<MehrMenu csrfToken="tok" isAdmin={true} />);
+  const html = renderToString(<MehrMenu csrfToken="tok" isAdmin />);
   assertStringIncludes(html, 'href="/admin"');
 });

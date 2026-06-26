@@ -261,9 +261,9 @@ export function requireAuth(): Handler {
   };
 }
 
-export async function requireAdmin(
+export function requireAdmin(
   ctx: FreshContext<State>,
-): Promise<Response | null> {
+): Response | null {
   if (ctx.state.user?.role !== "admin") {
     return new Response(
       `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>Kein Zugriff</title></head><body><main style="padding:2rem"><h1>403 — Kein Zugriff</h1><p>Diese Seite ist nur für Administratoren zugänglich.</p><a href="/">Zurück zur Startseite</a></main></body></html>`,
