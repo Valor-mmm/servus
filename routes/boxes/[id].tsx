@@ -8,7 +8,11 @@ import {
   updateBox,
   updateBoxStatus,
 } from "@/lib/inventory/boxRepo.ts";
-import { listItemsByBox, updateItem } from "@/lib/inventory/itemRepo.ts";
+import {
+  listItems,
+  listItemsByBox,
+  updateItem,
+} from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
@@ -20,6 +24,7 @@ import { presignGet } from "@/lib/photos/signing.ts";
 interface PageProps {
   box: Box;
   items: Item[];
+  unpackedItems: Item[];
   destinationRoom: Room | null;
   rooms: Room[];
   error: string | null;
@@ -38,6 +43,7 @@ function BoxDetailPage(
   {
     box,
     items,
+    unpackedItems,
     destinationRoom,
     rooms,
     error,
@@ -258,6 +264,40 @@ function BoxDetailPage(
             </button>
           </form>
         )}
+
+        {box.status !== "delivered" && (
+          <details class="einpacken-section">
+            <summary>{t("boxes.einpacken_heading")}</summary>
+            <div class="einpacken-body">
+              {unpackedItems.length === 0
+                ? <p class="text-muted">{t("boxes.einpacken_empty")}</p>
+                : (
+                  <form method="post" action={`/boxes/${box.id}`}>
+                    <input type="hidden" name="csrf_token" value={csrfToken} />
+                    <input type="hidden" name="_action" value="einpacken" />
+                    <ul class="einpacken-list">
+                      {unpackedItems.map((item) => (
+                        <li key={item.id} class="einpacken-item">
+                          <input
+                            type="checkbox"
+                            id={`ep-${item.id}`}
+                            name="itemIds"
+                            value={item.id}
+                          />
+                          <label for={`ep-${item.id}`}>
+                            {item.name || t("items.placeholderName")}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                    <button type="submit" class="btn-primary">
+                      {t("boxes.einpacken")}
+                    </button>
+                  </form>
+                )}
+            </div>
+          </details>
+        )}
       </main>
     </>
   );
@@ -284,14 +324,18 @@ export const handler = define.handlers({
     const box = await findBox(ctx.params.id);
     if (!box) return new Response(t("error.not_found"), { status: 404 });
 
-    const [items, destinationRoom, categories, rooms] = await Promise.all([
-      listItemsByBox(box.id),
-      box.destinationRoomId
-        ? findRoom(box.destinationRoomId)
-        : Promise.resolve(null),
-      listCategories(),
-      listRooms(),
-    ]);
+    const [items, destinationRoom, categories, rooms, allItems] = await Promise
+      .all([
+        listItemsByBox(box.id),
+        box.destinationRoomId
+          ? findRoom(box.destinationRoomId)
+          : Promise.resolve(null),
+        listCategories(),
+        listRooms(),
+        listItems(),
+      ]);
+
+    const unpackedItems = allItems.filter((i) => i.boxId === null);
 
     const categoryMap = Object.fromEntries(
       categories.map((c) => [c.id, c.name]),
@@ -302,6 +346,7 @@ export const handler = define.handlers({
       <BoxDetailPage
         box={box}
         items={items}
+        unpackedItems={unpackedItems}
         destinationRoom={destinationRoom}
         rooms={rooms}
         error={null}
@@ -323,13 +368,17 @@ export const handler = define.handlers({
     if (action === "delete") {
       const currentItems = await listItemsByBox(box.id);
       if (currentItems.length > 0) {
-        const [destinationRoom, categories, rooms] = await Promise.all([
-          box.destinationRoomId
-            ? findRoom(box.destinationRoomId)
-            : Promise.resolve(null),
-          listCategories(),
-          listRooms(),
-        ]);
+        const [destinationRoom, categories, rooms, allItems] = await Promise
+          .all(
+            [
+              box.destinationRoomId
+                ? findRoom(box.destinationRoomId)
+                : Promise.resolve(null),
+              listCategories(),
+              listRooms(),
+              listItems(),
+            ],
+          );
         const categoryMap = Object.fromEntries(
           categories.map((c) => [c.id, c.name]),
         );
@@ -337,6 +386,7 @@ export const handler = define.handlers({
           <BoxDetailPage
             box={box}
             items={currentItems}
+            unpackedItems={allItems.filter((i) => i.boxId === null)}
             destinationRoom={destinationRoom}
             rooms={rooms}
             error={t("boxes.error.not_empty")}
@@ -420,6 +470,17 @@ export const handler = define.handlers({
       if (itemId) {
         await updateItem(itemId, { boxId: null });
       }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/boxes/${box.id}` },
+      });
+    }
+
+    if (action === "einpacken") {
+      const itemIds = form.getAll("itemIds") as string[];
+      await Promise.all(
+        itemIds.map((id) => updateItem(id, { boxId: box.id })),
+      );
       return new Response(null, {
         status: 302,
         headers: { Location: `/boxes/${box.id}` },

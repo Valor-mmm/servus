@@ -1169,6 +1169,117 @@ button:focus-visible,
   font-size: 0.85rem;
 }
 
+/* ── Standort picker ───────────────────────────────────────────────────────── */
+.standort-picker {
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+.standort-picker legend {
+  padding: 0 0.25rem;
+  color: var(--servus-text-muted);
+  font-size: 0.85rem;
+}
+.standort-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.standort-bar {
+  display: flex;
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+.standort-bar label {
+  flex: 1;
+  text-align: center;
+  padding: 0.4rem 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--servus-text-muted);
+  background: transparent;
+  user-select: none;
+}
+.standort-bar label:not(:last-child) {
+  border-right: 1px solid var(--servus-border);
+}
+.standort-picker:has(#sp-room:checked) .standort-bar label[for="sp-room"],
+.standort-picker:has(#sp-box:checked) .standort-bar label[for="sp-box"],
+.standort-picker:has(#sp-container:checked)
+  .standort-bar
+  label[for="sp-container"] {
+  background: var(--servus-primary);
+  color: #fff;
+}
+.standort-panel {
+  display: none;
+}
+#sp-room:checked ~ #sp-panel-room,
+#sp-box:checked ~ #sp-panel-box,
+#sp-container:checked ~ #sp-panel-container {
+  display: block;
+}
+.standort-panel select {
+  width: 100%;
+}
+
+/* ── Einpacken section ─────────────────────────────────────────────────────── */
+.einpacken-section {
+  margin-top: 1.5rem;
+  border: 1px solid var(--servus-border);
+  border-radius: var(--servus-radius);
+}
+.einpacken-section summary {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.einpacken-section summary::before {
+  content: "▸";
+  font-size: 0.8rem;
+  color: var(--servus-text-muted);
+}
+.einpacken-section[open] summary::before {
+  content: "▾";
+}
+.einpacken-section summary::-webkit-details-marker {
+  display: none;
+}
+.einpacken-body {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--servus-border);
+}
+.einpacken-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.einpacken-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+.einpacken-item label {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+
 /* ── Dashboard ─────────────────────────────────────────────────────────────── */
 .dashboard-tiles {
   display: grid;

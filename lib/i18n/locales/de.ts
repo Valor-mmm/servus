@@ -237,6 +237,10 @@ const de = {
   "items.name_placeholder": "z. B. Sofa",
   "items.category_label": "Kategorie",
   "items.room_label": "Raum (optional)",
+  "items.standort": "Standort",
+  "items.standort.room": "Raum",
+  "items.standort.box": "Karton",
+  "items.standort.container": "Behälter",
   "items.value_label": "Geschätzter Wert (€, optional)",
   "items.warranty_label": "Garantie bis (optional)",
   "items.photos_label": "Fotos",
@@ -419,6 +423,11 @@ const de = {
   "boxes.status.empty": "Leer",
   "boxes.status.packed": "Gepackt",
   "boxes.status.delivered": "Geliefert",
+
+  // Einpacken (bulk-pack into box)
+  "boxes.einpacken": "Einpacken",
+  "boxes.einpacken_heading": "Gegenstände einpacken",
+  "boxes.einpacken_empty": "Keine freien Gegenstände vorhanden.",
 
   // Box lifecycle actions
   "boxes.action.mark_delivered": "Als geliefert markieren",
