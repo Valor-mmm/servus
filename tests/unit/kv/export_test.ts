@@ -32,6 +32,7 @@ Deno.test("exportKv: all EXPORT_PREFIXES entries appear in output", async () => 
     await kv.set(["item-group", "i1", "g1"], true);
     await kv.set(["category-schema", "cat1"], { fields: [] });
     await kv.set(["group", "g1"], { id: "g1", name: "Test" });
+    await kv.set(["group-by-name", "test"], "g1");
     await kv.set(["group-item", "g1", "i1"], { itemId: "i1", groupId: "g1" });
     await kv.set(["box", "b1"], { code: "B-001" });
     await kv.set(["box-by-code", "B-001"], "b1");
