@@ -34,4 +34,4 @@
 - [x] 5.1 Run `deno task test` — all pass
 - [x] 5.2 E2E: log in → `/` shows stat tiles with counts; incomplete-items tile
       links to `/items/incomplete`
-- [ ] 5.3 Run `deno task e2e` — all pass
+- [x] 5.3 Run `deno task e2e` — all pass
