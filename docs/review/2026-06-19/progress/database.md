@@ -1,7 +1,7 @@
 # Database review progress
 
-Status: complete. Last checkpoint: Summary written
-Tick `[x]` only after findings for that area are appended to findings/database.md.
+Status: complete. Last checkpoint: Summary written Tick `[x]` only after
+findings for that area are appended to findings/database.md.
 
 - [x] lib/kv wrappers & key schema
 - [x] Inventory entity keys + indexes (items, categories, rooms, boxes, groups)

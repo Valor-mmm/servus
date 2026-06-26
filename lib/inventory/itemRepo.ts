@@ -111,7 +111,11 @@ async function assertNoCycle(
   }
   // Walk from containerId up through its ancestors; if itemId appears, it's a cycle.
   let current: Item | null = await findItem(containerId);
+  let depth = 0;
   while (current !== null && current.containerId !== null) {
+    if (++depth > 50) {
+      throw new Error("Container hierarchy too deep (> 50 levels)");
+    }
     if (current.containerId === itemId) {
       throw new Error(
         `Assigning container '${containerId}' would create a cycle`,

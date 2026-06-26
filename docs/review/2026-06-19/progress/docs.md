@@ -1,7 +1,7 @@
 # Documentation review progress
 
-Status: complete. Last checkpoint: Summary written
-Tick `[x]` only after findings for that area are appended to findings/docs.md.
+Status: complete. Last checkpoint: Summary written Tick `[x]` only after
+findings for that area are appended to findings/docs.md.
 
 - [x] README accuracy + env/setup
 - [x] CLAUDE.md drift

@@ -2,8 +2,10 @@
 
 ## Purpose
 
-TBD - created by archiving change add-import-export. Update Purpose after
-archive.
+Defines the admin data export and import capabilities. Export produces a
+newline-delimited JSON (NDJSON) snapshot of all KV records that can be used as a
+backup or for migration. Import restores from such a snapshot. Both operations
+are admin-only and available in the admin hub at `/admin`.
 
 ## Requirements
 

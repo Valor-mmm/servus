@@ -79,7 +79,11 @@ export function ItemsPage(
             🔍
           </button>
         </div>
-        <select name="cat" data-autosubmit>
+        <select
+          name="cat"
+          data-autosubmit
+          aria-label={t("items.filter_category")}
+        >
           <option value="">
             {t("items.filter_all")} {t("items.filter_category")}
           </option>
@@ -89,7 +93,11 @@ export function ItemsPage(
             </option>
           ))}
         </select>
-        <select name="room" data-autosubmit>
+        <select
+          name="room"
+          data-autosubmit
+          aria-label={t("items.filter_room")}
+        >
           <option value="">
             {t("items.filter_all")} {t("items.filter_room")}
           </option>

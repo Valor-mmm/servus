@@ -14,7 +14,10 @@ async function isLoggedIn(req: Request): Promise<boolean> {
   for (const part of cookieHeader.split(";")) {
     const [k, ...v] = part.trim().split("=");
     if (k.trim() === COOKIE_NAME) {
-      const sessionId = await verifySessionCookie(v.join("=").trim(), SESSION_KEY());
+      const sessionId = await verifySessionCookie(
+        v.join("=").trim(),
+        SESSION_KEY(),
+      );
       if (sessionId) {
         const session = await findSession(sessionId);
         return session !== null;

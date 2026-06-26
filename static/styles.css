@@ -1433,6 +1433,30 @@ button:focus-visible,
   border-color: var(--servus-danger);
 }
 
+.file-input-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.file-input-label input[type="file"] {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border: 2px dashed var(--servus-border);
+  border-radius: var(--servus-radius);
+  background: var(--servus-bg);
+  color: var(--servus-text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.file-input-label input[type="file"]:focus {
+  outline: 2px solid var(--servus-accent);
+  outline-offset: 2px;
+}
+
 /* ── Auth page ─────────────────────────────────────────────────────────────── */
 .auth-page {
   min-height: 100dvh;

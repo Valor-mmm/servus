@@ -1,7 +1,7 @@
 # UX review progress
 
-Status: complete. Last checkpoint: Summary written
-Tick `[x]` only after findings for that flow are appended to findings/ux.md.
+Status: complete. Last checkpoint: Summary written Tick `[x]` only after
+findings for that flow are appended to findings/ux.md.
 
 - [x] Login & session longevity
 - [x] Invite redemption (logged-out)
@@ -23,6 +23,8 @@ Tick `[x]` only after findings for that flow are appended to findings/ux.md.
 - [x] Export then re-import via /admin
 - [x] Manage invites
 - [x] Logout
-- [x] Redundant/competing paths audit (multiple ways to do the same thing -> name the primary)
-- [x] Cross-reference with UI findings (ONLY after all above are done — read findings/ui.md, reconcile agree/disagree + UX consequences)
+- [x] Redundant/competing paths audit (multiple ways to do the same thing ->
+      name the primary)
+- [x] Cross-reference with UI findings (ONLY after all above are done — read
+      findings/ui.md, reconcile agree/disagree + UX consequences)
 - [x] Summary written

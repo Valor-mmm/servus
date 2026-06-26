@@ -77,7 +77,7 @@ function AdminPage(
           enctype="multipart/form-data"
         >
           <input type="hidden" name="csrf_token" value={csrfToken} />
-          <label>
+          <label class="file-input-label">
             {t("admin.import.file_label")}
             <input
               type="file"

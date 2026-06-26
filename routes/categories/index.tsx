@@ -119,7 +119,7 @@ function CategoriesPage(
                   method="post"
                   action="/categories"
                   data-confirm={t("categories.delete_confirm", {
-                    name: cat.label,
+                    name: cat.name,
                   })}
                 >
                   <input type="hidden" name="csrf_token" value={csrfToken} />

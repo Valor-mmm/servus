@@ -1,7 +1,7 @@
 # UI review progress
 
-Status: complete. Last checkpoint: Summary written
-Tick `[x]` only after findings for that area are appended to findings/ui.md.
+Status: complete. Last checkpoint: Summary written Tick `[x]` only after
+findings for that area are appended to findings/ui.md.
 
 - [x] Home / dashboard
 - [x] Items list & browse/filter

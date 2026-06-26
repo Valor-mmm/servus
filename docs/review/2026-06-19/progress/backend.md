@@ -1,7 +1,9 @@
 # Backend review progress
 
-Status: complete. Last checkpoint: Summary written (progress reconciled by orchestrator — agent finished findings + Observations but was cut off before ticking boxes)
-Tick `[x]` only after findings for that area are appended to findings/backend.md.
+Status: complete. Last checkpoint: Summary written (progress reconciled by
+orchestrator — agent finished findings + Observations but was cut off before
+ticking boxes) Tick `[x]` only after findings for that area are appended to
+findings/backend.md.
 
 - [x] lib/auth - hashing (Argon2id params)
 - [x] lib/auth - sessions & cookie flags / expiry (Max-Age bug?)

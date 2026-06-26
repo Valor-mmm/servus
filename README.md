@@ -31,10 +31,13 @@ The app runs at http://localhost:8000.
 
 ### Environment variables
 
-| Variable             | Description                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `SERVUS_SESSION_KEY` | 32-byte hex string for signing session cookies. Generate with: `openssl rand -hex 32`                         |
-| `SERVUS_SEED_USERS`  | JSON array of initial users: `[{"username":"monster","password":"..."},{"username":"maus","password":"..."}]` |
+| Variable               | Required | Description                                                                                                   |
+| ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `SERVUS_SESSION_KEY`   | yes      | 32-byte hex string for signing session cookies. Generate with: `openssl rand -hex 32`                         |
+| `SERVUS_SEED_USERS`    | yes      | JSON array of initial users: `[{"username":"monster","password":"..."},{"username":"maus","password":"..."}]` |
+| `R2_ACCESS_KEY_ID`     | optional | Cloudflare R2 API key ID — only required when item photos are in use                                          |
+| `R2_SECRET_ACCESS_KEY` | optional | Cloudflare R2 API secret                                                                                      |
+| `R2_PUBLIC_URL`        | optional | Public base URL of the R2 bucket (e.g. `https://pub-xxx.r2.dev`) for presigned GET URLs                      |
 
 ### Commands
 

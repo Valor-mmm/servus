@@ -1,7 +1,9 @@
 # Frontend review progress
 
-Status: complete. Last checkpoint: Summary written (progress reconciled by orchestrator — agent finished findings but was cut off before ticking boxes)
-Tick `[x]` only after findings for that area are appended to findings/frontend.md.
+Status: complete. Last checkpoint: Summary written (progress reconciled by
+orchestrator — agent finished findings but was cut off before ticking boxes)
+Tick `[x]` only after findings for that area are appended to
+findings/frontend.md.
 
 - [x] islands/ContainerField
 - [x] islands/ContainerSelector
