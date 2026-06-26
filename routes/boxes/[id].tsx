@@ -254,6 +254,9 @@ function BoxDetailPage(
             method="post"
             action={`/boxes/${box.id}`}
             class="unpack-all-form"
+            data-confirm={t("boxes.unpack_all_confirm", {
+              room: destinationRoom?.name ?? "",
+            })}
           >
             <input type="hidden" name="csrf_token" value={csrfToken} />
             <input type="hidden" name="_action" value="unpack_all" />

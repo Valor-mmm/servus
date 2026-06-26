@@ -15,6 +15,7 @@ export const EXPORT_PREFIXES: Deno.KvKey[] = [
   ["category-by-name"],
   ["category-schema"],
   ["group"],
+  ["group-by-name"],
   ["group-item"],
   ["user"],
   ["invite"],

@@ -66,7 +66,11 @@ Hosted on [Deno Deploy](https://deno.com/deploy) (free tier).
    - `SERVUS_SESSION_KEY`
    - `SERVUS_SEED_USERS`
 
-Pushes to `main` trigger CI → if green → auto-deploy.
+Pushes to `main` trigger CI (GitHub Actions) → if green → auto-deploy via the
+[Deno Deploy GitHub App](https://deno.com/deploy/docs/deployctl). The app is
+connected directly to the repository in the Deno Deploy project dashboard; no
+`deployctl` step is needed in `ci.yml`. PRs get an automatic preview deployment
+URL from the same integration.
 
 ## Architecture
 

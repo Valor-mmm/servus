@@ -414,6 +414,8 @@ const de = {
   "boxes.bulk_add_result": "{count} Gegenstand/Gegenstände hinzugefügt.",
   "boxes.remove_item": "Entfernen",
   "boxes.remove_item_confirm": 'Gegenstand "{name}" aus Karton entfernen?',
+  "boxes.unpack_all_confirm":
+    "Alle Gegenstände nach {room} verschieben? Diese Aktion kann nicht rückgängig gemacht werden.",
   "boxes.delete_confirm": 'Karton "{code}" wirklich löschen?',
   "boxes.error.not_empty":
     "Karton enthält noch Gegenstände und kann nicht gelöscht werden.",
