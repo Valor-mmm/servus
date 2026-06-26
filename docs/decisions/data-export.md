@@ -1,14 +1,14 @@
 # Decision: data export and import
 
-**Date:** 2026-03  
+**Date:** 2026-03\
 **Change:** `add-import-export`
 
 ## Context
 
 Deno KV on Deno Deploy includes automatic backups, but those are opaque to the
-user. The owners wanted the ability to take a human-readable snapshot at any time
-(before a major data migration, at end-of-move, etc.) and restore from it if
-needed.
+user. The owners wanted the ability to take a human-readable snapshot at any
+time (before a major data migration, at end-of-move, etc.) and restore from it
+if needed.
 
 ## Decision
 

@@ -1,6 +1,6 @@
 # Decision: item containment
 
-**Date:** 2026-05  
+**Date:** 2026-05\
 **Change:** `explore/boxes-contain-items`
 
 ## Context
@@ -26,9 +26,9 @@ the box assignment and vice versa, enforced in `updateItem`.
 
 ## Alternatives considered
 
-- **Nested boxes** — a separate `Container` entity. Rejected: adds a third entity
-  type where the existing `Item` + `canContain` flag is sufficient for a home
-  inventory app.
+- **Nested boxes** — a separate `Container` entity. Rejected: adds a third
+  entity type where the existing `Item` + `canContain` flag is sufficient for a
+  home inventory app.
 - **Flat references without cycle guard** — rejected as a data integrity risk.
 
 ## Consequences

@@ -235,8 +235,8 @@ Capability gained: **data export / import** (admin backup).
 - Export: `GET /admin/export` streams all KV records as NDJSON.
 - Import: `POST /admin/import` accepts an NDJSON file, fully parses before
   writing (all-or-nothing on malformed lines), writes records back.
-- `EXPORT_PREFIXES` is the authoritative list of prefixes that constitute
-  app state; `deleteAllKv` reuses the same list.
+- `EXPORT_PREFIXES` is the authoritative list of prefixes that constitute app
+  state; `deleteAllKv` reuses the same list.
 
 **Non-goals:** scheduled backups, cloud sync.
 
@@ -296,8 +296,8 @@ Capability gained: **dashboard** and **placement UX**.
 - Item edit form: three overlapping placement fields collapsed into a single
   "Standort" segmented picker (Raum / Karton / Behälter); only the relevant
   sub-picker is shown.
-- Box detail: "Einpacken" section lets the user bulk-assign unboxed items to
-  the current box via checkbox list.
+- Box detail: "Einpacken" section lets the user bulk-assign unboxed items to the
+  current box via checkbox list.
 
 **Non-goals:** drag-and-drop, AI placement suggestions.
 
@@ -358,8 +358,8 @@ Capability gained: **dashboard** and **placement UX**.
   shared inline script. The `data-confirm` attribute on the triggering element
   carries the German prompt text. This keeps JS minimal while meeting the
   usability bar for an irreversible action.
-- **D15.** Login rate-limiting uses `SERVUS_RATE_LIMIT_IP_THRESHOLD` env var
-  to allow the E2E suite to raise the threshold without touching production
+- **D15.** Login rate-limiting uses `SERVUS_RATE_LIMIT_IP_THRESHOLD` env var to
+  allow the E2E suite to raise the threshold without touching production
   constants. Production defaults to 5 attempts / 15 min per IP per spec.
 
 ## Beyond MVP

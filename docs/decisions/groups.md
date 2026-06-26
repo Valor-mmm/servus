@@ -1,6 +1,6 @@
 # Decision: item groups
 
-**Date:** 2026-01  
+**Date:** 2026-01\
 **Change:** `groups`
 
 ## Context
