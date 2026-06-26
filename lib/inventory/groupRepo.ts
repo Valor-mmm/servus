@@ -241,13 +241,17 @@ export async function reorderMembers(
   orderedItemIds: string[],
 ): Promise<void> {
   const kv = await getKv();
+  const entries = await Promise.all(
+    orderedItemIds.map((id) => kv.get<Membership>(GROUP_ITEM_KEY(groupId, id))),
+  );
+  let op = kv.atomic();
   let position = 0;
-  for (const itemId of orderedItemIds) {
-    const existing = await kv.get<Membership>(GROUP_ITEM_KEY(groupId, itemId));
-    if (existing.value === null) continue; // ignore items not in the group
-    await kv.set(GROUP_ITEM_KEY(groupId, itemId), { position });
+  for (let i = 0; i < orderedItemIds.length; i++) {
+    if (entries[i].value === null) continue; // not a member — skip
+    op = op.set(GROUP_ITEM_KEY(groupId, orderedItemIds[i]), { position });
     position++;
   }
+  await op.commit();
 }
 
 // The item-side cascade (clearing an item's memberships on delete) is inlined in

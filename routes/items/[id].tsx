@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   deleteItem,
   findItem,
@@ -59,16 +60,15 @@ function ItemDetailPage(
     rooms,
   }: PageProps,
 ) {
-  const displayName = item.name ||
-    (item.status === "pending" ? t("items.placeholderName") : "–");
+  const displayName = item.name || t("items.placeholderName");
   const isContainer = category?.canContain === true;
 
   return (
     <main class="page">
       <h1>
         {t("items.detail_title")}: {displayName}
-        {item.status === "pending" && (
-          <span class="badge badge-pending">{t("items.pending")}</span>
+        {item.status === "incomplete" && (
+          <span class="badge badge-incomplete">{t("items.incomplete")}</span>
         )}
       </h1>
       {photoUrls.length > 0 && (
@@ -197,6 +197,9 @@ function ItemDetailPage(
                   method="post"
                   action={`/items/${item.id}`}
                   style="display:block"
+                  data-confirm={t("items.delete_confirm", {
+                    name: item.name || t("items.placeholderName"),
+                  })}
                 >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
@@ -227,6 +230,9 @@ function ItemDetailPage(
               method="post"
               action={`/items/${item.id}`}
               style="display:inline"
+              data-confirm={t("items.delete_confirm", {
+                name: item.name || t("items.placeholderName"),
+              })}
             >
               <input type="hidden" name="csrf_token" value={csrfToken} />
               <input type="hidden" name="_action" value="delete" />
@@ -243,7 +249,7 @@ function ItemDetailPage(
         <section class="container-contents">
           <h2>{t("items.contents_heading")}</h2>
           {contents.length === 0
-            ? <p class="empty">{t("items.contents_empty")}</p>
+            ? <EmptyState message={t("items.contents_empty")} />
             : (
               <ul class="item-list">
                 {contents.map((c) => (

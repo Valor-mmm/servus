@@ -60,13 +60,14 @@ test("quick-add bottom-nav link opens capture page; photo creates unboxed pendin
   await page.locator("button", { hasText: "Fertig" }).click();
   await page.waitForLoadState("networkidle");
 
-  // Verify item shows in /items with pending badge
+  // Verify item shows in /items with incomplete badge
   await page.goto("/items");
-  await expect(page.locator("span.badge-pending").first()).toBeVisible();
-  await expect(page.locator("li.item-pending").first()).toBeVisible();
+  await expect(page.locator("span.badge-incomplete").first()).toBeVisible();
+  await expect(page.locator("li.item-incomplete").first()).toBeVisible();
 
-  // Verify item shows in /items/pending
-  await page.goto("/items/pending");
-  await expect(page.locator("li.item-pending").first()).toBeVisible();
-  await expect(page.locator("text=(unbenannt)").first()).toBeVisible();
+  // Verify item shows in /items/incomplete triage
+  await page.goto("/items/incomplete");
+  await expect(page.locator(".triage-index")).toBeVisible();
+  await expect(page.locator("h2.triage-item-name", { hasText: "(unbenannt)" }))
+    .toBeVisible();
 });

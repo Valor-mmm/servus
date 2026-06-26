@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   findBox,
   markBoxDelivered,
@@ -7,7 +8,11 @@ import {
   updateBox,
   updateBoxStatus,
 } from "@/lib/inventory/boxRepo.ts";
-import { listItemsByBox, updateItem } from "@/lib/inventory/itemRepo.ts";
+import {
+  listItems,
+  listItemsByBox,
+  updateItem,
+} from "@/lib/inventory/itemRepo.ts";
 import { listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { findRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { Box, Item, Room } from "@/lib/inventory/types.ts";
@@ -19,6 +24,7 @@ import { presignGet } from "@/lib/photos/signing.ts";
 interface PageProps {
   box: Box;
   items: Item[];
+  unpackedItems: Item[];
   destinationRoom: Room | null;
   rooms: Room[];
   error: string | null;
@@ -30,14 +36,14 @@ interface PageProps {
 
 function displayName(item: Item): string {
   if (item.name) return item.name;
-  if (item.status === "pending") return t("items.placeholderName");
-  return "–";
+  return t("items.placeholderName");
 }
 
 function BoxDetailPage(
   {
     box,
     items,
+    unpackedItems,
     destinationRoom,
     rooms,
     error,
@@ -94,6 +100,7 @@ function BoxDetailPage(
               method="post"
               action={`/boxes/${box.id}`}
               style="display:inline"
+              data-confirm={t("boxes.delete_confirm", { code: box.code })}
             >
               <input type="hidden" name="csrf_token" value={csrfToken} />
               <input type="hidden" name="_action" value="delete" />
@@ -102,7 +109,7 @@ function BoxDetailPage(
               </button>
             </form>
           )}
-          <a href="/boxes">{t("action.back")}</a>
+          <a href="/boxes" class="btn-secondary">{t("action.back")}</a>
         </div>
 
         {error && <p class="error">{error}</p>}
@@ -139,14 +146,14 @@ function BoxDetailPage(
         <h2>{t("boxes.item_count")}</h2>
 
         {items.length === 0
-          ? <p class="empty">{t("boxes.items_empty")}</p>
+          ? <EmptyState message={t("boxes.items_empty")} />
           : (
             <ul class="item-list">
               {items.map((item) => (
                 <li
                   key={item.id}
                   class={`item-row${
-                    item.status === "pending" ? " item-pending" : ""
+                    item.status === "incomplete" ? " item-incomplete" : ""
                   }`}
                 >
                   {thumbnailUrls[item.id] && (
@@ -158,9 +165,9 @@ function BoxDetailPage(
                     />
                   )}
                   <a href={`/items/${item.id}`}>{displayName(item)}</a>
-                  {item.status === "pending" && (
-                    <span class="badge badge-pending">
-                      {t("items.pending")}
+                  {item.status === "incomplete" && (
+                    <span class="badge badge-incomplete">
+                      {t("items.incomplete")}
                     </span>
                   )}
                   <span class="meta">
@@ -247,6 +254,9 @@ function BoxDetailPage(
             method="post"
             action={`/boxes/${box.id}`}
             class="unpack-all-form"
+            data-confirm={t("boxes.unpack_all_confirm", {
+              room: destinationRoom?.name ?? "",
+            })}
           >
             <input type="hidden" name="csrf_token" value={csrfToken} />
             <input type="hidden" name="_action" value="unpack_all" />
@@ -256,6 +266,40 @@ function BoxDetailPage(
               })}
             </button>
           </form>
+        )}
+
+        {box.status !== "delivered" && (
+          <details class="einpacken-section">
+            <summary>{t("boxes.einpacken_heading")}</summary>
+            <div class="einpacken-body">
+              {unpackedItems.length === 0
+                ? <p class="text-muted">{t("boxes.einpacken_empty")}</p>
+                : (
+                  <form method="post" action={`/boxes/${box.id}`}>
+                    <input type="hidden" name="csrf_token" value={csrfToken} />
+                    <input type="hidden" name="_action" value="einpacken" />
+                    <ul class="einpacken-list">
+                      {unpackedItems.map((item) => (
+                        <li key={item.id} class="einpacken-item">
+                          <input
+                            type="checkbox"
+                            id={`ep-${item.id}`}
+                            name="itemIds"
+                            value={item.id}
+                          />
+                          <label for={`ep-${item.id}`}>
+                            {item.name || t("items.placeholderName")}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                    <button type="submit" class="btn-primary">
+                      {t("boxes.einpacken")}
+                    </button>
+                  </form>
+                )}
+            </div>
+          </details>
         )}
       </main>
     </>
@@ -283,14 +327,18 @@ export const handler = define.handlers({
     const box = await findBox(ctx.params.id);
     if (!box) return new Response(t("error.not_found"), { status: 404 });
 
-    const [items, destinationRoom, categories, rooms] = await Promise.all([
-      listItemsByBox(box.id),
-      box.destinationRoomId
-        ? findRoom(box.destinationRoomId)
-        : Promise.resolve(null),
-      listCategories(),
-      listRooms(),
-    ]);
+    const [items, destinationRoom, categories, rooms, allItems] = await Promise
+      .all([
+        listItemsByBox(box.id),
+        box.destinationRoomId
+          ? findRoom(box.destinationRoomId)
+          : Promise.resolve(null),
+        listCategories(),
+        listRooms(),
+        listItems(),
+      ]);
+
+    const unpackedItems = allItems.filter((i) => i.boxId === null);
 
     const categoryMap = Object.fromEntries(
       categories.map((c) => [c.id, c.name]),
@@ -301,6 +349,7 @@ export const handler = define.handlers({
       <BoxDetailPage
         box={box}
         items={items}
+        unpackedItems={unpackedItems}
         destinationRoom={destinationRoom}
         rooms={rooms}
         error={null}
@@ -322,13 +371,17 @@ export const handler = define.handlers({
     if (action === "delete") {
       const currentItems = await listItemsByBox(box.id);
       if (currentItems.length > 0) {
-        const [destinationRoom, categories, rooms] = await Promise.all([
-          box.destinationRoomId
-            ? findRoom(box.destinationRoomId)
-            : Promise.resolve(null),
-          listCategories(),
-          listRooms(),
-        ]);
+        const [destinationRoom, categories, rooms, allItems] = await Promise
+          .all(
+            [
+              box.destinationRoomId
+                ? findRoom(box.destinationRoomId)
+                : Promise.resolve(null),
+              listCategories(),
+              listRooms(),
+              listItems(),
+            ],
+          );
         const categoryMap = Object.fromEntries(
           categories.map((c) => [c.id, c.name]),
         );
@@ -336,6 +389,7 @@ export const handler = define.handlers({
           <BoxDetailPage
             box={box}
             items={currentItems}
+            unpackedItems={allItems.filter((i) => i.boxId === null)}
             destinationRoom={destinationRoom}
             rooms={rooms}
             error={t("boxes.error.not_empty")}
@@ -419,6 +473,17 @@ export const handler = define.handlers({
       if (itemId) {
         await updateItem(itemId, { boxId: null });
       }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/boxes/${box.id}` },
+      });
+    }
+
+    if (action === "einpacken") {
+      const itemIds = form.getAll("itemIds") as string[];
+      await Promise.all(
+        itemIds.map((id) => updateItem(id, { boxId: box.id })),
+      );
       return new Response(null, {
         status: 302,
         headers: { Location: `/boxes/${box.id}` },

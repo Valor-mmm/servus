@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t, td } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   createCategory,
   deleteCategory,
@@ -83,7 +84,7 @@ function CategoriesPage(
       </form>
 
       {categories.length === 0
-        ? <p class="empty">{t("categories.empty")}</p>
+        ? <EmptyState message={t("categories.empty")} />
         : (
           <ul class="item-list category-list">
             {categories.map((cat) => (
@@ -114,7 +115,13 @@ function CategoriesPage(
                     {t("categories.save")}
                   </button>
                 </form>
-                <form method="post" action="/categories">
+                <form
+                  method="post"
+                  action="/categories"
+                  data-confirm={t("categories.delete_confirm", {
+                    name: cat.name,
+                  })}
+                >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
                   <input type="hidden" name="id" value={cat.id} />

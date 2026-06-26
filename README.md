@@ -31,10 +31,13 @@ The app runs at http://localhost:8000.
 
 ### Environment variables
 
-| Variable             | Description                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `SERVUS_SESSION_KEY` | 32-byte hex string for signing session cookies. Generate with: `openssl rand -hex 32`                         |
-| `SERVUS_SEED_USERS`  | JSON array of initial users: `[{"username":"monster","password":"..."},{"username":"maus","password":"..."}]` |
+| Variable               | Required | Description                                                                                                   |
+| ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `SERVUS_SESSION_KEY`   | yes      | 32-byte hex string for signing session cookies. Generate with: `openssl rand -hex 32`                         |
+| `SERVUS_SEED_USERS`    | yes      | JSON array of initial users: `[{"username":"monster","password":"..."},{"username":"maus","password":"..."}]` |
+| `R2_ACCESS_KEY_ID`     | optional | Cloudflare R2 API key ID — only required when item photos are in use                                          |
+| `R2_SECRET_ACCESS_KEY` | optional | Cloudflare R2 API secret                                                                                      |
+| `R2_PUBLIC_URL`        | optional | Public base URL of the R2 bucket (e.g. `https://pub-xxx.r2.dev`) for presigned GET URLs                       |
 
 ### Commands
 
@@ -63,7 +66,11 @@ Hosted on [Deno Deploy](https://deno.com/deploy) (free tier).
    - `SERVUS_SESSION_KEY`
    - `SERVUS_SEED_USERS`
 
-Pushes to `main` trigger CI → if green → auto-deploy.
+Pushes to `main` trigger CI (GitHub Actions) → if green → auto-deploy via the
+[Deno Deploy GitHub App](https://deno.com/deploy/docs/deployctl). The app is
+connected directly to the repository in the Deno Deploy project dashboard; no
+`deployctl` step is needed in `ci.yml`. PRs get an automatic preview deployment
+URL from the same integration.
 
 ## Architecture
 

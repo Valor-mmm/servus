@@ -1,6 +1,7 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { createRoom, deleteRoom, listRooms } from "@/lib/inventory/roomRepo.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import type { Room } from "@/lib/inventory/types.ts";
 
 interface PageProps {
@@ -31,13 +32,17 @@ function RoomsPage({ rooms, error, csrfToken }: PageProps) {
       </form>
 
       {rooms.length === 0
-        ? <p class="empty">{t("rooms.empty")}</p>
+        ? <EmptyState message={t("rooms.empty")} />
         : (
           <ul class="item-list">
             {rooms.map((room) => (
               <li key={room.id} class="item-row">
                 <a href={`/items?room=${room.id}`}>{room.name}</a>
-                <form method="post" action="/rooms">
+                <form
+                  method="post"
+                  action="/rooms"
+                  data-confirm={t("rooms.delete_confirm", { name: room.name })}
+                >
                   <input type="hidden" name="csrf_token" value={csrfToken} />
                   <input type="hidden" name="_action" value="delete" />
                   <input type="hidden" name="id" value={room.id} />

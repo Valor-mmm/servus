@@ -18,7 +18,7 @@ function typedItem(): Item {
     warrantyUntil: "2030-01-01",
     metadata: { author: SECRET_META, year: 1937 },
     photos: [],
-    status: "confirmed",
+    status: "complete",
     createdAt: 0,
     updatedAt: 0,
   };

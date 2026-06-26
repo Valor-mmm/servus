@@ -31,7 +31,9 @@ function EditSchemaPage(
         canDelete={canDelete}
       />
       <p>
-        <a href="/categories/schemas">{t("action.cancel")}</a>
+        <a href="/categories/schemas" class="btn-secondary">
+          {t("action.cancel")}
+        </a>
       </p>
     </main>
   );

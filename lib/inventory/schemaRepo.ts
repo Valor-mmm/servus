@@ -170,6 +170,16 @@ export async function updateSchema(
   let origin: SchemaOrigin;
   let createdAt: number;
   if (existing.value) {
+    // Prevent field key renames: any key that existed before must stay the same
+    const existingKeys = new Set(existing.value.fields.map((f) => f.key));
+    const submittedKeys = new Set(schema.fields.map((f) => f.key));
+    for (const key of existingKeys) {
+      if (!submittedKeys.has(key)) {
+        throw new SchemaValidationError(
+          `Field key '${key}' cannot be renamed or removed`,
+        );
+      }
+    }
     origin = existing.value.origin;
     createdAt = existing.value.createdAt;
   } else if (isBuiltinSchemaType(schemaType)) {

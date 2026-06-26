@@ -148,3 +148,25 @@ test("_app.tsx head includes theme-init.js script before stylesheet", async ({ p
   // Anti-flash: theme init must come before the stylesheet
   expect(themeScriptPos).toBeLessThan(stylesheetPos);
 });
+
+// ── EmptyState component ───────────────────────────────────────────────────────
+
+test("EmptyState renders lion SVG and message on empty admin invite list", async ({ page }) => {
+  // The admin invite list is empty at the start of a fresh test run.
+  // After all invite tests, invites are revoked — so this also works mid-run.
+  await page.goto("/admin");
+
+  // Revoke any lingering invites so we can reach the empty state.
+  while (await page.locator("button.btn-danger").count() > 0) {
+    page.once("dialog", (d) => d.accept());
+    await page.locator("button.btn-danger").first().click();
+    await page.waitForURL("/admin");
+  }
+
+  const emptyState = page.locator(".empty-state");
+  await expect(emptyState).toBeVisible();
+  // Lion SVG icon should be present
+  await expect(emptyState.locator("img.empty-state-icon")).toBeVisible();
+  // Message text should be rendered
+  await expect(emptyState.locator("p")).not.toBeEmpty();
+});

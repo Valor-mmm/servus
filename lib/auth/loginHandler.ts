@@ -75,7 +75,7 @@ export async function handleLoginPost(
   await resetUserFailures(username);
 
   const csrfToken = generateCsrfToken();
-  const session = await createSession(username, csrfToken);
+  const session = await createSession(username, csrfToken, user.role);
   const cookieValue = await signSessionId(session.sessionId, sessionKey);
 
   const cookie = [

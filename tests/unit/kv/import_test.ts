@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert";
-import { importKv } from "@/lib/kv/import.ts";
+import { assertEquals, assertRejects } from "@std/assert";
+import { importKv, ImportParseError } from "@/lib/kv/import.ts";
 
 async function* withBlanks(): AsyncGenerator<string> {
   yield "";
@@ -106,6 +106,35 @@ Deno.test("importKv: skips blank lines without error", async () => {
   try {
     const result = await importKv(kv, withBlanks());
     assertEquals(result.imported, 1);
+  } finally {
+    kv.close();
+  }
+});
+
+async function* malformedStream(): AsyncGenerator<string> {
+  yield JSON.stringify({ key: ["item", "good"], value: { name: "Sofa" } });
+  yield "THIS IS NOT JSON {{{";
+  yield JSON.stringify({ key: ["item", "good2"], value: { name: "Regal" } });
+}
+
+Deno.test("importKv: malformed line aborts import and writes nothing", async () => {
+  const kv = await Deno.openKv(":memory:");
+  try {
+    await assertRejects(
+      () => importKv(kv, malformedStream()),
+      ImportParseError,
+      "malformed",
+    );
+
+    // Nothing should have been written (all-or-nothing)
+    const good = await kv.get(["item", "good"]);
+    assertEquals(
+      good.value,
+      null,
+      "valid entry must not be written when stream has malformed lines",
+    );
+    const good2 = await kv.get(["item", "good2"]);
+    assertEquals(good2.value, null);
   } finally {
     kv.close();
   }

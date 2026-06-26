@@ -212,17 +212,94 @@ Capability gained: **item-classification**.
 
 **Non-goals:** on-device classification, paid vision APIs, multiple photos.
 
-### M9 — `add-invite-codes`
+### M9 — `add-invite-codes` ✓
 
 Capability gained: **invites**.
 
 - Admin can mint single-use invite codes (random, ≥ 128 bits, stored hashed).
 - Codes expire 7 days from issuance by default.
-- Consuming a code creates a user with a chosen password; the code is burned
-  atomically.
+- Consuming a code creates a helper account atomically; the code is burned on
+  first use.
 - Admin can list outstanding invites and revoke unused ones.
+- QR code generated server-side on the one-time code banner for mobile scanning.
+- Copy-to-clipboard button on the invite URL banner.
+- Invite redemption page shows app context and expiry so the helper knows what
+  they are accepting.
 
-**Non-goals:** role granularity beyond admin/user, email delivery.
+**Non-goals:** email delivery.
+
+### M10 — `add-import-export` ✓
+
+Capability gained: **data export / import** (admin backup).
+
+- Export: `GET /admin/export` streams all KV records as NDJSON.
+- Import: `POST /admin/import` accepts an NDJSON file, fully parses before
+  writing (all-or-nothing on malformed lines), writes records back.
+- `EXPORT_PREFIXES` is the authoritative list of prefixes that constitute app
+  state; `deleteAllKv` reuses the same list.
+
+**Non-goals:** scheduled backups, cloud sync.
+
+### M11 — `groups` ✓
+
+Capability gained: **item groups**.
+
+- Named, ordered collections of items that cross category/room boundaries.
+- Many-to-many membership; items can belong to zero or more groups.
+- Admin can create, rename, reorder members, and delete groups.
+- Group membership shown on item detail page.
+
+**Non-goals:** group nesting, helper-managed groups.
+
+### M12 — `explore/boxes-contain-items` ✓
+
+Capability gained: **containment** (items inside items).
+
+- `Item` gains nullable `containerId` pointing to another `Item`.
+- `Category` gains `canContain` flag; only flagged categories appear in the
+  container picker.
+- `containerId` and `boxId` are mutually exclusive.
+- Cycle detection prevents an item from being placed inside its own descendant.
+
+**Non-goals:** arbitrary nesting depth in the UI (picker shows flat list).
+
+### M13 — `themes-raute-sternenhimmel` ✓
+
+Capability gained: **named themes**.
+
+- Two selectable themes: `raute` (default Bavarian blue) and `sternenhimmel`
+  (dark starfield).
+- Preference stored in the session; no flash-of-wrong-theme.
+- Theme switcher visible to admin users in the nav.
+
+**Non-goals:** per-user persistent theme across devices after logout.
+
+### M14 — `authorization-role-based-admin-access` ✓
+
+Capability gained: **role-based access control**.
+
+- `User` gains `role: "admin" | "user"` field.
+- Seeded users default to `"admin"`; invite-created helpers get `"user"`.
+- `requireAdmin()` middleware guards all `/admin/*` routes (403 for helpers).
+- Nav hides "Verwaltung" for helper sessions.
+- Migration script promotes existing role-less users to `"admin"`.
+
+**Non-goals:** fine-grained permissions beyond admin/user.
+
+### M15 — `phase4-dashboard` + `phase4-placement` ✓
+
+Capability gained: **dashboard** and **placement UX**.
+
+- Dashboard at `/` shows total items, incomplete-item count (linked to triage),
+  packed-box ratio, last 5 items with lazy thumbnails, and a prominent Erfassen
+  CTA.
+- Item edit form: three overlapping placement fields collapsed into a single
+  "Standort" segmented picker (Raum / Karton / Behälter); only the relevant
+  sub-picker is shown.
+- Box detail: "Einpacken" section lets the user bulk-assign unboxed items to the
+  current box via checkbox list.
+
+**Non-goals:** drag-and-drop, AI placement suggestions.
 
 ---
 
@@ -270,6 +347,20 @@ Capability gained: **invites**.
   URL thumbnail strip so users can see what they have captured before finishing
   the session. Both changes required no new API surface and no schema changes;
   they are purely island-side UX.
+- **D13.** Item status was renamed from `"pending"/"confirmed"` to
+  `"incomplete"/"complete"`. The triage page moved from `/items/pending` to
+  `/items/incomplete` (301 redirect preserved). Photo-first capture creates
+  `"incomplete"` items; the standard form creates `"complete"` items. The edit
+  form gained two submit buttons ("Speichern & fertig" / "Speichern &
+  unvollständig") to allow reclassification in one step.
+- **D14.** Destructive actions (delete item/box/room/category, revoke invite,
+  "Alle entpacken") are confirmed via `window.confirm()` wired from a single
+  shared inline script. The `data-confirm` attribute on the triggering element
+  carries the German prompt text. This keeps JS minimal while meeting the
+  usability bar for an irreversible action.
+- **D15.** Login rate-limiting uses `SERVUS_RATE_LIMIT_IP_THRESHOLD` env var to
+  allow the E2E suite to raise the threshold without touching production
+  constants. Production defaults to 5 attempts / 15 min per IP per spec.
 
 ## Beyond MVP
 

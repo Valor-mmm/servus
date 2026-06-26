@@ -1,9 +1,12 @@
 import { define } from "@/utils.ts";
 import { getKv } from "@/lib/kv/client.ts";
 import { importKv } from "@/lib/kv/import.ts";
+import { requireAdmin } from "@/lib/auth/middleware.ts";
 
 export const handler = define.handlers({
   async POST(ctx) {
+    const guard = await requireAdmin(ctx);
+    if (guard) return guard;
     let form: FormData;
     try {
       form = await ctx.req.formData();

@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage loads and shows app name", async ({ page }) => {
+test("homepage loads and shows app name in title", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("servus");
-  await expect(page.locator("h1")).toContainText("servus");
+  // Dashboard shows Erfassen CTA button
+  await expect(page.locator("a.btn-primary")).toBeVisible();
 });
 
 test("healthz returns ok", async ({ request }) => {

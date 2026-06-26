@@ -1,6 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
-import { findItem, resolveRoom, updateItem } from "@/lib/inventory/itemRepo.ts";
+import { findItem, listItems, updateItem } from "@/lib/inventory/itemRepo.ts";
 import { findCategory, listCategories } from "@/lib/inventory/categoryRepo.ts";
 import { resolveSchema } from "@/lib/inventory/schemaRepo.ts";
 import { MetadataValidationError } from "@/lib/inventory/validateMetadata.ts";
@@ -19,6 +19,10 @@ import {
 } from "@/components/SchemaFields.tsx";
 import { ItemGroupsEditor } from "@/components/ItemGroupsEditor.tsx";
 import {
+  type ContainerItem,
+  StandortPicker,
+} from "@/components/StandortPicker.tsx";
+import {
   addMembership,
   findOrCreateGroup,
   listGroups,
@@ -27,7 +31,6 @@ import {
 } from "@/lib/inventory/groupRepo.ts";
 import type { Group } from "@/lib/inventory/types.ts";
 import NativePhotoCapture from "@/islands/NativePhotoCapture.tsx";
-import ItemLocationFields from "@/islands/ItemLocationFields.tsx";
 import { getR2Config } from "@/lib/photos/config.ts";
 import { presignGet } from "@/lib/photos/signing.ts";
 
@@ -37,13 +40,12 @@ interface PageProps {
   schema: CategorySchema;
   rooms: Room[];
   boxes: BoxWithItemCount[];
+  containerItems: ContainerItem[];
   groups: Group[];
   allGroupNames: string[];
   error: string | null;
   csrfToken: string;
   photoUrls: string[];
-  containerName: string | null;
-  derivedRoomId: string | null;
 }
 
 async function schemaForItem(item: Item): Promise<CategorySchema> {
@@ -58,13 +60,12 @@ function EditItemPage(
     schema,
     rooms,
     boxes,
+    containerItems,
     groups,
     allGroupNames,
     error,
     csrfToken,
     photoUrls,
-    containerName,
-    derivedRoomId,
   }: PageProps,
 ) {
   return (
@@ -81,6 +82,7 @@ function EditItemPage(
                 method="post"
                 action={`/items/${item.id}/edit`}
                 style="display:inline"
+                data-confirm={t("items.removePhoto_confirm")}
               >
                 <input type="hidden" name="csrf_token" value={csrfToken} />
                 <input type="hidden" name="_action" value="remove_photo" />
@@ -126,18 +128,13 @@ function EditItemPage(
           </select>
         </label>
 
-        <ItemLocationFields
+        <StandortPicker
           rooms={rooms}
-          boxes={boxes.map((b) => ({
-            id: b.id,
-            code: b.code,
-            label: b.label,
-          }))}
-          initialContainerId={item.containerId}
-          initialContainerName={containerName}
-          initialRoomId={item.roomId}
-          initialBoxId={item.boxId}
-          initialDerivedRoomId={derivedRoomId}
+          boxes={boxes}
+          containerItems={containerItems}
+          currentRoomId={item.roomId}
+          currentBoxId={item.boxId}
+          currentContainerId={item.containerId}
         />
 
         <label>
@@ -174,8 +171,27 @@ function EditItemPage(
 
         <SchemaFields schema={schema} metadata={item.metadata} />
 
-        <button type="submit">{t("action.save")}</button>
-        <a href={`/items/${item.id}`}>{t("action.cancel")}</a>
+        <div class="form-actions">
+          <button
+            type="submit"
+            name="status"
+            value="complete"
+            class="btn-primary"
+          >
+            {t("items.saveComplete")}
+          </button>
+          <button
+            type="submit"
+            name="status"
+            value="incomplete"
+            class="btn-secondary"
+          >
+            {t("items.saveIncomplete")}
+          </button>
+          <a href={`/items/${item.id}`} class="btn-secondary">
+            {t("action.cancel")}
+          </a>
+        </div>
       </form>
 
       <ItemGroupsEditor
@@ -208,27 +224,39 @@ function buildPhotoUrls(photos: string[]): string[] {
   }
 }
 
+async function fetchContainerItems(): Promise<ContainerItem[]> {
+  const [allItems, categories] = await Promise.all([
+    listItems(),
+    listCategories(),
+  ]);
+  const containerCatIds = new Set(
+    categories.filter((c) => c.canContain).map((c) => c.id),
+  );
+  return allItems
+    .filter((i) => i.categoryId !== null && containerCatIds.has(i.categoryId))
+    .map((i) => ({ id: i.id, name: i.name || i.id }));
+}
+
 export const handler = define.handlers({
   async GET(ctx) {
     const item = await findItem(ctx.params.id);
     if (!item) return new Response(t("error.not_found"), { status: 404 });
 
-    const [categories, rooms, boxes, schema, { groups, allGroupNames }] =
-      await Promise.all([
-        listCategories(),
-        listRooms(),
-        listBoxes(),
-        schemaForItem(item),
-        groupData(item.id),
-      ]);
-
-    let containerName: string | null = null;
-    let derivedRoomId: string | null = null;
-    if (item.containerId) {
-      const containerItem = await findItem(item.containerId);
-      containerName = containerItem?.name ?? null;
-      derivedRoomId = await resolveRoom(item);
-    }
+    const [
+      categories,
+      rooms,
+      boxes,
+      schema,
+      { groups, allGroupNames },
+      containerItems,
+    ] = await Promise.all([
+      listCategories(),
+      listRooms(),
+      listBoxes(),
+      schemaForItem(item),
+      groupData(item.id),
+      fetchContainerItems(),
+    ]);
 
     const photoUrls = buildPhotoUrls(item.photos);
     return ctx.render(
@@ -238,13 +266,12 @@ export const handler = define.handlers({
         schema={schema}
         rooms={rooms}
         boxes={boxes}
+        containerItems={containerItems}
         groups={groups}
         allGroupNames={allGroupNames}
         error={null}
         csrfToken={ctx.state.csrfToken ?? ""}
         photoUrls={photoUrls}
-        containerName={containerName}
-        derivedRoomId={derivedRoomId}
       />,
     );
   },
@@ -298,31 +325,40 @@ export const handler = define.handlers({
 
     const name = ((form.get("name") as string | null) ?? "").trim();
     const categoryId = (form.get("categoryId") as string | null) || null;
-    const containerId = (form.get("containerId") as string | null) ?? "";
-    const roomId = (form.get("roomId") as string | null) ?? "";
-    const boxId = (form.get("boxId") as string | null) ?? "";
+    const standortType = (form.get("standort_type") as string | null) ?? "room";
+    const rawRoomId = (form.get("roomId") as string | null) || null;
+    const rawBoxId = (form.get("boxId") as string | null) || null;
+    const rawContainerId = (form.get("containerId") as string | null) || null;
+    // Only the field matching standort_type is used; others are cleared.
+    const roomId = standortType === "room" ? rawRoomId : null;
+    const boxId = standortType === "box" ? rawBoxId : null;
+    const containerId = standortType === "container" ? rawContainerId : null;
     const quantityRaw = (form.get("quantity") as string | null) ?? "1";
     const valueRaw = (form.get("estimatedValue") as string | null) ?? "";
+    const statusRaw = (form.get("status") as string | null) ?? "";
+    const status: "incomplete" | "complete" = statusRaw === "incomplete"
+      ? "incomplete"
+      : "complete";
 
     const warrantyRaw = (form.get("warrantyUntil") as string | null) ?? "";
     const metadata = readMetadataFromForm(form);
 
     const renderError = async (error: string) => {
-      const [categories, rooms, boxes, schema, { groups, allGroupNames }] =
-        await Promise.all([
-          listCategories(),
-          listRooms(),
-          listBoxes(),
-          schemaForItem(item),
-          groupData(item.id),
-        ]);
-      let containerName: string | null = null;
-      let derivedRoomId: string | null = null;
-      if (item.containerId) {
-        const containerItem = await findItem(item.containerId);
-        containerName = containerItem?.name ?? null;
-        derivedRoomId = await resolveRoom(item);
-      }
+      const [
+        categories,
+        rooms,
+        boxes,
+        schema,
+        { groups, allGroupNames },
+        containerItems,
+      ] = await Promise.all([
+        listCategories(),
+        listRooms(),
+        listBoxes(),
+        schemaForItem(item),
+        groupData(item.id),
+        fetchContainerItems(),
+      ]);
       return ctx.render(
         <EditItemPage
           item={item}
@@ -330,13 +366,12 @@ export const handler = define.handlers({
           schema={schema}
           rooms={rooms}
           boxes={boxes}
+          containerItems={containerItems}
           groups={groups}
           allGroupNames={allGroupNames}
           error={error}
           csrfToken={ctx.state.csrfToken ?? ""}
           photoUrls={buildPhotoUrls(item.photos)}
-          containerName={containerName}
-          derivedRoomId={derivedRoomId}
         />,
       );
     };
@@ -349,24 +384,21 @@ export const handler = define.handlers({
     }
 
     const estimatedValue = valueRaw ? parseFloat(valueRaw) : null;
-    // Server-side: reject if both containerId and boxId are set
-    if (containerId && boxId) {
-      return renderError(t("items.error.category_required"));
-    }
 
     try {
       await updateItem(item.id, {
         name,
         categoryId,
-        containerId: containerId || null,
-        roomId: roomId || null,
-        boxId: boxId || null,
+        containerId,
+        roomId,
+        boxId,
         quantity,
         estimatedValue: estimatedValue !== null && isNaN(estimatedValue)
           ? null
           : estimatedValue,
         warrantyUntil: warrantyRaw || null,
         metadata,
+        status,
       });
     } catch (e) {
       if (e instanceof MetadataValidationError) {

@@ -7,9 +7,10 @@ const SESSION_KEY = () => Deno.env.get("SERVUS_SESSION_KEY") ?? "";
 interface LoginFormProps {
   error: string | null;
   next: string;
+  username?: string;
 }
 
-function LoginForm({ error, next }: LoginFormProps) {
+function LoginForm({ error, next, username }: LoginFormProps) {
   return (
     <main class="auth-page">
       <h1>{t("app.name")}</h1>
@@ -21,6 +22,7 @@ function LoginForm({ error, next }: LoginFormProps) {
           <input
             type="text"
             name="username"
+            value={username ?? ""}
             autocomplete="username"
             required
           />
@@ -71,13 +73,19 @@ export const handler = define.handlers({
         <LoginForm
           error={t("auth.rate_limited", { seconds: String(secs) })}
           next={next}
+          username={username}
         />,
+        { status: 429, headers: { "Retry-After": String(secs) } },
       );
     }
 
     if (!result.success) {
       return ctx.render(
-        <LoginForm error={t("auth.login_error")} next={next} />,
+        <LoginForm
+          error={t("auth.login_error")}
+          next={next}
+          username={username}
+        />,
       );
     }
 

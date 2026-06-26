@@ -62,7 +62,7 @@ export interface BoxTombstone {
   reason: "unpacked" | "manual";
 }
 
-export type ItemStatus = "pending" | "suggested" | "confirmed";
+export type ItemStatus = "incomplete" | "complete";
 
 export interface Item {
   id: string;

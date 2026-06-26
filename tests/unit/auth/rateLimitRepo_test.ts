@@ -16,7 +16,8 @@ async function withKv(fn: () => Promise<void>): Promise<void> {
   }
 }
 
-// IP rate limit: 30 failures per 15-minute sliding window
+// IP rate limit: 5 failures per 15-minute sliding window (default; configurable
+// via SERVUS_RATE_LIMIT_IP_THRESHOLD env var — E2E tests set it to 100)
 
 Deno.test("checkAndIncrementIp allows first attempt", async () => {
   await withKv(async () => {
@@ -25,9 +26,10 @@ Deno.test("checkAndIncrementIp allows first attempt", async () => {
   });
 });
 
-Deno.test("checkAndIncrementIp blocks after 30 failures", async () => {
+Deno.test("checkAndIncrementIp blocks after threshold is exceeded (default: 5)", async () => {
   await withKv(async () => {
-    for (let i = 0; i < 30; i++) {
+    // Exhaust the default threshold of 5 — the 6th call must be limited
+    for (let i = 0; i < 5; i++) {
       await checkAndIncrementIp("5.6.7.8", "session-key");
     }
     const result = await checkAndIncrementIp("5.6.7.8", "session-key");

@@ -49,7 +49,9 @@ function EditBoxPage({ box, rooms, csrfToken }: PageProps) {
         </label>
 
         <button type="submit">{t("action.save")}</button>
-        <a href={`/boxes/${box.id}`}>{t("action.cancel")}</a>
+        <a href={`/boxes/${box.id}`} class="btn-secondary">
+          {t("action.cancel")}
+        </a>
       </form>
     </main>
   );

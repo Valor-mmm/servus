@@ -2,7 +2,10 @@
 
 ## Purpose
 
-TBD - created by archiving change groups. Update Purpose after archive.
+Defines item groups: named, ordered collections that cut across categories and
+rooms. A group lets the owner logically cluster items (e.g. "Küchenzubehör",
+"Werkzeug") without changing their physical placement. Groups are admin-managed;
+helpers can view but not create or delete them.
 
 ## Requirements
 

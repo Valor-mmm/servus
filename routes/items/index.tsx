@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   countItems,
   listItems,
@@ -31,8 +32,7 @@ interface PageProps {
 
 function displayName(item: Item): string {
   if (item.name) return item.name;
-  if (item.status === "pending") return t("items.placeholderName");
-  return "–";
+  return t("items.placeholderName");
 }
 
 export function ItemsPage(
@@ -79,7 +79,11 @@ export function ItemsPage(
             🔍
           </button>
         </div>
-        <select name="cat" data-autosubmit>
+        <select
+          name="cat"
+          data-autosubmit
+          aria-label={t("items.filter_category")}
+        >
           <option value="">
             {t("items.filter_all")} {t("items.filter_category")}
           </option>
@@ -89,7 +93,11 @@ export function ItemsPage(
             </option>
           ))}
         </select>
-        <select name="room" data-autosubmit>
+        <select
+          name="room"
+          data-autosubmit
+          aria-label={t("items.filter_room")}
+        >
           <option value="">
             {t("items.filter_all")} {t("items.filter_room")}
           </option>
@@ -102,19 +110,14 @@ export function ItemsPage(
       </form>
 
       {items.length === 0
-        ? (
-          <div class="empty-state">
-            <img src="/lion.svg" alt="" aria-hidden="true" />
-            <p>{t("items.empty")}</p>
-          </div>
-        )
+        ? <EmptyState message={t("items.empty")} />
         : (
           <ul class="item-list">
             {items.map((item) => (
               <li
                 key={item.id}
                 class={`item-row${
-                  item.status === "pending" ? " item-pending" : ""
+                  item.status === "incomplete" ? " item-incomplete" : ""
                 }`}
               >
                 {thumbnailUrls[item.id] && (
@@ -129,9 +132,9 @@ export function ItemsPage(
                 <div class="item-row-body">
                   <div class="item-row-top">
                     <a href={`/items/${item.id}`}>{displayName(item)}</a>
-                    {item.status === "pending" && (
-                      <span class="badge badge-pending">
-                        {t("items.pending")}
+                    {item.status === "incomplete" && (
+                      <span class="badge badge-incomplete">
+                        {t("items.incomplete")}
                       </span>
                     )}
                   </div>

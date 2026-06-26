@@ -72,9 +72,10 @@ servus/
   lib/
     auth/                      ← password hashing, sessions, rate-limit
     kv/                        ← typed wrappers around Deno KV
-    inventory/                 ← item/category/room/box domain logic
-    moving/                    ← packing, unpacking, bulk move
+    inventory/                 ← item/category/room/box/group domain logic
     invites/                   ← invite code mint + consume
+    photos/                    ← R2 presign helpers
+    i18n/                      ← German locale + t() helper
   tests/
     unit/                      ← Deno test, fast, no network
     integration/               ← Deno test against a real KV instance
@@ -157,16 +158,14 @@ Forbidden by default (override only with explicit user OK):
 
 ## 10. CI/CD
 
-GitHub Actions runs on every PR and on push to main. The pipeline:
+GitHub Actions runs on every PR and on push to main. Three parallel jobs (all
+required before merge):
 
-1. **Lint** — `deno lint`
-2. **Format check** — `deno fmt --check`
-3. **Type check** — `deno check **/*.ts`
-4. **Unit tests** — `deno test tests/unit`
-5. **Integration tests** — `deno test --allow-* tests/integration`
-6. **Playwright E2E** — boots dev server, runs `tests/e2e`
-7. **Dep audit** — `deno info` + a simple deny-list check
-8. **Deploy (main only)** — pushes to Deno Deploy via `deployctl`
+1. **check** — `deno lint`, `deno fmt --check`, `deno check **/*.ts`
+2. **test** — unit + integration: `deno test tests/unit tests/integration`
+3. **e2e** — `deno task build`, Playwright install, `playwright test`
+
+Pushes to main auto-deploy to Deno Deploy via the `deployctl` GitHub Action.
 
 Branch protection on main: all checks required, linear history, no direct
 pushes.
@@ -226,7 +225,7 @@ time on **specs**, not on implementation review.
 
 ```bash
 # Local dev
-deno task start
+deno task dev
 
 # Run unit + integration tests
 deno task test

@@ -84,8 +84,7 @@ export const handler = define.handlers({
     const itemUrl = `${origin}/items/${item.id}`;
     const qrSvg = await QRCode.toString(itemUrl, { type: "svg", margin: 1 });
 
-    const name = item.name ||
-      (item.status === "pending" ? t("items.placeholderName") : "–");
+    const name = item.name || t("items.placeholderName");
 
     const html = `<!DOCTYPE html>
 <html lang="de">

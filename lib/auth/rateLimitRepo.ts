@@ -2,7 +2,10 @@ import { getKv } from "@/lib/kv/client.ts";
 import type { IpRateLimit, UserRateLimit } from "@/lib/auth/types.ts";
 
 const IP_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const IP_THRESHOLD = 30; // 30 per 15 min; E2E suite uses ~10-15 slots (setup + auth tests)
+const IP_THRESHOLD = parseInt(
+  Deno.env.get("SERVUS_RATE_LIMIT_IP_THRESHOLD") ?? "5",
+  10,
+);
 const USER_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const USER_THRESHOLD = 5;
 

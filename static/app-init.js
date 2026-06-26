@@ -109,6 +109,32 @@
       if (form) form.requestSubmit();
     });
   });
+
+  /* ── data-confirm: require confirmation before destructive form submits ── */
+  document.addEventListener("submit", function (e) {
+    const form = e.target;
+    const msg = form.dataset && form.dataset.confirm;
+    if (!msg) return;
+    if (!confirm(msg)) e.preventDefault();
+  }, true);
+
+  /* ── data-copy: copy-to-clipboard buttons ── */
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const text = btn.dataset.copy;
+      const done = btn.dataset.copyDone || "✓";
+      if (!text || !navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () {
+        const original = btn.textContent;
+        btn.textContent = done;
+        btn.disabled = true;
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.disabled = false;
+        }, 2000);
+      });
+    });
+  });
 })();
 
 if ("serviceWorker" in navigator) {

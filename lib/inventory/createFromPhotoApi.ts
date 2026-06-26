@@ -35,7 +35,7 @@ export async function handleCreateFromPhoto(
     quantity: 1,
     estimatedValue: null,
     photos: [photoKey],
-    status: "pending",
+    status: "incomplete",
   });
 
   return { status: 201, item };

@@ -78,7 +78,8 @@ The item edit page gets:
 ```html
 <input name="groupName" list="group-names" ... />
 <datalist id="group-names">
-  <option value="Campingkram"><option value="Harry Potter">…
+  <option value="Campingkram">
+    <option value="Harry Potter">…
 </datalist>
 ```
 

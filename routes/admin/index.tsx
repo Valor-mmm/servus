@@ -1,8 +1,10 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import { listOutstandingInvites, mintInvite } from "@/lib/invites/index.ts";
 import { generateQrSvg } from "@/lib/invites/qr.ts";
 import type { Invite } from "@/lib/invites/types.ts";
+import { requireAdmin } from "@/lib/auth/middleware.ts";
 
 interface PageProps {
   imported: number | null;
@@ -75,7 +77,7 @@ function AdminPage(
           enctype="multipart/form-data"
         >
           <input type="hidden" name="csrf_token" value={csrfToken} />
-          <label>
+          <label class="file-input-label">
             {t("admin.import.file_label")}
             <input
               type="file"
@@ -108,6 +110,14 @@ function AdminPage(
               <strong>{t("invites.code_label")}:</strong>
             </p>
             <code class="invite-url">{newInviteUrl}</code>
+            <button
+              type="button"
+              class="btn-copy"
+              data-copy={newInviteUrl}
+              data-copy-done={t("invites.copy_done")}
+            >
+              {t("invites.copy")}
+            </button>
             {qrSvg && (
               <img
                 class="invite-qr"
@@ -140,7 +150,7 @@ function AdminPage(
         </form>
 
         {invites.length === 0
-          ? <p class="empty">{t("invites.empty")}</p>
+          ? <EmptyState message={t("invites.empty")} />
           : (
             <ul class="item-list">
               {invites.map((inv) => (
@@ -153,6 +163,7 @@ function AdminPage(
                   <form
                     method="post"
                     action={`/admin/invites/${inv.id}/revoke`}
+                    data-confirm={t("invites.revoke_confirm")}
                   >
                     <input type="hidden" name="csrf_token" value={csrfToken} />
                     <button type="submit" class="btn-danger btn-small">
@@ -170,6 +181,8 @@ function AdminPage(
 
 export const handler = define.handlers({
   async GET(ctx) {
+    const guard = await requireAdmin(ctx);
+    if (guard) return guard;
     const url = new URL(ctx.req.url);
     const imported = url.searchParams.get("imported");
     const skipped = url.searchParams.get("skipped");
@@ -192,6 +205,8 @@ export const handler = define.handlers({
   },
 
   async POST(ctx) {
+    const guard = await requireAdmin(ctx);
+    if (guard) return guard;
     const form = await ctx.req.formData();
     const action = form.get("_action") as string;
 

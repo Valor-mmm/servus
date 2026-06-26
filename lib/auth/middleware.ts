@@ -8,6 +8,7 @@ import {
   touchSession,
 } from "@/lib/auth/sessionRepo.ts";
 import { verifyCsrfToken } from "@/lib/auth/csrf.ts";
+import { findUser } from "@/lib/auth/userRepo.ts";
 
 const PUBLIC_PATHS = new Set(["/login", "/logout", "/healthz"]);
 
@@ -31,7 +32,7 @@ function parseCookieHeader(header: string, name: string): string | null {
 export interface MiddlewareResult {
   pass: boolean;
   response?: Response;
-  user?: { username: string };
+  user?: { username: string; role?: "admin" | "user" };
 }
 
 export async function applyRequireAuth(
@@ -101,7 +102,10 @@ export async function applyRequireAuth(
     // request past the throttle window will retry.
   }
 
-  return { pass: true, user: { username: session.username } };
+  return {
+    pass: true,
+    user: { username: session.username, role: session.role },
+  };
 }
 
 export async function applyCsrfGuard(
@@ -246,9 +250,30 @@ export function requireAuth(): Handler {
         const session = await findSession(sessionId);
         if (session) ctx.state.csrfToken = session.csrfToken;
       }
+      // Role is baked into the session since the login/invite flow stores it there.
+      // Fallback to a user KV read for sessions created before this field existed.
+      if (!result.user.role) {
+        const user = await findUser(result.user.username);
+        if (user) ctx.state.user = { ...result.user, role: user.role };
+      }
     }
     return ctx.next();
   };
+}
+
+export function requireAdmin(
+  ctx: FreshContext<State>,
+): Response | null {
+  if (ctx.state.user?.role !== "admin") {
+    return new Response(
+      `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>Kein Zugriff</title></head><body><main style="padding:2rem"><h1>403 — Kein Zugriff</h1><p>Diese Seite ist nur für Administratoren zugänglich.</p><a href="/">Zurück zur Startseite</a></main></body></html>`,
+      {
+        status: 403,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      },
+    );
+  }
+  return null;
 }
 
 export function csrfGuard(): Handler {

@@ -1,9 +1,11 @@
 import { t } from "@/lib/i18n/t.ts";
 
+export function navActive(current: string, href: string): boolean {
+  return current === href || current.startsWith(href + "/");
+}
+
 function active(current: string, href: string): string {
-  return current === href || current.startsWith(href + "/")
-    ? " nav-active"
-    : "";
+  return navActive(current, href) ? " nav-active" : "";
 }
 
 /**

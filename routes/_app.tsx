@@ -89,13 +89,15 @@ export default define.page(function App({ Component, state, url }) {
               >
                 {t("nav.rooms")}
               </a>
-              <a
-                href="/admin"
-                class={navActive(path, "/admin").trim() || undefined}
-                title={t("admin.nav")}
-              >
-                {t("admin.nav")}
-              </a>
+              {state.user?.role === "admin" && (
+                <a
+                  href="/admin"
+                  class={navActive(path, "/admin").trim() || undefined}
+                  title={t("admin.nav")}
+                >
+                  {t("admin.nav")}
+                </a>
+              )}
               <button
                 type="button"
                 class="theme-toggle"

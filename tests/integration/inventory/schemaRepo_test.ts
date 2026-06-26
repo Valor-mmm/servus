@@ -9,6 +9,7 @@ import {
   resolveSchema,
   updateSchema,
 } from "@/lib/inventory/schemaRepo.ts";
+import { SchemaValidationError } from "@/lib/inventory/validateSchema.ts";
 
 async function withKv(fn: () => Promise<void>): Promise<void> {
   const kv = await Deno.openKv(":memory:");
@@ -126,6 +127,34 @@ Deno.test("deleting a built-in override reverts resolution to the seed", async (
     await deleteSchema("book");
     const reverted = await resolveSchema("book");
     assertEquals(reverted.fields[0].key, "author"); // seed restored
+  });
+});
+
+Deno.test("updateSchema rejects dropping an existing field key", async () => {
+  await withKv(async () => {
+    await createSchema(sample); // fields: ["species", "location"]
+
+    // Omitting "location" must be rejected — items that use this schema
+    // would have their metadata silently orphaned otherwise
+    await assertRejects(
+      () =>
+        updateSchema("plant", {
+          schemaType: "plant",
+          label: "Pflanze",
+          fields: [
+            { key: "species", label: "Art", type: "text" as const },
+            // "location" intentionally dropped — must throw
+          ],
+        }),
+      SchemaValidationError,
+    );
+
+    // Schema must be unchanged
+    const schema = await resolveSchema("plant");
+    assertEquals(
+      schema.fields.map((f) => f.key),
+      ["species", "location"],
+    );
   });
 });
 

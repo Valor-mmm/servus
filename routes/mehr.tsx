@@ -6,7 +6,9 @@ import { t } from "@/lib/i18n/t.ts";
  * logout action that no longer fit in the mobile bottom bar. Server-rendered,
  * island-free.
  */
-export function MehrMenu({ csrfToken }: { csrfToken: string }) {
+export function MehrMenu(
+  { csrfToken, isAdmin }: { csrfToken: string; isAdmin?: boolean },
+) {
   return (
     <main class="page">
       <h1>{t("menu.title")}</h1>
@@ -30,12 +32,14 @@ export function MehrMenu({ csrfToken }: { csrfToken: string }) {
             {t("nav.groups")}
           </a>
         </li>
-        <li>
-          <a href="/admin">
-            <span class="nav-icon">🛠️</span>
-            {t("admin.nav")}
-          </a>
-        </li>
+        {isAdmin && (
+          <li>
+            <a href="/admin">
+              <span class="nav-icon">🛠️</span>
+              {t("admin.nav")}
+            </a>
+          </li>
+        )}
         <li>
           <button
             type="button"
@@ -63,6 +67,11 @@ export function MehrMenu({ csrfToken }: { csrfToken: string }) {
 
 export const handler = define.handlers({
   GET(ctx) {
-    return ctx.render(<MehrMenu csrfToken={ctx.state.csrfToken ?? ""} />);
+    return ctx.render(
+      <MehrMenu
+        csrfToken={ctx.state.csrfToken ?? ""}
+        isAdmin={ctx.state.user?.role === "admin"}
+      />,
+    );
   },
 });

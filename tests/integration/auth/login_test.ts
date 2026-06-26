@@ -88,8 +88,8 @@ Deno.test("POST /login: unknown username returns same failure shape (no enumerat
 
 Deno.test("POST /login: rate-limited IP returns 429 result", async () => {
   await withKv(async () => {
-    // Exhaust the IP rate limit (10 failures)
-    for (let i = 0; i < 10; i++) {
+    // Exhaust the IP rate limit: threshold is 5, so 5 calls + 1 triggering call
+    for (let i = 0; i < 5; i++) {
       await handleLoginPost(
         { username: "noone", password: "bad", ip: "99.0.0.1" },
         SESSION_KEY,

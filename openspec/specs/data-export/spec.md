@@ -2,8 +2,10 @@
 
 ## Purpose
 
-TBD - created by archiving change add-import-export. Update Purpose after
-archive.
+Defines the admin data export and import capabilities. Export produces a
+newline-delimited JSON (NDJSON) snapshot of all KV records that can be used as a
+backup or for migration. Import restores from such a snapshot. Both operations
+are admin-only and available in the admin hub at `/admin`.
 
 ## Requirements
 
@@ -51,9 +53,11 @@ JSON line: `{ "key": [...], "value": <any>, "versionstamp": "<hex>" }`.
 
 The following KV key prefixes are in scope (iterated via `kv.list`): `["item"]`,
 `["item-by-category"]`, `["item-by-room"]`, `["item-by-box"]`,
-`["item-by-time"]`, `["box"]`, `["box-by-code"]`, `["box-tombstone"]`,
-`["room"]`, `["room-by-name"]`, `["category"]`, `["category-by-name"]`,
-`["user"]`, `["invite"]`, `["invite-by-code"]`, `["invite-by-expiry"]`.
+`["item-by-time"]`, `["item-by-container"]`, `["item-group"]`, `["box"]`,
+`["box-by-code"]`, `["box-tombstone"]`, `["room"]`, `["room-by-name"]`,
+`["category"]`, `["category-by-name"]`, `["category-schema"]`, `["group"]`,
+`["group-by-name"]`, `["group-item"]`, `["user"]`, `["invite"]`,
+`["invite-by-code"]`, `["invite-by-expiry"]`.
 
 The single key `["box-code-counter"]` MUST also be included (via `kv.get`).
 

@@ -49,7 +49,7 @@ export interface CreateItemInput {
   warrantyUntil?: string | null;
   metadata?: Record<string, unknown>;
   photos?: string[];
-  status?: "pending" | "confirmed";
+  status?: "incomplete" | "complete";
 }
 
 export interface UpdateItemInput {
@@ -63,6 +63,7 @@ export interface UpdateItemInput {
   warrantyUntil?: string | null;
   metadata?: Record<string, unknown>;
   photos?: string[];
+  status?: "incomplete" | "complete";
 }
 
 function coerceQuantity(raw: unknown): number {
@@ -110,7 +111,11 @@ async function assertNoCycle(
   }
   // Walk from containerId up through its ancestors; if itemId appears, it's a cycle.
   let current: Item | null = await findItem(containerId);
+  let depth = 0;
   while (current !== null && current.containerId !== null) {
+    if (++depth > 50) {
+      throw new Error("Container hierarchy too deep (> 50 levels)");
+    }
     if (current.containerId === itemId) {
       throw new Error(
         `Assigning container '${containerId}' would create a cycle`,
@@ -152,7 +157,7 @@ export async function createItem(input: CreateItemInput): Promise<Item> {
     warrantyUntil,
     metadata,
     photos: input.photos ?? [],
-    status: input.status ?? "confirmed",
+    status: input.status ?? "complete",
     createdAt: now,
     updatedAt: now,
   };
@@ -198,6 +203,15 @@ export async function findItem(id: string): Promise<Item | null> {
   const kv = await getKv();
   const entry = await kv.get<Item>(ITEM_KEY(id));
   return entry.value ? normalizeItem(entry.value) : null;
+}
+
+export async function findItemEntry(
+  id: string,
+): Promise<Deno.KvEntryMaybe<Item>> {
+  const kv = await getKv();
+  const entry = await kv.get<Item>(ITEM_KEY(id));
+  if (!entry.value) return entry;
+  return { ...entry, value: normalizeItem(entry.value) };
 }
 
 export async function listItems(): Promise<Item[]> {
@@ -309,8 +323,10 @@ export async function updateItem(
   input: UpdateItemInput,
 ): Promise<Item> {
   const kv = await getKv();
-  const existing = await findItem(id);
+  const entry = await findItemEntry(id);
+  const existing = entry.value;
   if (!existing) throw new Error(`Item '${id}' not found`);
+  const versionstamp = entry.versionstamp;
 
   const settingContainer = input.containerId !== undefined;
   const resolvedContainerId = settingContainer
@@ -372,10 +388,13 @@ export async function updateItem(
     warrantyUntil,
     metadata,
     photos: input.photos !== undefined ? input.photos : existing.photos,
+    status: input.status !== undefined ? input.status : existing.status,
     updatedAt: Date.now(),
   };
 
-  const op = kv.atomic().set(ITEM_KEY(id), updated);
+  const op = kv.atomic()
+    .check({ key: ITEM_KEY(id), versionstamp })
+    .set(ITEM_KEY(id), updated);
 
   // Category index
   if (
@@ -407,7 +426,8 @@ export async function updateItem(
     if (updated.boxId) op.set(BOX_IDX_KEY(updated.boxId, id), true);
   }
 
-  await op.commit();
+  const result = await op.commit();
+  if (!result.ok) throw new Error(`Concurrent write conflict on item '${id}'`);
 
   // Update box status for any affected box
   if (resolvedBoxId !== existing.boxId) {

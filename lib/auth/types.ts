@@ -2,11 +2,13 @@ export interface User {
   username: string;
   passwordHash: string;
   createdAt: number;
+  role: "admin" | "user";
 }
 
 export interface Session {
   sessionId: string;
   username: string;
+  role: "admin" | "user";
   createdAt: number;
   lastSeen: number;
   csrfToken: string;

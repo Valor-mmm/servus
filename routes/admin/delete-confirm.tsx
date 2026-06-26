@@ -2,6 +2,7 @@ import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
 import { getKv } from "@/lib/kv/client.ts";
 import { exportKv } from "@/lib/kv/export.ts";
+import { requireAdmin } from "@/lib/auth/middleware.ts";
 
 interface PageProps {
   count: number;
@@ -39,6 +40,8 @@ function DeleteConfirmPage({ count, csrfToken }: PageProps) {
 
 export const handler = define.handlers({
   async GET(ctx) {
+    const guard = await requireAdmin(ctx);
+    if (guard) return guard;
     const kv = await getKv();
     let count = 0;
     for await (const _line of exportKv(kv)) {

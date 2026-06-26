@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
 import { t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import {
   countMembers,
   createGroup,
@@ -40,7 +41,7 @@ function GroupsPage(
       </form>
 
       {rows.length === 0
-        ? <p class="empty">{t("groups.empty")}</p>
+        ? <EmptyState message={t("groups.empty")} />
         : (
           <ul class="item-list">
             {rows.map(({ group, count }) => (
@@ -55,7 +56,7 @@ function GroupsPage(
         )}
 
       <p>
-        <a href="/mehr">{t("action.back")}</a>
+        <a href="/mehr" class="btn-secondary">{t("action.back")}</a>
       </p>
     </main>
   );

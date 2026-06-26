@@ -20,7 +20,7 @@ async function withKv(fn: () => Promise<void>): Promise<void> {
 
 Deno.test("createSession stores session and returns it", async () => {
   await withKv(async () => {
-    const s = await createSession("alice", "csrf-token-abc");
+    const s = await createSession("alice", "csrf-token-abc", "admin");
     assertExists(s.sessionId);
     assertEquals(s.username, "alice");
     assertEquals(s.csrfToken, "csrf-token-abc");
@@ -31,7 +31,7 @@ Deno.test("createSession stores session and returns it", async () => {
 
 Deno.test("findSession returns stored session by id", async () => {
   await withKv(async () => {
-    const s = await createSession("bob", "csrf-xyz");
+    const s = await createSession("bob", "csrf-xyz", "admin");
     const found = await findSession(s.sessionId);
     assertExists(found);
     assertEquals(found.username, "bob");
@@ -47,7 +47,7 @@ Deno.test("findSession returns null for unknown id", async () => {
 
 Deno.test("findSession reads with strong consistency", async () => {
   await withKv(async () => {
-    const s = await createSession("strong", "csrf");
+    const s = await createSession("strong", "csrf", "admin");
 
     // Intercept kv.get on the cached client to observe options passed by
     // findSession. The interception is per-test (withKv closes the kv after).
@@ -72,7 +72,7 @@ Deno.test("findSession reads with strong consistency", async () => {
 
 Deno.test("deleteSession removes the session record", async () => {
   await withKv(async () => {
-    const s = await createSession("carol", "csrf");
+    const s = await createSession("carol", "csrf", "admin");
     await deleteSession(s.sessionId, "carol");
     const found = await findSession(s.sessionId);
     assertEquals(found, null);
@@ -81,8 +81,8 @@ Deno.test("deleteSession removes the session record", async () => {
 
 Deno.test("listSessionsForUser returns all session ids for a user", async () => {
   await withKv(async () => {
-    const s1 = await createSession("dave", "csrf1");
-    const s2 = await createSession("dave", "csrf2");
+    const s1 = await createSession("dave", "csrf1", "admin");
+    const s2 = await createSession("dave", "csrf2", "admin");
     const ids = await listSessionsForUser("dave");
     assertEquals(ids.length, 2);
     const idSet = new Set(ids);
@@ -93,7 +93,7 @@ Deno.test("listSessionsForUser returns all session ids for a user", async () => 
 
 Deno.test("touchSession updates lastSeen if throttle window has passed", async () => {
   await withKv(async () => {
-    const s = await createSession("eve", "csrf");
+    const s = await createSession("eve", "csrf", "admin");
     // Force lastSeen to be old enough (>1h) by manipulating the record
     const kv = await import("@/lib/kv/client.ts").then((m) => m.getKv());
     const old = Date.now() - 2 * 60 * 60 * 1000; // 2 hours ago
@@ -109,7 +109,7 @@ Deno.test("touchSession updates lastSeen if throttle window has passed", async (
 
 Deno.test("touchSession does NOT update lastSeen within throttle window", async () => {
   await withKv(async () => {
-    const s = await createSession("frank", "csrf");
+    const s = await createSession("frank", "csrf", "admin");
     const originalLastSeen = s.lastSeen;
     // Touch immediately (within the 1-hour throttle window)
     await touchSession(s.sessionId);

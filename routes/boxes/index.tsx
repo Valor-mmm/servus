@@ -1,5 +1,6 @@
 import { define } from "@/utils.ts";
-import { t } from "@/lib/i18n/t.ts";
+import { count, t } from "@/lib/i18n/t.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
 import { createBox, listBoxes } from "@/lib/inventory/boxRepo.ts";
 import { listRooms } from "@/lib/inventory/roomRepo.ts";
 import type { BoxWithItemCount } from "@/lib/inventory/boxRepo.ts";
@@ -33,12 +34,7 @@ function BoxesPage({ boxes, rooms, csrfToken }: PageProps) {
       </form>
 
       {boxes.length === 0
-        ? (
-          <div class="empty-state">
-            <img src="/lion.svg" alt="" aria-hidden="true" />
-            <p>{t("boxes.empty")}</p>
-          </div>
-        )
+        ? <EmptyState message={t("boxes.empty")} />
         : (
           <ul class="item-list">
             {boxes.map((box) => (
@@ -52,7 +48,7 @@ function BoxesPage({ boxes, rooms, csrfToken }: PageProps) {
                     ? roomMap[box.destinationRoomId] ?? "–"
                     : t("boxes.no_destination_room")}
                   {" · "}
-                  {t("boxes.item_count")}: {box.itemCount}
+                  {count(box.itemCount, t("items.singular"), t("items.plural"))}
                 </span>
                 <span class={`badge badge-${box.status}`}>
                   {t(`boxes.status.${box.status}` as Parameters<typeof t>[0])}

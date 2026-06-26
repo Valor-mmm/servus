@@ -13,6 +13,13 @@ const de = {
   "home.welcome": "Willkommen bei servus.",
   "home.subtitle": "Dein privates Haushaltssystem.",
 
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+  "dashboard.totalItems": "Gegenstände",
+  "dashboard.incompleteItems": "Unvollständig",
+  "dashboard.packedBoxes": "Kartons gepackt",
+  "dashboard.recent": "Zuletzt erfasst",
+  "dashboard.cta": "Erfassen",
+
   // ── Auth ──────────────────────────────────────────────────────────────────
   "auth.login": "Anmelden",
   "auth.logout": "Abmelden",
@@ -22,6 +29,7 @@ const de = {
   "auth.rate_limited": "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
   "auth.locked_out":
     "Konto vorübergehend gesperrt. Bitte warte {seconds} Sekunden.",
+  "auth.forbidden": "Kein Zugriff. Diese Seite ist nur für Administratoren.",
 
   // ── Errors ────────────────────────────────────────────────────────────────
   "error.not_found": "Seite nicht gefunden.",
@@ -105,6 +113,9 @@ const de = {
   "schemas.fields_heading": "Felder",
   "schemas.field_label": "Bezeichnung",
   "schemas.field_label_placeholder": "z. B. Farbe",
+  "schemas.field_key_label": "Schlüssel",
+  "schemas.field_key_immutable_hint":
+    "Der Feldschlüssel kann nach dem Speichern nicht mehr geändert werden.",
   "schemas.field_type": "Feldtyp",
   "schemas.field_options": "Auswahlmöglichkeiten (eine pro Zeile)",
   "schemas.add_field": "Feld hinzufügen",
@@ -226,6 +237,10 @@ const de = {
   "items.name_placeholder": "z. B. Sofa",
   "items.category_label": "Kategorie",
   "items.room_label": "Raum (optional)",
+  "items.standort": "Standort",
+  "items.standort.room": "Raum",
+  "items.standort.box": "Karton",
+  "items.standort.container": "Behälter",
   "items.value_label": "Geschätzter Wert (€, optional)",
   "items.warranty_label": "Garantie bis (optional)",
   "items.photos_label": "Fotos",
@@ -270,14 +285,21 @@ const de = {
   "items.addPhoto": "Foto hinzufügen",
   "items.fromGallery": "Aus Galerie",
   "items.removePhoto": "Foto entfernen",
+  "items.removePhoto_confirm": "Foto wirklich entfernen?",
   "items.removePhotoFailed":
     "Entfernen fehlgeschlagen. Bitte erneut versuchen.",
   "items.retry": "Wiederholen",
   "items.captureFinished": "Fertig",
-  "items.pending": "Ausstehend",
-  "items.needsReview": "Zur Überprüfung",
-  "items.pending_title": "Ausstehende Gegenstände",
-  "items.pending_empty": "Keine ausstehenden Gegenstände.",
+  "items.incomplete": "Unvollständig",
+  "items.complete": "Vollständig",
+  "items.saveComplete": "Speichern & fertig",
+  "items.saveIncomplete": "Speichern & unvollständig",
+  "items.incomplete_title": "Unvollständige Gegenstände",
+  "items.incomplete_empty":
+    "Keine unvollständigen Gegenstände. Alles erledigt!",
+  "items.triageIndex": "{n} von {m}",
+  "items.triagePrev": "Vorheriges",
+  "items.triageNext": "Nächstes",
   "items.quick_add_title": "Schnellerfassung",
   "items.recentCount": "neueste Gegenstände",
   "items.loadAll": "Alle Gegenstände laden",
@@ -299,14 +321,22 @@ const de = {
   "invites.code_warning":
     "Bitte kopiere diesen Code jetzt — er wird nicht erneut angezeigt.",
   "invites.code_label": "Einladungslink",
+  "invites.copy": "Link kopieren",
+  "invites.copy_done": "Kopiert!",
   "invites.qr_label": "QR-Code für Einladungslink",
   "invites.nav": "Einladungen",
 
   // ── Invite registration ────────────────────────────────────────────────────
   "invite.title": "Einladung",
+  "invite.app_context": "servus — Haushaltsmanagement",
+  "invite.access_context":
+    "Du wirst als Helfer:in hinzugefügt und kannst Gegenstände einsehen und bearbeiten.",
+  "invite.expiry_context": "Dieser Link ist gültig bis {expiry}.",
   "invite.confirm": "Einladung annehmen",
   "invite.confirm_subtitle":
     "Klicke auf den Button, um deinen Zugang zu aktivieren.",
+  "invite.already_logged_in":
+    "Du bist bereits angemeldet. Melde dich zuerst ab, um einen neuen Zugang zu aktivieren.",
   "invite.error.invalid": "Ungültiger oder abgelaufener Einladungscode.",
   "invite.error.rate_limited":
     "Zu viele Versuche. Bitte warte {seconds} Sekunden.",
@@ -355,6 +385,8 @@ const de = {
   "items.delete_container_confirm": "Trotzdem löschen",
   "items.label_page_title": "Behälter-Etikett",
   "items.label_action": "Etikett drucken",
+  "items.singular": "Gegenstand",
+  "items.plural": "Gegenstände",
   "categories.can_contain_label": "Kann Gegenstände enthalten",
   "categories.error.occupied_containers":
     "Kategorie enthält noch befüllte Behälter. Bitte erst leeren.",
@@ -382,6 +414,8 @@ const de = {
   "boxes.bulk_add_result": "{count} Gegenstand/Gegenstände hinzugefügt.",
   "boxes.remove_item": "Entfernen",
   "boxes.remove_item_confirm": 'Gegenstand "{name}" aus Karton entfernen?',
+  "boxes.unpack_all_confirm":
+    "Alle Gegenstände nach {room} verschieben? Diese Aktion kann nicht rückgängig gemacht werden.",
   "boxes.delete_confirm": 'Karton "{code}" wirklich löschen?',
   "boxes.error.not_empty":
     "Karton enthält noch Gegenstände und kann nicht gelöscht werden.",
@@ -391,6 +425,11 @@ const de = {
   "boxes.status.empty": "Leer",
   "boxes.status.packed": "Gepackt",
   "boxes.status.delivered": "Geliefert",
+
+  // Einpacken (bulk-pack into box)
+  "boxes.einpacken": "Einpacken",
+  "boxes.einpacken_heading": "Gegenstände einpacken",
+  "boxes.einpacken_empty": "Keine freien Gegenstände vorhanden.",
 
   // Box lifecycle actions
   "boxes.action.mark_delivered": "Als geliefert markieren",
@@ -403,6 +442,8 @@ const de = {
   "boxes.place_item_label": "In Raum einlagern",
   "boxes.assign_room_heading": "Zielraum festlegen",
   "boxes.label_item_count": "{count} Gegenstände",
+  "boxes.singular": "Karton",
+  "boxes.plural": "Kartons",
 } as const;
 
 export default de;

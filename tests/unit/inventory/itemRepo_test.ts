@@ -1,9 +1,10 @@
 import { assertEquals, assertExists, assertRejects } from "@std/assert";
-import { closeKv, setKv } from "@/lib/kv/client.ts";
+import { closeKv, getKv, setKv } from "@/lib/kv/client.ts";
 import {
   createItem,
   deleteItem,
   findItem,
+  findItemEntry,
   listItems,
   listItemsByCategory,
   listItemsByRoom,
@@ -25,7 +26,7 @@ const CAT_B = "cat-b";
 const ROOM_X = "room-x";
 const ROOM_Y = "room-y";
 
-Deno.test("createItem sets status:confirmed and photos:[]", async () => {
+Deno.test("createItem sets status:complete and photos:[]", async () => {
   await withKv(async () => {
     const item = await createItem({
       name: "Sofa",
@@ -34,13 +35,38 @@ Deno.test("createItem sets status:confirmed and photos:[]", async () => {
       estimatedValue: null,
     });
     assertExists(item.id);
-    assertEquals(item.status, "confirmed");
+    assertEquals(item.status, "complete");
     assertEquals(item.photos, []);
     assertEquals(item.name, "Sofa");
     assertEquals(item.categoryId, CAT_A);
     assertEquals(item.roomId, ROOM_X);
     assertEquals(typeof item.createdAt, "number");
     assertEquals(typeof item.updatedAt, "number");
+  });
+});
+
+Deno.test("updateItem: status=complete saves complete, status=incomplete saves incomplete", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Stuhl",
+      categoryId: CAT_A,
+      roomId: null,
+      estimatedValue: null,
+      status: "incomplete",
+    });
+    assertEquals(item.status, "incomplete");
+
+    const updated = await updateItem(item.id, {
+      status: "complete",
+      name: item.name,
+    });
+    assertEquals(updated.status, "complete");
+
+    const reverted = await updateItem(item.id, {
+      status: "incomplete",
+      name: item.name,
+    });
+    assertEquals(reverted.status, "incomplete");
   });
 });
 
@@ -193,6 +219,66 @@ Deno.test("updateItem throws for unknown id", async () => {
       () => updateItem("nonexistent", { name: "test" }),
       Error,
       "not found",
+    );
+  });
+});
+
+Deno.test("updateItem: atomic check rejects stale versionstamp (concurrent write guard)", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Apfel",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+    });
+
+    // Capture versionstamp before any update
+    const entryBefore = await findItemEntry(item.id);
+    const staleStamp = entryBefore.versionstamp;
+
+    // Advance the item to a new versionstamp via a legitimate update
+    await updateItem(item.id, { name: "Birne" });
+
+    // Attempt a raw atomic with the now-stale versionstamp — simulates a
+    // lost-update race where a concurrent writer read the old stamp
+    const kv = await getKv();
+    const result = await kv.atomic()
+      .check({ key: ["item", item.id], versionstamp: staleStamp })
+      .set(["item", item.id], { ...entryBefore.value, name: "Ghostwrite" })
+      .commit();
+
+    assertEquals(result.ok, false, "atomic must reject a stale versionstamp");
+
+    // The legitimate update's value must be intact
+    const current = await findItem(item.id);
+    assertEquals(current?.name, "Birne");
+  });
+});
+
+Deno.test("updateItem: versionstamp is available via findItemEntry", async () => {
+  await withKv(async () => {
+    const item = await createItem({
+      name: "Buch",
+      categoryId: null,
+      roomId: null,
+      estimatedValue: null,
+    });
+
+    const entry = await findItemEntry(item.id);
+    assertExists(
+      entry.versionstamp,
+      "findItemEntry must return a versionstamp",
+    );
+    assertEquals(entry.value?.name, "Buch");
+
+    // After an update, the versionstamp must change
+    await updateItem(item.id, { name: "Buch 2" });
+    const entry2 = await findItemEntry(item.id);
+    assertExists(entry2.versionstamp);
+    assertEquals(
+      entry.versionstamp !== entry2.versionstamp,
+      true,
+      "versionstamp must change after an update",
     );
   });
 });
