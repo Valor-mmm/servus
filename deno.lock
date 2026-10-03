@@ -27,8 +27,8 @@
     "jsr:@std/uuid@^1.0.9": "1.0.9",
     "npm:@opentelemetry/api@^1.9.0": "1.9.1",
     "npm:@playwright/test@^1.44.0": "1.60.0",
-    "npm:@preact/signals@^2.5.1": "2.9.1_preact@10.29.2",
-    "npm:@preact/signals@^2.9.0": "2.9.1_preact@10.29.2",
+    "npm:@preact/signals@^2.5.1": "2.9.1_preact@11.0.0_preact-render-to-string@6.7.0",
+    "npm:@preact/signals@^2.9.0": "2.9.1_preact@11.0.0_preact-render-to-string@6.7.0",
     "npm:@types/qrcode@1.5.5": "1.5.5",
     "npm:aws4fetch@1.0.20": "1.0.20",
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
@@ -36,10 +36,11 @@
     "npm:esbuild@~0.25.5": "0.25.7",
     "npm:hash-wasm@*": "4.12.0",
     "npm:hash-wasm@4.12.0": "4.12.0",
-    "npm:preact-render-to-string@^6.6.3": "6.7.0_preact@10.29.2",
-    "npm:preact-render-to-string@^6.7.0": "6.7.0_preact@10.29.2",
-    "npm:preact@^10.28.2": "10.29.2",
-    "npm:preact@^10.29.1": "10.29.2",
+    "npm:preact-render-to-string@^6.6.3": "6.7.0_preact@11.0.0",
+    "npm:preact-render-to-string@^6.7.0": "6.7.0_preact@11.0.0",
+    "npm:preact@11": "11.0.0_preact-render-to-string@6.7.0",
+    "npm:preact@^10.28.2": "10.29.8_preact-render-to-string@6.7.0",
+    "npm:preact@^10.29.1": "10.29.8_preact-render-to-string@6.7.0",
     "npm:qrcode@1.5.4": "1.5.4"
   },
   "jsr": {
@@ -293,11 +294,11 @@
     "@preact/signals-core@1.14.2": {
       "integrity": "sha512-RZHdBj9ZF4n40Rp4jS052EHHjBWf96P9oNdXPfhQTovCuWY9iQn3Gq+gOTJSgBO9A/JBuPfMOWsSX/lIU9Pc/A=="
     },
-    "@preact/signals@2.9.1_preact@10.29.2": {
+    "@preact/signals@2.9.1_preact@11.0.0_preact-render-to-string@6.7.0": {
       "integrity": "sha512-xVqN8mJjbSN5IB/8Ubmd9NN+Ew6zJswoRxrjZbH3YsgkMshFeO6d8zxEFpHRTq9GJZx7cnPs2CnCpFqtGXGNsw==",
       "dependencies": [
         "@preact/signals-core",
-        "preact"
+        "preact@11.0.0_preact-render-to-string@6.7.0"
       ]
     },
     "@types/node@25.9.1": {
@@ -452,14 +453,29 @@
     "pngjs@5.0.0": {
       "integrity": "sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw=="
     },
-    "preact-render-to-string@6.7.0_preact@10.29.2": {
+    "preact-render-to-string@6.7.0_preact@11.0.0": {
       "integrity": "sha512-Z4WR8fmLMRpdYqJ9i7vrlXSsSrxVJydwrkEXHapexfARbWfGb7vGcnvNQnIzN0cXciMVOlz/XLoiMCi9gUsy9Q==",
       "dependencies": [
-        "preact"
+        "preact@11.0.0_preact-render-to-string@6.7.0"
       ]
     },
-    "preact@10.29.2": {
-      "integrity": "sha512-7tNmwg/7mzzAoB/8kSg6Hl37JraAZw3Z3A0JSY7VXlZwo82Xn0G7wKbNNs2qoF4ZEEsQGTwDAroNdqKs1ofJxQ=="
+    "preact@10.29.8_preact-render-to-string@6.7.0": {
+      "integrity": "sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==",
+      "dependencies": [
+        "preact-render-to-string"
+      ],
+      "optionalPeers": [
+        "preact-render-to-string"
+      ]
+    },
+    "preact@11.0.0_preact-render-to-string@6.7.0": {
+      "integrity": "sha512-LRTLKuSe6VYPhvBDjwFaX+nuZnpsw6IN2GSboisAvhGsncylBmrbDCERhgKDn6yP2mAwbGvsB5OVyTe33M8gBg==",
+      "dependencies": [
+        "preact-render-to-string"
+      ],
+      "optionalPeers": [
+        "preact-render-to-string"
+      ]
     },
     "qrcode@1.5.4": {
       "integrity": "sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==",
@@ -544,7 +560,7 @@
       "npm:aws4fetch@1.0.20",
       "npm:hash-wasm@4.12.0",
       "npm:preact-render-to-string@^6.7.0",
-      "npm:preact@^10.29.1",
+      "npm:preact@11",
       "npm:qrcode@1.5.4"
     ]
   }
