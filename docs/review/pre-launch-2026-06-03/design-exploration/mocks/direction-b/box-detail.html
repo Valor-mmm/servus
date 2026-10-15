@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Karton B-006 — Direction B: Hütte</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --loden: #3D5A3E;
+    --loden-tief: #2A4129;
+    --eiche: #7A4F2B;
+    --eiche-dunkel: #553A1F;
+    --eiche-hell: #B89779;
+    --papier: #FAF5E8;
+    --papier-warm: #F2E9D0;
+    --tinte: #2A1F12;
+    --tinte-mid: #5E4C36;
+    --schnee: #FFFFFF;
+    --bayernblau: #1A5FA8;
+    --enzian: #C4922A;
+    --enzian-hell: #E5B95A;
+    --rot: #8B2D2D;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "EB Garamond", Garamond, serif;
+    background: var(--papier);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.12  0 0 0 0 0.07  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    color: var(--tinte);
+  }
+
+  /* shared top nav */
+  header.top {
+    background: var(--eiche-dunkel);
+    color: var(--papier);
+    border-bottom: 3px solid var(--enzian);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'><filter id='wood'><feTurbulence type='turbulence' baseFrequency='0.01 0.5' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 0.20  0 0 0 0 0.13  0 0 0 0 0.06  0 0 0 0.40 0'/></filter><rect width='100%' height='100%' filter='url(%23wood)'/></svg>");
+  }
+  .top-inner { max-width: 1080px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; gap: 32px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand svg { width: 40px; height: 40px; }
+  .brand .wordmark { font-family: "EB Garamond", serif; font-weight: 600; font-size: 26px; }
+  .brand .wordmark em { font-style: italic; color: var(--enzian-hell); font-weight: 500; }
+  nav.primary { display: flex; gap: 4px; flex: 1; }
+  nav.primary a { color: var(--papier); text-decoration: none; font-family: "EB Garamond", serif; font-size: 18px; padding: 8px 14px; opacity: 0.8; position: relative; }
+  nav.primary a.active { opacity: 1; color: var(--enzian-hell); font-style: italic; }
+  nav.primary a.active::after { content: ""; position: absolute; bottom: -16px; left: 14px; right: 14px; height: 3px; background: var(--enzian); }
+  .icon-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: var(--papier); width: 34px; height: 34px; border-radius: 4px; cursor: pointer; font-size: 15px; }
+  .top-right { display: flex; gap: 12px; align-items: center; }
+  @media (max-width: 768px) { nav.primary { display: none; } .top-inner { padding: 12px 16px; } }
+
+  .page { max-width: 1080px; margin: 0 auto; padding: 32px 32px 110px; }
+  @media (max-width: 768px) { .page { padding: 20px 16px 110px; } }
+
+  /* breadcrumb */
+  .crumbs {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--eiche);
+    margin-bottom: 16px;
+  }
+  .crumbs a { color: var(--eiche-dunkel); text-decoration: none; }
+  .crumbs span { margin: 0 6px; color: var(--eiche-hell); }
+
+  /* ── Box hero: looks like an actual paper tag tied to a box ── */
+  .box-hero {
+    background: var(--schnee);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.20  0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    border: 1.5px solid var(--eiche);
+    padding: 32px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: center;
+    position: relative;
+    box-shadow: 6px 6px 0 rgba(122,79,43,0.15);
+  }
+  .box-hero::before {
+    content: "";
+    position: absolute;
+    top: 14px; left: 14px; right: 14px; bottom: 14px;
+    border: 1px solid var(--eiche-hell);
+    pointer-events: none;
+  }
+  /* Twine hole at top-left, suggests a real tag */
+  .box-hero::after {
+    content: "";
+    position: absolute;
+    top: -10px; left: 40px;
+    width: 18px; height: 18px;
+    background: var(--papier);
+    border: 1.5px solid var(--eiche);
+    border-radius: 50%;
+  }
+
+  .code-block {
+    text-align: center;
+    padding-right: 24px;
+    border-right: 1.5px dashed var(--eiche-hell);
+    position: relative; z-index: 1;
+  }
+  .code-block .label {
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--eiche);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .code-block .code {
+    font-family: "EB Garamond", serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 1;
+    color: var(--tinte);
+    letter-spacing: -0.02em;
+  }
+  .code-block .stamp {
+    margin-top: 12px;
+    display: inline-block;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--rot);
+    border: 1.5px solid var(--rot);
+    padding: 4px 12px;
+    transform: rotate(-3deg);
+    opacity: 0.85;
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+  .hero-content .title {
+    font-family: "EB Garamond", serif;
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    color: var(--tinte);
+  }
+  .hero-content .meta-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 18px;
+    font-size: 15px;
+    color: var(--tinte-mid);
+  }
+  .hero-content .meta-grid dt {
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eiche);
+    font-weight: 600;
+    align-self: center;
+  }
+  .hero-content .meta-grid dd {
+    margin: 0;
+    font-family: "EB Garamond", serif;
+    font-size: 17px;
+    color: var(--tinte);
+  }
+
+  .hero-status {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+  .hero-status .seal {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--papier);
+    background: var(--bayernblau);
+    border-radius: 999px;
+    padding: 16px 22px;
+    display: inline-block;
+    box-shadow: inset 0 0 0 3px var(--papier), inset 0 0 0 4.5px var(--bayernblau);
+  }
+  .hero-status .count {
+    display: block;
+    font-family: "EB Garamond", serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin-top: 14px;
+    color: var(--tinte);
+  }
+  .hero-status .count .num { font-size: 36px; font-style: italic; color: var(--loden); display: block; line-height: 1; }
+
+  @media (max-width: 760px) {
+    .box-hero { grid-template-columns: 1fr; gap: 18px; padding: 28px 22px 22px; }
+    .code-block { border-right: none; border-bottom: 1.5px dashed var(--eiche-hell); padding: 0 0 16px; }
+    .code-block .code { font-size: 48px; }
+    .hero-status { text-align: left; }
+  }
+
+  /* ── Actions ── */
+  .actions {
+    display: flex; gap: 12px; align-items: center;
+    margin: 24px 0 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: "EB Garamond", serif;
+    font-weight: 500;
+    font-size: 17px;
+    padding: 10px 18px;
+    border: 1.5px solid var(--eiche);
+    background: var(--schnee);
+    color: var(--tinte);
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 2px;
+    box-shadow: 2px 2px 0 var(--eiche-hell);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn:hover { background: var(--papier-warm); }
+  .btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--eiche-hell); }
+  .btn.primary {
+    background: var(--loden);
+    color: var(--papier);
+    border-color: var(--loden-tief);
+    box-shadow: 2px 2px 0 var(--eiche-dunkel);
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: var(--loden-tief); }
+  .btn.danger {
+    background: transparent;
+    color: var(--rot);
+    border-color: var(--rot);
+    font-style: italic;
+    box-shadow: none;
+  }
+  .btn.danger:hover { background: var(--rot); color: var(--papier); }
+  .btn.link {
+    border: none; background: transparent; box-shadow: none; padding-left: 4px;
+    font-style: italic; color: var(--eiche);
+  }
+  .btn.link:hover { color: var(--loden); }
+
+  /* ── Capture pane ── */
+  .capture-pane {
+    margin-top: 24px;
+    background: var(--papier-warm);
+    border: 1.5px solid var(--eiche);
+    border-radius: 2px;
+    padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    flex-wrap: wrap;
+  }
+  .capture-pane h3 {
+    font-family: "EB Garamond", serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .capture-pane p { margin: 0; color: var(--tinte-mid); font-style: italic; font-size: 15px; }
+
+  /* ── Inventory inside the box ── */
+  .section-head {
+    margin: 36px 0 8px;
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 1.5px solid var(--eiche);
+    padding-bottom: 4px;
+  }
+  .section-head h2 {
+    font-family: "EB Garamond", serif;
+    font-size: 26px;
+    font-weight: 600;
+    font-style: italic;
+    margin: 0;
+    color: var(--tinte);
+  }
+  .section-head .meta {
+    font-family: "Inter", sans-serif;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--eiche); font-weight: 600;
+  }
+
+  ul.items { list-style: none; padding: 0; margin: 0; }
+  li.item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    gap: 14px; align-items: center;
+    padding: 14px 4px;
+    border-bottom: 1px dotted var(--eiche-hell);
+  }
+  li.item:nth-child(odd) { background: rgba(122,79,43,0.04); }
+  .row-num {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--eiche);
+    font-size: 18px;
+    text-align: right;
+  }
+  .item .name {
+    font-family: "EB Garamond", serif;
+    font-size: 19px;
+    color: var(--tinte);
+  }
+  .qty {
+    display: inline-flex; background: var(--schnee); border: 1px solid var(--eiche); border-radius: 2px;
+  }
+  .qty button { background: transparent; border: none; font: inherit; font-family: "EB Garamond", serif; font-size: 18px; font-weight: 600; padding: 4px 12px; color: var(--eiche-dunkel); cursor: pointer; min-width: 32px; }
+  .qty .count { padding: 4px 10px; font-family: "EB Garamond", serif; font-style: italic; font-size: 16px; min-width: 34px; text-align: center; border-left: 1px solid var(--eiche); border-right: 1px solid var(--eiche); background: var(--papier-warm); display: grid; place-items: center; }
+  .row-remove {
+    background: transparent; border: none;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    color: var(--eiche);
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 15px;
+  }
+  .row-remove:hover { color: var(--rot); text-decoration: underline; }
+
+  /* mobile bottom nav */
+  nav.bottom { display: none; }
+  @media (max-width: 768px) {
+    nav.bottom { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--eiche-dunkel); border-top: 3px solid var(--enzian); padding: 8px 0 14px; justify-content: space-around; z-index: 10; }
+    nav.bottom a { color: var(--papier); text-decoration: none; font-family: "EB Garamond", serif; font-size: 12px; font-style: italic; flex: 1; text-align: center; display: grid; gap: 3px; justify-items: center; opacity: 0.7; }
+    nav.bottom a.active { opacity: 1; color: var(--enzian-hell); }
+    nav.bottom a .glyph { font-size: 22px; font-style: normal; }
+    nav.bottom a.quick-add { opacity: 1; background: var(--enzian); color: var(--tinte); border-radius: 999px; padding: 6px 4px; margin-top: -16px; box-shadow: 0 0 0 4px var(--eiche-dunkel); }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="36" fill="#FAF5E8" stroke="#E5B95A" stroke-width="1.5"/>
+          <g stroke="#E5B95A" stroke-width="1.2" fill="none">
+            <path d="M40 8 L40 18"/><path d="M18 18 L25 26"/><path d="M62 18 L55 26"/>
+            <path d="M8 40 L18 40"/><path d="M72 40 L62 40"/>
+            <path d="M18 62 L25 54"/><path d="M62 62 L55 54"/>
+          </g>
+          <path d="M28 32 L40 24 L52 32 L52 48 L46 56 L40 58 L34 56 L28 48 Z" fill="#C4922A" stroke="#553A1F" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="34" cy="40" r="1.6" fill="#2A1F12"/>
+          <circle cx="46" cy="40" r="1.6" fill="#2A1F12"/>
+          <path d="M37 46 L40 50 L43 46 Z" fill="#2A1F12"/>
+        </svg>
+        <div class="wordmark"><em>s</em>ervus</div>
+      </div>
+      <nav class="primary">
+        <a href="#">Gegenstände</a>
+        <a href="#" class="active">Umzugskartons</a>
+        <a href="#">Kategorien</a>
+        <a href="#">Räume</a>
+        <a href="#">Einladungen</a>
+      </nav>
+      <div class="top-right">
+        <button class="icon-btn">☾</button>
+        <button class="icon-btn">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <div class="crumbs"><a href="#">Kartons</a><span>›</span>B-006</div>
+
+    <section class="box-hero">
+      <div class="code-block">
+        <div class="label">Karton</div>
+        <div class="code">B-006</div>
+        <div class="stamp">gepackt · 3.6.</div>
+      </div>
+      <div class="hero-content">
+        <h1 class="title">Küche — Geschirr &amp; Pfannen</h1>
+        <dl class="meta-grid">
+          <dt>Zielraum</dt><dd>Küche</dd>
+          <dt>Erstellt</dt><dd>3. Juni 2026</dd>
+          <dt>Schwer</dt><dd>Ja, schwer beladen</dd>
+        </dl>
+      </div>
+      <div class="hero-status">
+        <span class="seal">Gepackt</span>
+        <span class="count"><span class="num">3</span>Gegenstände</span>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary">✓ Als geliefert markieren</button>
+      <a class="btn" href="#">Bearbeiten</a>
+      <a class="btn" href="#">Karton-Etikett</a>
+      <button class="btn danger">Löschen</button>
+      <a class="btn link" href="#">← Zurück zur Übersicht</a>
+    </div>
+
+    <div class="capture-pane">
+      <div>
+        <h3>Foto-Sitzung</h3>
+        <p>Mehrere Gegenstände nacheinander mit der Kamera erfassen.</p>
+      </div>
+      <button class="btn primary">📷 Kamera aktivieren</button>
+    </div>
+
+    <div class="section-head">
+      <h2>Was drin ist</h2>
+      <span class="meta">3 Posten · 9 Stück gesamt</span>
+    </div>
+
+    <ul class="items">
+      <li class="item">
+        <span class="row-num">i</span>
+        <div class="name">Messerblock, fünfteilig</div>
+        <div class="qty"><button>−</button><span class="count">×4</span><button>+</button></div>
+        <button class="row-remove">entfernen</button>
+      </li>
+      <li class="item">
+        <span class="row-num">ii</span>
+        <div class="name">Kupferpfanne, klein</div>
+        <div class="qty"><button>−</button><span class="count">×4</span><button>+</button></div>
+        <button class="row-remove">entfernen</button>
+      </li>
+      <li class="item">
+        <span class="row-num">iii</span>
+        <div class="name">Suppenkelle</div>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+        <button class="row-remove">entfernen</button>
+      </li>
+    </ul>
+
+  </div>
+
+  <nav class="bottom">
+    <a href="#"><span class="glyph">▦</span>Inventar</a>
+    <a href="#" class="active"><span class="glyph">▥</span>Kartons</a>
+    <a href="#" class="quick-add"><span class="glyph">＋</span>Schnell</a>
+    <a href="#"><span class="glyph">✦</span>Kat.</a>
+    <a href="#"><span class="glyph">⌂</span>Räume</a>
+  </nav>
+
+</body>
+</html>

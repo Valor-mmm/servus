@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Karton B-006 — Direction A: Raute</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --blau: #0E4FA0;
+    --blau-tief: #093C7C;
+    --weiss: #FFFFFF;
+    --tinte: #0A1A2E;
+    --pergament: #F4ECDA;
+    --pergament-mid: #ECE2C8;
+    --gold: #E5A82E;
+    --mortel: #7B8B9E;
+    --rot: #B4332D;
+    --grun: #2F7A4F;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background: var(--pergament);
+    color: var(--tinte);
+  }
+
+  /* Reuse top-bar styles */
+  header.top { background: var(--blau); color: var(--weiss); position: relative; overflow: hidden; }
+  header.top .lozenge-strip {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 60px 60px,
+      linear-gradient(45deg,  transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 60px 60px;
+    opacity: 0.07;
+  }
+  .top-inner { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 40px; }
+  .brand { display: flex; gap: 12px; align-items: center; font-family: "DIN Alternate", system-ui; font-weight: 900; font-size: 24px; }
+  .brand svg { width: 36px; height: 36px; }
+  nav.primary { display: flex; gap: 8px; flex: 1; }
+  nav.primary a { color: var(--weiss); text-decoration: none; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; padding: 10px 16px; }
+  nav.primary a.active { background: var(--gold); color: var(--tinte); clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%); }
+  .icon-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: var(--weiss); width: 38px; height: 38px; display: grid; place-items: center; cursor: pointer; }
+  .top-actions { display: flex; gap: 12px; }
+  @media (max-width: 768px) { nav.primary { display: none; } .top-inner { padding: 14px 16px; } }
+
+  .page { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+  @media (max-width: 768px) { .page { padding: 0 16px 100px; } }
+
+  /* ── Breadcrumb ── */
+  .crumbs {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--mortel);
+    margin: 24px 0 0;
+  }
+  .crumbs a { color: var(--mortel); text-decoration: none; }
+  .crumbs span { margin: 0 8px; }
+
+  /* ── Hero: box code as a giant heraldic block ── */
+  .box-hero {
+    margin-top: 16px;
+    background: var(--blau);
+    color: var(--weiss);
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 28px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .box-hero .lozenge-cap {
+    position: absolute; top: -20px; right: -20px;
+    width: 160px; height: 160px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    opacity: 0.18;
+  }
+  .box-code {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    background: var(--weiss);
+    color: var(--blau);
+    padding: 12px 22px;
+    border: 3px solid var(--gold);
+    position: relative;
+    z-index: 1;
+  }
+  .box-meta { position: relative; z-index: 1; }
+  .box-label-line {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.1;
+    margin: 0 0 6px;
+  }
+  .box-sub {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .box-status {
+    position: relative; z-index: 1;
+    text-align: right;
+  }
+  .box-status .badge-big {
+    display: inline-block;
+    font-family: "DIN Alternate", system-ui;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: var(--gold);
+    color: var(--tinte);
+    padding: 8px 14px;
+    margin-bottom: 8px;
+  }
+  .box-status .count {
+    display: block;
+    font-family: "DIN Alternate", system-ui;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .box-status .count-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+  @media (max-width: 640px) {
+    .box-hero { grid-template-columns: auto 1fr; gap: 16px; padding: 20px; }
+    .box-code { font-size: 38px; padding: 8px 14px; }
+    .box-status { grid-column: 1 / -1; text-align: left; }
+  }
+
+  /* ── Actions ── */
+  .actions {
+    display: flex; gap: 12px;
+    margin: 24px 0 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 18px;
+    border: 1.5px solid var(--tinte);
+    background: var(--weiss);
+    color: var(--tinte);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn:hover { background: var(--tinte); color: var(--weiss); }
+  .btn.primary {
+    background: var(--gold);
+    color: var(--tinte);
+    border-color: var(--gold);
+  }
+  .btn.primary:hover { background: var(--blau); color: var(--weiss); border-color: var(--blau); }
+  .btn.danger {
+    background: transparent;
+    color: var(--rot);
+    border-color: var(--rot);
+  }
+  .btn.danger:hover { background: var(--rot); color: var(--weiss); }
+  .btn.link {
+    border: none;
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    color: var(--tinte);
+    padding-left: 6px;
+  }
+
+  /* ── Item list inside box ── */
+  .section-head {
+    margin: 32px 0 12px;
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 2px solid var(--tinte);
+    padding-bottom: 8px;
+  }
+  .section-head h2 {
+    font-family: "DIN Alternate", system-ui;
+    font-size: 22px; font-weight: 800;
+    margin: 0; letter-spacing: -0.01em;
+  }
+  .section-head .meta {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mortel); font-weight: 700;
+  }
+  ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  li.item {
+    display: grid;
+    grid-template-columns: 32px 1fr auto auto;
+    gap: 14px; align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #D6CDB3;
+  }
+  .row-mark {
+    width: 16px; height: 16px;
+    background: var(--blau);
+    transform: rotate(45deg);
+  }
+  .item .name {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .qty {
+    display: flex; border: 1.5px solid var(--tinte); background: var(--weiss);
+  }
+  .qty button {
+    border: none; background: transparent; padding: 4px 12px;
+    font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; color: var(--tinte);
+    min-width: 36px;
+  }
+  .qty .count {
+    padding: 4px 10px; font-family: "DIN Alternate", system-ui; font-weight: 700;
+    background: var(--pergament); min-width: 36px; text-align: center;
+    border-left: 1px solid var(--tinte); border-right: 1px solid var(--tinte);
+    align-self: stretch; display: grid; place-items: center;
+  }
+  .row-remove {
+    background: transparent;
+    border: none;
+    color: var(--mortel);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+  .row-remove:hover { color: var(--rot); }
+
+  /* ── Side capture pane ── */
+  .capture-pane {
+    margin-top: 24px;
+    background: var(--pergament-mid);
+    padding: 20px 24px;
+    border: 1.5px solid var(--tinte);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .capture-pane h3 {
+    margin: 0;
+    font-family: "DIN Alternate", system-ui;
+    font-size: 18px; font-weight: 800;
+  }
+  .capture-pane p { margin: 4px 0 0; color: var(--mortel); font-size: 14px; }
+
+  /* mobile bottom nav */
+  nav.bottom { display: none; }
+  @media (max-width: 768px) {
+    nav.bottom { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--blau); color: var(--weiss); border-top: 3px solid var(--gold); padding: 8px 0 14px; justify-content: space-around; z-index: 10; }
+    nav.bottom a { color: var(--weiss); text-decoration: none; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; text-align: center; flex: 1; display: grid; gap: 4px; justify-items: center; opacity: 0.6; }
+    nav.bottom a.active { opacity: 1; }
+    nav.bottom a .glyph { font-size: 18px; }
+    nav.bottom a.quick-add { opacity: 1; background: var(--gold); color: var(--tinte); clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%); padding: 8px 4px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="lozenge-strip"></div>
+    <div class="top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="60" height="60" stroke="#E5A82E" stroke-width="2" fill="none"/>
+          <path d="M16 44 L24 22 L32 38 L40 22 L48 44 L42 44 L38 36 L32 46 L26 36 L22 44 Z" fill="#E5A82E"/>
+          <circle cx="32" cy="14" r="2.4" fill="#E5A82E"/>
+        </svg>
+        servus
+      </div>
+      <nav class="primary">
+        <a href="#">Gegenstände</a>
+        <a href="#" class="active">Umzugskartons</a>
+        <a href="#">Kategorien</a>
+        <a href="#">Räume</a>
+        <a href="#">Einladungen</a>
+      </nav>
+      <div class="top-actions">
+        <button class="icon-btn">☾</button>
+        <button class="icon-btn">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="crumbs"><a href="#">Kartons</a><span>›</span>B-006</div>
+
+    <section class="box-hero">
+      <div class="lozenge-cap"></div>
+      <div class="box-code">B-006</div>
+      <div class="box-meta">
+        <div class="box-label-line">Küche – Geschirr &amp; Pfannen</div>
+        <div class="box-sub">Zielraum: Küche · Gepackt am 03.06.2026</div>
+      </div>
+      <div class="box-status">
+        <span class="badge-big">Gepackt</span>
+        <span class="count">3</span>
+        <span class="count-label">Gegenstände</span>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary">✓ Als geliefert markieren</button>
+      <a class="btn" href="#">Bearbeiten</a>
+      <a class="btn" href="#">Karton-Etikett →</a>
+      <button class="btn danger">Löschen</button>
+      <a class="btn link" href="#">← Zurück</a>
+    </div>
+
+    <div class="capture-pane">
+      <div>
+        <h3>Foto-Sitzung starten</h3>
+        <p>Schnell mehrere Gegenstände in diesem Karton erfassen.</p>
+      </div>
+      <button class="btn primary">📷 Kamera aktivieren</button>
+    </div>
+
+    <div class="section-head">
+      <h2>Inhalt</h2>
+      <span class="meta">3 Einträge · 9 Stück gesamt</span>
+    </div>
+
+    <ul class="items">
+      <li class="item">
+        <span class="row-mark"></span>
+        <div class="name">Messerblock, fünfteilig</div>
+        <div class="qty"><button>−</button><span class="count">×4</span><button>+</button></div>
+        <button class="row-remove">Entfernen</button>
+      </li>
+      <li class="item">
+        <span class="row-mark"></span>
+        <div class="name">Kupferpfanne, klein</div>
+        <div class="qty"><button>−</button><span class="count">×4</span><button>+</button></div>
+        <button class="row-remove">Entfernen</button>
+      </li>
+      <li class="item">
+        <span class="row-mark"></span>
+        <div class="name">Suppenkelle</div>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+        <button class="row-remove">Entfernen</button>
+      </li>
+    </ul>
+
+  </div>
+
+  <nav class="bottom">
+    <a href="#"><span class="glyph">▣</span>Gegenstände</a>
+    <a href="#" class="active"><span class="glyph">◫</span>Kartons</a>
+    <a href="#" class="quick-add"><span class="glyph">+</span>Schnell</a>
+    <a href="#"><span class="glyph">◌</span>Kat.</a>
+    <a href="#"><span class="glyph">⌂</span>Räume</a>
+  </nav>
+
+</body>
+</html>

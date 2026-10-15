@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Karton B-006 — Direction C: Bergsteiger</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --schiefer: #1F2A35;
+    --schiefer-tief: #0E1620;
+    --gletscher: #3FA1B8;
+    --gletscher-hell: #5DC4DA;
+    --himmel: #DCE9F0;
+    --himmel-tief: #C4D6E1;
+    --firn: #F7FAFC;
+    --granit: #4A5567;
+    --granit-hell: #A4B0C0;
+    --fohn: #E8A540;
+    --enzian: #1F4E8C;
+    --almrot: #A04545;
+    --packed: var(--gletscher);
+    --delivered: #3D8B5C;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Inter Tight", system-ui, sans-serif; background: var(--himmel); color: var(--schiefer); }
+
+  /* shared top */
+  header.top { background: var(--schiefer); color: var(--firn); border-bottom: 2px solid var(--gletscher); }
+  .top-inner { max-width: 1180px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; gap: 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+  .brand svg { width: 28px; height: 28px; }
+  nav.primary { display: flex; gap: 0; flex: 1; }
+  nav.primary a { color: var(--firn); text-decoration: none; font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; padding: 8px 16px; border-right: 1px solid rgba(255,255,255,0.08); opacity: 0.55; }
+  nav.primary a:first-child { border-left: 1px solid rgba(255,255,255,0.08); }
+  nav.primary a.active { opacity: 1; color: var(--gletscher-hell); background: var(--schiefer-tief); border-top: 2px solid var(--gletscher); margin-top: -2px; }
+  .coords { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--granit-hell); letter-spacing: 0.08em; }
+  .coords .blip { display: inline-block; width: 6px; height: 6px; background: var(--fohn); border-radius: 50%; margin-right: 6px; }
+  .icon-btn { background: transparent; color: var(--firn); border: 1px solid rgba(255,255,255,0.18); width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; font-size: 13px; }
+  .top-right { display: flex; gap: 8px; }
+  @media (max-width: 768px) { nav.primary { display: none; } .top-inner { padding: 12px 16px; gap: 12px; } }
+
+  .page { max-width: 1180px; margin: 0 auto; padding: 24px 32px 110px; }
+  @media (max-width: 768px) { .page { padding: 16px 16px 110px; } }
+
+  /* breadcrumb / route */
+  .route {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+    margin-bottom: 14px;
+  }
+  .route a { color: var(--enzian); text-decoration: none; }
+  .route .sep { margin: 0 6px; color: var(--granit-hell); }
+
+  /* ── Box hero: a "pitch card" ── */
+  .pitch-card {
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+    display: grid;
+    grid-template-columns: 220px 1fr 220px;
+    gap: 0;
+    overflow: hidden;
+  }
+  .pitch-card .id-block {
+    background: var(--schiefer);
+    color: var(--firn);
+    padding: 22px 24px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .pitch-card .id-block .row {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gletscher-hell);
+  }
+  .pitch-card .code {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 48px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 12px 0;
+    color: var(--firn);
+  }
+  .pitch-card .grade {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    background: var(--gletscher);
+    color: var(--schiefer-tief);
+    padding: 4px 10px;
+    align-self: flex-start;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .pitch-card .body {
+    padding: 22px 28px;
+  }
+  .pitch-card .title-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .pitch-card .title-row h1 {
+    margin: 0;
+    font-family: "Inter Tight", sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    color: var(--schiefer);
+  }
+  .pitch-card .updated {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--granit);
+  }
+  .pitch-card dl {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px 1fr;
+    gap: 10px 16px;
+    margin: 0;
+  }
+  .pitch-card dt {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+    font-weight: 500;
+    align-self: center;
+  }
+  .pitch-card dd {
+    margin: 0;
+    font-size: 14px;
+    color: var(--schiefer);
+    font-weight: 500;
+  }
+  .pitch-card .stats {
+    background: var(--himmel);
+    padding: 22px 24px;
+    border-left: 1px solid var(--himmel-tief);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .pitch-card .stats .row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px dotted var(--granit-hell);
+    padding-bottom: 8px;
+  }
+  .pitch-card .stats .row:last-child { border-bottom: none; }
+  .pitch-card .stats .lab {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+  }
+  .pitch-card .stats .val {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--schiefer);
+  }
+  .pitch-card .stats .val.gletscher { color: var(--gletscher); }
+
+  @media (max-width: 960px) {
+    .pitch-card { grid-template-columns: 1fr; }
+    .pitch-card .stats { border-left: none; border-top: 1px solid var(--himmel-tief); flex-direction: row; flex-wrap: wrap; }
+    .pitch-card .stats .row { flex: 1; min-width: 130px; border-bottom: none; border-right: 1px dotted var(--granit-hell); padding-right: 12px; padding-bottom: 0; }
+    .pitch-card .stats .row:last-child { border-right: none; }
+    .pitch-card dl { grid-template-columns: 110px 1fr; }
+  }
+
+  /* Action toolbar */
+  .toolbar {
+    display: flex; gap: 0;
+    margin-top: 0;
+    border: 1px solid var(--schiefer);
+    border-top: none;
+    background: var(--firn);
+  }
+  .toolbar .tool {
+    flex: 1;
+    background: var(--firn);
+    color: var(--schiefer);
+    border: none;
+    border-right: 1px solid var(--himmel-tief);
+    padding: 14px 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .toolbar .tool:last-child { border-right: none; }
+  .toolbar .tool:hover { background: var(--himmel); }
+  .toolbar .tool.primary {
+    background: var(--gletscher);
+    color: var(--schiefer-tief);
+  }
+  .toolbar .tool.primary:hover { background: var(--gletscher-hell); }
+  .toolbar .tool.danger { color: var(--almrot); }
+  .toolbar .tool.danger:hover { background: var(--almrot); color: var(--firn); }
+
+  @media (max-width: 640px) {
+    .toolbar { flex-wrap: wrap; }
+    .toolbar .tool { flex: 1 1 50%; border-bottom: 1px solid var(--himmel-tief); }
+  }
+
+  /* ── Capture panel ── */
+  .capture {
+    margin-top: 24px;
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+    padding: 18px 24px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .capture h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--schiefer);
+  }
+  .capture p {
+    margin: 4px 0 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--granit);
+  }
+  .capture button {
+    background: var(--schiefer);
+    color: var(--firn);
+    border: 1.5px solid var(--schiefer);
+    padding: 10px 18px;
+    font: inherit; font-family: "Inter Tight"; font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .capture button:hover { background: var(--enzian); border-color: var(--enzian); }
+
+  /* ── Pitch contents table ── */
+  .section-head {
+    margin: 32px 0 8px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--schiefer);
+    padding-bottom: 8px;
+  }
+  .section-head h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .section-head .meta {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--granit);
+  }
+
+  table.contents {
+    width: 100%; border-collapse: collapse;
+    background: var(--firn);
+    border: 1px solid var(--schiefer);
+    margin-top: 0;
+  }
+  table.contents thead th {
+    background: var(--schiefer);
+    color: var(--gletscher-hell);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: left;
+    padding: 10px 14px;
+  }
+  table.contents td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--himmel-tief);
+    vertical-align: middle;
+  }
+  table.contents tr:last-child td { border-bottom: none; }
+  td.idx {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--granit);
+    font-size: 12px;
+    width: 50px;
+  }
+  td.iname { font-weight: 600; font-size: 15px; }
+  td.iqty {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: right;
+    color: var(--schiefer);
+  }
+  td.iqty .controls {
+    display: inline-flex; align-items: center;
+    border: 1.5px solid var(--schiefer);
+    margin-left: 10px;
+    background: var(--firn);
+  }
+  td.iqty .controls button {
+    background: transparent; border: none; cursor: pointer;
+    font: inherit; font-weight: 600; font-size: 13px;
+    padding: 3px 10px;
+    color: var(--schiefer);
+    min-width: 26px;
+  }
+  td.iqty .controls .n {
+    padding: 3px 8px; background: var(--himmel);
+    border-left: 1px solid var(--schiefer); border-right: 1px solid var(--schiefer);
+    min-width: 30px; text-align: center;
+  }
+  td.iremove {
+    text-align: right;
+    width: 80px;
+  }
+  td.iremove button {
+    background: transparent;
+    border: 1px solid var(--himmel-tief);
+    color: var(--granit);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  td.iremove button:hover { color: var(--almrot); border-color: var(--almrot); }
+
+  /* Mobile bottom nav */
+  nav.bottom { display: none; }
+  @media (max-width: 768px) {
+    nav.bottom { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--schiefer); border-top: 2px solid var(--gletscher); padding: 6px 0 14px; justify-content: space-around; z-index: 10; }
+    nav.bottom a { color: var(--firn); text-decoration: none; font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; flex: 1; text-align: center; display: grid; gap: 4px; justify-items: center; opacity: 0.55; padding: 6px 0; }
+    nav.bottom a.active { opacity: 1; color: var(--gletscher-hell); }
+    nav.bottom a .glyph { font-size: 14px; line-height: 1; }
+    nav.bottom a.quick-add { opacity: 1; background: var(--gletscher); color: var(--schiefer); }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="24,6 42,40 6,40" fill="none" stroke="#5DC4DA" stroke-width="2"/>
+          <polygon points="24,16 36,40 12,40" fill="#3FA1B8"/>
+          <circle cx="24" cy="32" r="3" fill="#E8A540"/>
+        </svg>
+        servus
+      </div>
+      <nav class="primary">
+        <a href="#">Gegenstände</a>
+        <a href="#" class="active">Kartons</a>
+        <a href="#">Kategorien</a>
+        <a href="#">Räume</a>
+        <a href="#">Einladungen</a>
+      </nav>
+      <div class="coords"><span class="blip"></span>monster@daheim</div>
+      <div class="top-right">
+        <button class="icon-btn">☾</button>
+        <button class="icon-btn">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <div class="route"><a href="#">Route</a><span class="sep">/</span><a href="#">Kartons</a><span class="sep">/</span>B-006</div>
+
+    <section class="pitch-card">
+      <div class="id-block">
+        <div class="row">Pitch · Karton</div>
+        <div>
+          <div class="code">B-006</div>
+          <div class="grade">Gepackt</div>
+        </div>
+        <div class="row">Topo · 524 m ü.NN</div>
+      </div>
+      <div class="body">
+        <div class="title-row">
+          <h1>Küche — Geschirr &amp; Pfannen</h1>
+          <span class="updated">Aktualisiert 03.06.2026 14:22</span>
+        </div>
+        <dl>
+          <dt>Zielraum</dt><dd>Küche (Erdgeschoss)</dd>
+          <dt>Status</dt><dd>Gepackt &middot; bereit zur Lieferung</dd>
+          <dt>Erstellt</dt><dd>03.06.2026 12:01</dd>
+          <dt>Gewicht</dt><dd>~ 12 kg (geschätzt)</dd>
+          <dt>Etikett</dt><dd>QR vorhanden &middot; <a href="#" style="color: var(--enzian); text-decoration: none;">drucken ↗</a></dd>
+          <dt>Verpackt von</dt><dd>monster</dd>
+        </dl>
+      </div>
+      <aside class="stats">
+        <div class="row"><span class="lab">Posten</span><span class="val gletscher">3</span></div>
+        <div class="row"><span class="lab">Stück</span><span class="val">9</span></div>
+        <div class="row"><span class="lab">Fotos</span><span class="val">7</span></div>
+      </aside>
+    </section>
+
+    <div class="toolbar">
+      <button class="tool primary">✓ Als geliefert markieren</button>
+      <a class="tool" href="#">Bearbeiten</a>
+      <a class="tool" href="#">Etikett →</a>
+      <button class="tool danger">Löschen</button>
+      <a class="tool" href="#">← Zurück</a>
+    </div>
+
+    <div class="capture">
+      <div>
+        <h3>Foto-Sitzung starten</h3>
+        <p>capture/append → I[…] · auto-upload on shutter</p>
+      </div>
+      <button>📷  Kamera aktivieren</button>
+    </div>
+
+    <div class="section-head">
+      <h2>Inhalt</h2>
+      <span class="meta">[3] posten · 9 stück</span>
+    </div>
+
+    <table class="contents">
+      <thead>
+        <tr><th>#</th><th>Name</th><th style="text-align:right">Anzahl</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="idx">01</td>
+          <td class="iname">Messerblock, fünfteilig</td>
+          <td class="iqty">×4 <span class="controls"><button>−</button><span class="n">4</span><button>+</button></span></td>
+          <td class="iremove"><button>entfernen</button></td>
+        </tr>
+        <tr>
+          <td class="idx">02</td>
+          <td class="iname">Kupferpfanne, klein</td>
+          <td class="iqty">×4 <span class="controls"><button>−</button><span class="n">4</span><button>+</button></span></td>
+          <td class="iremove"><button>entfernen</button></td>
+        </tr>
+        <tr>
+          <td class="idx">03</td>
+          <td class="iname">Suppenkelle</td>
+          <td class="iqty">×1 <span class="controls"><button>−</button><span class="n">1</span><button>+</button></span></td>
+          <td class="iremove"><button>entfernen</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <nav class="bottom">
+    <a href="#"><span class="glyph">▦</span>Items</a>
+    <a href="#" class="active"><span class="glyph">◫</span>Kartons</a>
+    <a href="#" class="quick-add"><span class="glyph">+</span>Schnell</a>
+    <a href="#"><span class="glyph">∷</span>Kat.</a>
+    <a href="#"><span class="glyph">⌂</span>Räume</a>
+  </nav>
+
+</body>
+</html>

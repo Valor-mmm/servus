@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>servus — Gegenstände — Direction A: Raute</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --blau: #0E4FA0;
+    --blau-tief: #093C7C;
+    --weiss: #FFFFFF;
+    --tinte: #0A1A2E;
+    --pergament: #F4ECDA;
+    --pergament-mid: #ECE2C8;
+    --gold: #E5A82E;
+    --mortel: #7B8B9E;
+    --rot: #B4332D;
+    --grun: #2F7A4F;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background: var(--pergament);
+    color: var(--tinte);
+    min-height: 100vh;
+  }
+
+  /* ───── Top flag-band ───── */
+  header.top {
+    background: var(--blau);
+    color: var(--weiss);
+    position: relative;
+    overflow: hidden;
+  }
+  header.top .lozenge-strip {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 60px 60px,
+      linear-gradient(45deg,  transparent 49.5%, var(--weiss) 49.5%, var(--weiss) 50.5%, transparent 50.5%) 0 0 / 60px 60px;
+    opacity: 0.07;
+  }
+  .top-inner {
+    position: relative; z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  .brand { display: flex; gap: 12px; align-items: center; font-family: "DIN Alternate", system-ui; font-weight: 900; font-size: 24px; letter-spacing: -0.01em; }
+  .brand svg { width: 36px; height: 36px; }
+  nav.primary { display: flex; gap: 8px; flex: 1; }
+  nav.primary a {
+    color: var(--weiss);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 10px 16px;
+    position: relative;
+  }
+  nav.primary a.active {
+    background: var(--gold);
+    color: var(--tinte);
+    clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
+  }
+  nav.primary a:not(.active):hover { background: rgba(255,255,255,0.08); }
+  .top-actions { display: flex; gap: 12px; align-items: center; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: var(--weiss);
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.12); }
+
+  @media (max-width: 768px) {
+    nav.primary { display: none; }
+    .top-inner { padding: 14px 16px; }
+  }
+
+  /* ───── Page header band ───── */
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+  @media (max-width: 768px) { .page { padding: 0 16px 100px; } }
+
+  .page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 32px 0 20px;
+    border-bottom: 2px solid var(--tinte);
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mortel); font-weight: 700; margin: 0 0 4px; }
+  h1 {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 800;
+    font-size: 44px;
+    margin: 0;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  h1 .count { color: var(--blau); font-feature-settings: "tnum"; }
+  .cta-primary {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    background: var(--blau);
+    color: var(--weiss);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .cta-primary:hover { background: var(--blau-tief); }
+  .cta-primary::after {
+    content: ""; position: absolute; inset: 0 0 -5px 0;
+    background: var(--gold); z-index: -1;
+  }
+  .cta-primary { isolation: isolate; }
+
+  /* ───── Filter row ───── */
+  .filters {
+    display: flex; gap: 10px; align-items: center;
+    margin: 20px 0 24px;
+    flex-wrap: wrap;
+  }
+  .search {
+    flex: 1; min-width: 220px;
+    display: flex;
+    border: 1.5px solid var(--tinte);
+    background: var(--weiss);
+  }
+  .search input {
+    flex: 1; border: none; outline: none;
+    padding: 12px 14px;
+    font: inherit; font-size: 15px;
+    background: transparent;
+  }
+  .search button {
+    background: var(--tinte); color: var(--weiss);
+    border: none; padding: 0 18px;
+    cursor: pointer; font-size: 14px;
+  }
+  .chip-select {
+    border: 1.5px solid var(--tinte);
+    background: var(--weiss);
+    padding: 11px 14px;
+    font: inherit; font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ───── Item rows ───── */
+  ul.items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--tinte);
+  }
+  li.item {
+    display: grid;
+    grid-template-columns: 56px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #D6CDB3;
+    transition: background .12s;
+  }
+  li.item:hover { background: var(--pergament-mid); cursor: pointer; }
+  .thumb {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--blau) 0 50%, var(--weiss) 50% 100%);
+    display: grid; place-items: center;
+    color: var(--gold);
+    font-weight: 900;
+    font-family: "DIN Alternate", system-ui;
+    font-size: 22px;
+  }
+  .thumb.real { background-image: linear-gradient(135deg, rgba(14,79,160,0.85), rgba(14,79,160,0.25)), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56'><rect width='56' height='56' fill='%23B89F6A'/></svg>"); }
+  .item .name {
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.005em;
+  }
+  .item .name .meta {
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--mortel);
+    letter-spacing: 0.02em;
+    margin-top: 2px;
+  }
+  .badge {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 5px 10px;
+    border: 1px solid currentColor;
+  }
+  .badge.pending { color: var(--gold); }
+  .badge.packed  { color: var(--weiss); background: var(--blau); border-color: var(--blau); }
+  .badge.delivered { color: var(--weiss); background: var(--grun); border-color: var(--grun); }
+
+  .qty {
+    display: flex; align-items: stretch;
+    border: 1.5px solid var(--tinte);
+    background: var(--weiss);
+  }
+  .qty button {
+    border: none; background: transparent;
+    padding: 6px 12px;
+    font: inherit; font-weight: 700; font-size: 16px;
+    cursor: pointer;
+    color: var(--tinte);
+    min-width: 36px;
+  }
+  .qty .count {
+    padding: 6px 10px;
+    font-family: "DIN Alternate", system-ui;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--pergament);
+    min-width: 36px;
+    text-align: center;
+    border-left: 1px solid var(--tinte);
+    border-right: 1px solid var(--tinte);
+    align-self: stretch;
+    display: grid; place-items: center;
+  }
+
+  /* ───── Footer / load all ───── */
+  .load-all {
+    margin-top: 24px;
+    display: flex; justify-content: center;
+  }
+  .load-all a {
+    color: var(--blau);
+    text-decoration: none;
+    font-family: "DIN Alternate", system-ui;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 12px 24px;
+    border: 1.5px solid var(--blau);
+    background: transparent;
+  }
+  .load-all a:hover { background: var(--blau); color: var(--weiss); }
+
+  /* ───── Mobile bottom nav ───── */
+  nav.bottom {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    nav.bottom {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--blau);
+      color: var(--weiss);
+      border-top: 3px solid var(--gold);
+      padding: 8px 0 14px;
+      justify-content: space-around;
+      z-index: 10;
+    }
+    nav.bottom a {
+      color: var(--weiss);
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-align: center;
+      flex: 1;
+      display: grid; gap: 4px;
+      justify-items: center;
+      opacity: 0.6;
+    }
+    nav.bottom a.active { opacity: 1; }
+    nav.bottom a .glyph { font-size: 18px; }
+    nav.bottom a.quick-add {
+      opacity: 1;
+      background: var(--gold);
+      color: var(--tinte);
+      clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+      padding: 8px 4px;
+    }
+    h1 { font-size: 30px; }
+    .page-head { flex-direction: column; align-items: flex-start; }
+    li.item { grid-template-columns: 48px 1fr; row-gap: 8px; }
+    li.item .badge { grid-column: 2; justify-self: start; }
+    li.item .qty { grid-column: 1 / -1; justify-self: end; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="lozenge-strip"></div>
+    <div class="top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="60" height="60" stroke="#E5A82E" stroke-width="2" fill="none"/>
+          <path d="M16 44 L24 22 L32 38 L40 22 L48 44 L42 44 L38 36 L32 46 L26 36 L22 44 Z" fill="#E5A82E"/>
+          <circle cx="32" cy="14" r="2.4" fill="#E5A82E"/>
+        </svg>
+        servus
+      </div>
+      <nav class="primary">
+        <a href="#" class="active">Gegenstände</a>
+        <a href="#">Umzugskartons</a>
+        <a href="#">Kategorien</a>
+        <a href="#">Räume</a>
+        <a href="#">Einladungen</a>
+      </nav>
+      <div class="top-actions">
+        <button class="icon-btn" title="Design umschalten">☾</button>
+        <button class="icon-btn" title="Abmelden">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">Inventar · 21 Einträge</p>
+        <h1>Gegenstände <span class="count">21</span></h1>
+      </div>
+      <a href="#" class="cta-primary">+ Gegenstand hinzufügen</a>
+    </div>
+
+    <div class="filters">
+      <div class="search">
+        <input placeholder="Suchen …">
+        <button>Suchen</button>
+      </div>
+      <select class="chip-select">
+        <option>Alle Kategorien</option>
+        <option>Bücher</option>
+        <option>Hosen</option>
+        <option>Werkzeug</option>
+      </select>
+      <select class="chip-select">
+        <option>Alle Räume</option>
+        <option>Küche</option>
+      </select>
+    </div>
+
+    <ul class="items">
+      <li class="item">
+        <div class="thumb">B</div>
+        <div class="name">Bücher: Goethe-Werkausgabe<span class="meta">Bücher · Wohnzimmer · in B-006</span></div>
+        <span class="badge packed">Gepackt</span>
+        <div class="qty"><button>−</button><span class="count">×4</span><button>+</button></div>
+      </li>
+      <li class="item">
+        <div class="thumb">L</div>
+        <div class="name">Lederhose, kurz<span class="meta">Hosen · Schlafzimmer · in B-009</span></div>
+        <span class="badge packed">Gepackt</span>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+      </li>
+      <li class="item">
+        <div class="thumb">H</div>
+        <div class="name">Hammer, mittelgroß<span class="meta">Werkzeug · Keller</span></div>
+        <span class="badge delivered">Geliefert</span>
+        <div class="qty"><button>−</button><span class="count">×2</span><button>+</button></div>
+      </li>
+      <li class="item">
+        <div class="thumb">K</div>
+        <div class="name">Kupferpfanne<span class="meta">Küche · ohne Karton</span></div>
+        <span class="badge pending">Ausstehend</span>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+      </li>
+      <li class="item">
+        <div class="thumb">D</div>
+        <div class="name">Daunendecke<span class="meta">Schlafzimmer · in B-007</span></div>
+        <span class="badge packed">Gepackt</span>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+      </li>
+      <li class="item">
+        <div class="thumb">M</div>
+        <div class="name">Messerblock<span class="meta">Küche · in B-006</span></div>
+        <span class="badge packed">Gepackt</span>
+        <div class="qty"><button>−</button><span class="count">×1</span><button>+</button></div>
+      </li>
+    </ul>
+
+    <div class="load-all"><a href="#">Alle Gegenstände laden →</a></div>
+  </div>
+
+  <nav class="bottom">
+    <a href="#" class="active"><span class="glyph">▣</span>Gegenstände</a>
+    <a href="#"><span class="glyph">◫</span>Kartons</a>
+    <a href="#" class="quick-add"><span class="glyph">+</span>Schnell</a>
+    <a href="#"><span class="glyph">◌</span>Kat.</a>
+    <a href="#"><span class="glyph">⌂</span>Räume</a>
+  </nav>
+
+</body>
+</html>
