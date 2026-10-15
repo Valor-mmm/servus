@@ -124,8 +124,11 @@ Every change follows the same loop. **Do not skip steps.**
 
 - Passwords hashed with **Argon2id** (memory cost ≥ 64MB, time cost ≥ 3,
   parallelism = 1, salt ≥ 16 bytes from `crypto.getRandomValues`).
-- Session cookies: `HttpOnly`, `Secure`, `SameSite=Strict`, signed with
+- Session cookies: `HttpOnly`, `Secure`, `SameSite=Lax`, signed with
   HMAC-SHA256, server-side session lookup in KV with idle + absolute expiry.
+  (`SameSite=Lax` is intentional: `Strict` blocks the cookie on iOS PWA resume
+  and bookmark navigation. CSRF is handled by explicit tokens on all mutations,
+  making `Lax` equivalent in practice.)
 - Login endpoint: **per-IP** rate limit (e.g. 5 attempts / 15 min) AND
   **per-username** lockout with exponential backoff. Always answer in constant
   time to avoid username enumeration.

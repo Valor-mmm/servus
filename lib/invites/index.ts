@@ -101,7 +101,7 @@ export async function consumeInvite(
     `${COOKIE_NAME}=${cookieValue}`,
     "HttpOnly",
     "Secure",
-    "SameSite=Strict",
+    "SameSite=Lax",
     "Path=/",
     `Max-Age=${ABSOLUTE_TTL_SECONDS}`,
   ].join("; ");

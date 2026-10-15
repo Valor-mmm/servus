@@ -36,7 +36,7 @@ Deno.test("POST /login: success sets session cookie and creates a session", asyn
     assertMatch(resp.cookie ?? "", /servus_session=/);
     assertMatch(resp.cookie ?? "", /HttpOnly/);
     assertMatch(resp.cookie ?? "", /Secure/);
-    assertMatch(resp.cookie ?? "", /SameSite=Strict/);
+    assertMatch(resp.cookie ?? "", /SameSite=Lax/);
   });
 });
 

@@ -82,7 +82,7 @@ export async function handleLoginPost(
     `${COOKIE_NAME}=${cookieValue}`,
     "HttpOnly",
     "Secure",
-    "SameSite=Strict",
+    "SameSite=Lax",
     "Path=/",
     `Max-Age=${ABSOLUTE_TTL_SECONDS}`,
   ].join("; ");

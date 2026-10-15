@@ -194,9 +194,14 @@ export const handler = define.handlers({
       items = items.filter((i) => i.name.toLowerCase().includes(lower));
     } else {
       items = await listItemsRecent(RECENT_LIMIT);
-      // Fallback for items created before the time index existed
-      if (items.length === 0) {
-        items = await listItems();
+      // If the time index returned fewer items than the limit, there may be
+      // items that predate the index. Re-scan everything so nothing is hidden.
+      if (items.length < RECENT_LIMIT) {
+        const all = await listItems();
+        if (all.length > items.length) {
+          all.sort((a, b) => b.createdAt - a.createdAt);
+          items = all.slice(0, RECENT_LIMIT);
+        }
       }
     }
 
