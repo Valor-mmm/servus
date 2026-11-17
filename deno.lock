@@ -34,8 +34,7 @@
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.7",
-    "npm:hash-wasm@*": "4.12.0",
-    "npm:hash-wasm@4.12.0": "4.12.0",
+    "npm:hash-wasm@4.13.0": "4.13.0",
     "npm:preact-render-to-string@^6.6.3": "6.7.0_preact@10.29.2",
     "npm:preact-render-to-string@^6.7.0": "6.7.0_preact@10.29.2",
     "npm:preact@^10.28.2": "10.29.2",
@@ -405,8 +404,8 @@
     "get-caller-file@2.0.5": {
       "integrity": "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg=="
     },
-    "hash-wasm@4.12.0": {
-      "integrity": "sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ=="
+    "hash-wasm@4.13.0": {
+      "integrity": "sha512-GrWl7wsV46fKIXQZB5ebskLZLAmKL6d9RS0fspCxDeQyjoNu1AfTJTMLPOJyfzaQm0ldFiwFN21/w+sE/kgEFQ=="
     },
     "is-fullwidth-code-point@3.0.0": {
       "integrity": "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="
@@ -542,7 +541,7 @@
       "npm:@preact/signals@^2.9.0",
       "npm:@types/qrcode@1.5.5",
       "npm:aws4fetch@1.0.20",
-      "npm:hash-wasm@4.12.0",
+      "npm:hash-wasm@4.13.0",
       "npm:preact-render-to-string@^6.7.0",
       "npm:preact@^10.29.1",
       "npm:qrcode@1.5.4"
